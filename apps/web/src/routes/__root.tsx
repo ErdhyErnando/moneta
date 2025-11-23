@@ -20,7 +20,7 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 			},
 			{
 				name: "description",
-				content: "moneta is a web application",
+				content: "Moneta is a expense tracking application",
 			},
 		],
 		links: [

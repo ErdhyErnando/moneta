@@ -56,6 +56,9 @@ export default function SignInForm({
 
 	return (
 		<div className="mx-auto mt-10 w-full max-w-md p-6">
+			<p className="text-center text-muted-foreground text-sm">
+				Welcome to Moneta
+			</p>
 			<h1 className="mb-6 text-center font-bold text-3xl">Welcome Back</h1>
 
 			<form
