@@ -17,7 +17,13 @@ app.use(
 	}),
 );
 
+import { authMiddleware } from "./middleware";
+import categories from "./routes/categories";
+
 app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
+
+app.use("/api/*", authMiddleware);
+app.route("/api/categories", categories);
 
 app.get("/", (c) => {
 	return c.text("OK");
