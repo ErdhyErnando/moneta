@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import {
 	Dialog,
 	DialogContent,
+	DialogDescription,
+	DialogFooter,
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
@@ -51,6 +53,8 @@ type TransactionFormData = {
 function ExpensePage() {
 	const [isOpen, setIsOpen] = useState(false);
 	const [editingId, setEditingId] = useState<number | null>(null);
+	const [deleteId, setDeleteId] = useState<number | null>(null);
+	const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 	const queryClient = useQueryClient();
 
 	const { data: expenses, isLoading } = useQuery({
@@ -107,6 +111,8 @@ function ExpensePage() {
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["expenses"] });
 			toast.success("Expense deleted successfully");
+			setIsDeleteOpen(false);
+			setDeleteId(null);
 		},
 		onError: (error: AxiosError<{ error: { message: string } }>) => {
 			toast.error(
@@ -128,9 +134,14 @@ function ExpensePage() {
 		setIsOpen(true);
 	};
 
-	const handleDelete = async (id: number) => {
-		if (confirm("Are you sure you want to delete this expense?")) {
-			await deleteMutation.mutateAsync(id);
+	const handleDelete = (id: number) => {
+		setDeleteId(id);
+		setIsDeleteOpen(true);
+	};
+
+	const confirmDelete = async () => {
+		if (deleteId) {
+			await deleteMutation.mutateAsync(deleteId);
 		}
 	};
 
@@ -156,30 +167,54 @@ function ExpensePage() {
 								{editingId ? "Edit Expense" : "Add Expense"}
 							</DialogTitle>
 						</DialogHeader>
-						<TransactionForm
-							type="expense"
-							onSubmit={handleSubmit}
-							defaultValues={
-								editingId
-									? expenses?.find((e) => e.id === editingId)
-										? {
-												amount: expenses.find((e) => e.id === editingId)
-													?.amount,
-												description: expenses.find((e) => e.id === editingId)
-													?.description,
-												date: new Date(
-													expenses.find((e) => e.id === editingId)?.date || "",
-												),
-												categoryId: expenses.find((e) => e.id === editingId)
-													?.categoryId,
-											}
-										: undefined
-									: undefined
-							}
-						/>
+						{(() => {
+							const editingExpense = editingId
+								? expenses?.find((e) => e.id === editingId)
+								: undefined;
+							return (
+								<TransactionForm
+									type="expense"
+									onSubmit={handleSubmit}
+									defaultValues={
+										editingExpense
+											? {
+													amount: editingExpense.amount,
+													description: editingExpense.description,
+													date: new Date(editingExpense.date),
+													categoryId: editingExpense.categoryId,
+												}
+											: undefined
+									}
+								/>
+							);
+						})()}
 					</DialogContent>
 				</Dialog>
 			</div>
+
+			<Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Delete Expense</DialogTitle>
+						<DialogDescription>
+							Are you sure you want to delete this expense? This action cannot
+							be undone.
+						</DialogDescription>
+					</DialogHeader>
+					<DialogFooter>
+						<Button variant="outline" onClick={() => setIsDeleteOpen(false)}>
+							Cancel
+						</Button>
+						<Button
+							variant="destructive"
+							onClick={confirmDelete}
+							disabled={deleteMutation.isPending}
+						>
+							{deleteMutation.isPending ? "Deleting..." : "Delete"}
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 
 			<div className="rounded-md border">
 				<Table>

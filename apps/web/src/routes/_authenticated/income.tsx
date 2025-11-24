@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import {
 	Dialog,
 	DialogContent,
+	DialogDescription,
+	DialogFooter,
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
@@ -51,6 +53,8 @@ type TransactionFormData = {
 function IncomePage() {
 	const [isOpen, setIsOpen] = useState(false);
 	const [editingId, setEditingId] = useState<number | null>(null);
+	const [deleteId, setDeleteId] = useState<number | null>(null);
+	const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 	const queryClient = useQueryClient();
 
 	const { data: incomes, isLoading } = useQuery({
@@ -107,6 +111,8 @@ function IncomePage() {
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["incomes"] });
 			toast.success("Income deleted successfully");
+			setIsDeleteOpen(false);
+			setDeleteId(null);
 		},
 		onError: (error: AxiosError<{ error: { message: string } }>) => {
 			toast.error(
@@ -128,9 +134,14 @@ function IncomePage() {
 		setIsOpen(true);
 	};
 
-	const handleDelete = async (id: number) => {
-		if (confirm("Are you sure you want to delete this income?")) {
-			await deleteMutation.mutateAsync(id);
+	const handleDelete = (id: number) => {
+		setDeleteId(id);
+		setIsDeleteOpen(true);
+	};
+
+	const confirmDelete = async () => {
+		if (deleteId) {
+			await deleteMutation.mutateAsync(deleteId);
 		}
 	};
 
@@ -156,29 +167,54 @@ function IncomePage() {
 								{editingId ? "Edit Income" : "Add Income"}
 							</DialogTitle>
 						</DialogHeader>
-						<TransactionForm
-							type="income"
-							onSubmit={handleSubmit}
-							defaultValues={
-								editingId
-									? incomes?.find((i) => i.id === editingId)
-										? {
-												amount: incomes.find((i) => i.id === editingId)?.amount,
-												description: incomes.find((i) => i.id === editingId)
-													?.description,
-												date: new Date(
-													incomes.find((i) => i.id === editingId)?.date || "",
-												),
-												categoryId: incomes.find((i) => i.id === editingId)
-													?.categoryId,
-											}
-										: undefined
-									: undefined
-							}
-						/>
+						{(() => {
+							const editingIncome = editingId
+								? incomes?.find((i) => i.id === editingId)
+								: undefined;
+							return (
+								<TransactionForm
+									type="income"
+									onSubmit={handleSubmit}
+									defaultValues={
+										editingIncome
+											? {
+													amount: editingIncome.amount,
+													description: editingIncome.description,
+													date: new Date(editingIncome.date),
+													categoryId: editingIncome.categoryId,
+												}
+											: undefined
+									}
+								/>
+							);
+						})()}
 					</DialogContent>
 				</Dialog>
 			</div>
+
+			<Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Delete Income</DialogTitle>
+						<DialogDescription>
+							Are you sure you want to delete this income? This action cannot be
+							undone.
+						</DialogDescription>
+					</DialogHeader>
+					<DialogFooter>
+						<Button variant="outline" onClick={() => setIsDeleteOpen(false)}>
+							Cancel
+						</Button>
+						<Button
+							variant="destructive"
+							onClick={confirmDelete}
+							disabled={deleteMutation.isPending}
+						>
+							{deleteMutation.isPending ? "Deleting..." : "Delete"}
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 
 			<div className="rounded-md border">
 				<Table>
