@@ -13,6 +13,8 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedIncomeRouteImport } from './routes/_authenticated/income'
+import { Route as AuthenticatedExpenseRouteImport } from './routes/_authenticated/expense'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -33,15 +35,29 @@ const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedIncomeRoute = AuthenticatedIncomeRouteImport.update({
+  id: '/income',
+  path: '/income',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedExpenseRoute = AuthenticatedExpenseRouteImport.update({
+  id: '/expense',
+  path: '/expense',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
+  '/expense': typeof AuthenticatedExpenseRoute
+  '/income': typeof AuthenticatedIncomeRoute
   '/': typeof AuthenticatedIndexRoute
 }
 export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
+  '/expense': typeof AuthenticatedExpenseRoute
+  '/income': typeof AuthenticatedIncomeRoute
   '/': typeof AuthenticatedIndexRoute
 }
 export interface FileRoutesById {
@@ -49,18 +65,22 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
+  '/_authenticated/expense': typeof AuthenticatedExpenseRoute
+  '/_authenticated/income': typeof AuthenticatedIncomeRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/dashboard' | '/login' | '/'
+  fullPaths: '/dashboard' | '/login' | '/expense' | '/income' | '/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/dashboard' | '/login' | '/'
+  to: '/dashboard' | '/login' | '/expense' | '/income' | '/'
   id:
     | '__root__'
     | '/_authenticated'
     | '/dashboard'
     | '/login'
+    | '/_authenticated/expense'
+    | '/_authenticated/income'
     | '/_authenticated/'
   fileRoutesById: FileRoutesById
 }
@@ -100,14 +120,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/income': {
+      id: '/_authenticated/income'
+      path: '/income'
+      fullPath: '/income'
+      preLoaderRoute: typeof AuthenticatedIncomeRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/expense': {
+      id: '/_authenticated/expense'
+      path: '/expense'
+      fullPath: '/expense'
+      preLoaderRoute: typeof AuthenticatedExpenseRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedExpenseRoute: typeof AuthenticatedExpenseRoute
+  AuthenticatedIncomeRoute: typeof AuthenticatedIncomeRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedExpenseRoute: AuthenticatedExpenseRoute,
+  AuthenticatedIncomeRoute: AuthenticatedIncomeRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }
 

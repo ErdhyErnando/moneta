@@ -10,8 +10,8 @@ app.use(logger());
 app.use(
 	"/*",
 	cors({
-		origin: process.env.CORS_ORIGIN || "",
-		allowMethods: ["GET", "POST", "OPTIONS"],
+		origin: process.env.CORS_ORIGIN || "http://localhost:3001",
+		allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
 		allowHeaders: ["Content-Type", "Authorization"],
 		credentials: true,
 	}),
@@ -19,14 +19,25 @@ app.use(
 
 import { authMiddleware } from "./middleware";
 import categories from "./routes/categories";
+import expenses from "./routes/expenses";
+import incomes from "./routes/incomes";
 
 app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 
+// Apply auth middleware to protect API routes (except auth routes which are handled above)
 app.use("/api/*", authMiddleware);
+
+// Register protected routes
 app.route("/api/categories", categories);
+app.route("/api/incomes", incomes);
+app.route("/api/expenses", expenses);
 
 app.get("/", (c) => {
 	return c.text("OK");
+});
+
+app.get("/test", (c) => {
+	return c.json({ message: "Test route works!" });
 });
 
 import { serve } from "@hono/node-server";
