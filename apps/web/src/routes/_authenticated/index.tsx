@@ -10,6 +10,8 @@ import { format } from "date-fns";
 import { useMemo, useState } from "react";
 
 import { ChartAreaInteractive } from "@/components/chart-area-interactive";
+import { ChartBarMonthlyExpenses } from "@/components/chart-bar-monthly-expenses";
+import { ChartPieExpenseCategories } from "@/components/chart-pie-expense-categories";
 import { CurrencySelector } from "@/components/currency-selector";
 import { DataTable, type Transaction } from "@/components/data-table";
 import { Button } from "@/components/ui/button";
@@ -40,6 +42,8 @@ interface DashboardSummary {
 	totalIncome: number;
 	totalExpenses: number;
 	netBalance: number;
+	totalStartingBalance: number;
+	currentBalance: number;
 }
 
 // API functions
@@ -191,7 +195,7 @@ function HomeComponent() {
 			</div>
 
 			{/* Summary Cards */}
-			<div className="grid gap-4 md:grid-cols-3">
+			<div className="grid gap-4 md:grid-cols-4">
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 						<CardTitle className="font-medium text-sm">Total Income</CardTitle>
@@ -236,20 +240,40 @@ function HomeComponent() {
 							<div className="h-8 w-32 animate-pulse rounded bg-muted" />
 						) : (
 							<div
-								className={`font-bold text-2xl ${
-									(summary?.netBalance || 0) >= 0
+								className={`font-bold text-2xl ${(summary?.netBalance || 0) >= 0
 										? "text-emerald-600"
 										: "text-rose-600"
-								}`}
+									}`}
 							>
 								{formatCurrency(summary?.netBalance || 0)}
 							</div>
 						)}
 					</CardContent>
 				</Card>
+
+				<Card>
+					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+						<CardTitle className="font-medium text-sm">Current Balance</CardTitle>
+						<IconWallet className="size-4 text-blue-500" />
+					</CardHeader>
+					<CardContent>
+						{summaryLoading ? (
+							<div className="h-8 w-32 animate-pulse rounded bg-muted" />
+						) : (
+							<div
+								className={`font-bold text-2xl ${(summary?.currentBalance || 0) >= 0
+										? "text-blue-600"
+										: "text-rose-600"
+									}`}
+							>
+								{formatCurrency(summary?.currentBalance || 0)}
+							</div>
+						)}
+					</CardContent>
+				</Card>
 			</div>
 
-			{/* Chart and Transactions */}
+			{/* Chart and Expense Pie */}
 			<div className="grid gap-6 md:grid-cols-7">
 				<div className="md:col-span-4">
 					<ChartAreaInteractive
@@ -258,27 +282,33 @@ function HomeComponent() {
 					/>
 				</div>
 				<div className="md:col-span-3">
-					<Card className="h-full">
-						<CardHeader>
-							<CardTitle>Recent Transactions</CardTitle>
-						</CardHeader>
-						<CardContent>
-							{transactionsLoading ? (
-								<div className="space-y-2">
-									{[...Array(5)].map((_, i) => (
-										<div
-											key={`skeleton-${i}`}
-											className="h-12 w-full animate-pulse rounded bg-muted"
-										/>
-									))}
-								</div>
-							) : (
-								<DataTable data={transactions} />
-							)}
-						</CardContent>
-					</Card>
+					<ChartPieExpenseCategories />
 				</div>
 			</div>
+
+			{/* Monthly Expense Bar Chart */}
+			<ChartBarMonthlyExpenses />
+
+			{/* Recent Transactions */}
+			<Card>
+				<CardHeader>
+					<CardTitle>Recent Transactions</CardTitle>
+				</CardHeader>
+				<CardContent>
+					{transactionsLoading ? (
+						<div className="space-y-2">
+							{[...Array(5)].map((_, i) => (
+								<div
+									key={`skeleton-${i}`}
+									className="h-12 w-full animate-pulse rounded bg-muted"
+								/>
+							))}
+						</div>
+					) : (
+						<DataTable data={transactions} />
+					)}
+				</CardContent>
+			</Card>
 		</div>
 	);
 }
