@@ -37,15 +37,28 @@ const CurrencyContext = createContext<CurrencyContextType | undefined>(
 export function CurrencyProvider({ children }: { children: React.ReactNode }) {
 	const [currencyCode, setCurrencyCode] = useState<CurrencyCode>(() => {
 		// Load from localStorage or default to USD
-		const stored = localStorage.getItem("currency");
-		return (stored as CurrencyCode) || "USD";
+		try {
+			const stored = localStorage.getItem("currency");
+			if (stored && stored in CURRENCIES) {
+				return stored as CurrencyCode;
+			}
+		} catch (error) {
+			// localStorage is unavailable (e.g., private browsing mode)
+			console.warn("Failed to access localStorage:", error);
+		}
+		return "USD";
 	});
 
 	const currency = CURRENCIES[currencyCode];
 
 	useEffect(() => {
 		// Persist to localStorage whenever currency changes
-		localStorage.setItem("currency", currencyCode);
+		try {
+			localStorage.setItem("currency", currencyCode);
+		} catch (error) {
+			// localStorage is unavailable (e.g., private browsing mode)
+			console.warn("Failed to save currency to localStorage:", error);
+		}
 	}, [currencyCode]);
 
 	const formatCurrency = (amount: number): string => {
