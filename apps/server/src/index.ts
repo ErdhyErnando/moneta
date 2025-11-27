@@ -19,6 +19,7 @@ app.use(
 
 import { authMiddleware } from "./middleware";
 import categories from "./routes/categories";
+import dashboard from "./routes/dashboard";
 import expenses from "./routes/expenses";
 import incomes from "./routes/incomes";
 
@@ -31,6 +32,7 @@ app.use("/api/*", authMiddleware);
 app.route("/api/categories", categories);
 app.route("/api/incomes", incomes);
 app.route("/api/expenses", expenses);
+app.route("/api/dashboard", dashboard);
 
 app.get("/", (c) => {
 	return c.text("OK");

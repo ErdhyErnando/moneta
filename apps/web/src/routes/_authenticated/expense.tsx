@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import { Edit, Plus, Trash } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { CurrencySelector } from "@/components/currency-selector";
 import TransactionForm from "@/components/transaction-form";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,6 +25,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { useCurrency } from "@/contexts/currency-context";
 import { api } from "@/lib/api";
 
 export const Route = createFileRoute("/_authenticated/expense")({
@@ -51,6 +53,7 @@ type TransactionFormData = {
 };
 
 function ExpensePage() {
+	const { formatCurrency } = useCurrency();
 	const [isOpen, setIsOpen] = useState(false);
 	const [editingId, setEditingId] = useState<number | null>(null);
 	const [deleteId, setDeleteId] = useState<number | null>(null);
@@ -149,47 +152,50 @@ function ExpensePage() {
 		<div className="container mx-auto py-10">
 			<div className="mb-6 flex items-center justify-between">
 				<h1 className="font-bold text-3xl">Expenses</h1>
-				<Dialog
-					open={isOpen}
-					onOpenChange={(open) => {
-						setIsOpen(open);
-						if (!open) setEditingId(null);
-					}}
-				>
-					<DialogTrigger asChild>
-						<Button variant="destructive">
-							<Plus className="mr-2 h-4 w-4" /> Add Expense
-						</Button>
-					</DialogTrigger>
-					<DialogContent>
-						<DialogHeader>
-							<DialogTitle>
-								{editingId ? "Edit Expense" : "Add Expense"}
-							</DialogTitle>
-						</DialogHeader>
-						{(() => {
-							const editingExpense = editingId
-								? expenses?.find((e) => e.id === editingId)
-								: undefined;
-							return (
-								<TransactionForm
-									type="expense"
-									onSubmit={handleSubmit}
-									defaultValues={
-										editingExpense
-											? {
-													amount: editingExpense.amount,
-													description: editingExpense.description,
-													date: new Date(editingExpense.date),
-													categoryId: editingExpense.categoryId,
-												}
-											: undefined
-									}
-								/>
-							);
-						})()}
-					</DialogContent>
-				</Dialog>
+				<div className="flex items-center gap-2">
+					<CurrencySelector />
+					<Dialog
+						open={isOpen}
+						onOpenChange={(open) => {
+							setIsOpen(open);
+							if (!open) setEditingId(null);
+						}}
+					>
+						<DialogTrigger asChild>
+							<Button variant="destructive">
+								<Plus className="mr-2 h-4 w-4" /> Add Expense
+							</Button>
+						</DialogTrigger>
+						<DialogContent>
+							<DialogHeader>
+								<DialogTitle>
+									{editingId ? "Edit Expense" : "Add Expense"}
+								</DialogTitle>
+							</DialogHeader>
+							{(() => {
+								const editingExpense = editingId
+									? expenses?.find((e) => e.id === editingId)
+									: undefined;
+								return (
+									<TransactionForm
+										type="expense"
+										onSubmit={handleSubmit}
+										defaultValues={
+											editingExpense
+												? {
+														amount: editingExpense.amount,
+														description: editingExpense.description,
+														date: new Date(editingExpense.date),
+														categoryId: editingExpense.categoryId,
+													}
+												: undefined
+										}
+									/>
+								);
+							})()}
+						</DialogContent>
+					</Dialog>
+				</div>
 			</div>
 
 			<Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
@@ -249,7 +255,7 @@ function ExpensePage() {
 									<TableCell>{expense.category.name}</TableCell>
 									<TableCell>{expense.description}</TableCell>
 									<TableCell className="text-right font-medium text-red-600">
-										-${Number(expense.amount).toFixed(2)}
+										-{formatCurrency(Number(expense.amount))}
 									</TableCell>
 									<TableCell className="text-right">
 										<Button
