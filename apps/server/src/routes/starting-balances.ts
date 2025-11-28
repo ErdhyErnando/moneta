@@ -7,7 +7,7 @@ import { z } from "zod";
 const app = new Hono<{ Variables: { user: { id: string } } }>();
 
 const startingBalanceSchema = z.object({
-	amount: z.string().transform((val) => val.toString()),
+	amount: z.string(),
 	description: z.string().optional(),
 	date: z.string().transform((str) => new Date(str)),
 	categoryId: z.number(),

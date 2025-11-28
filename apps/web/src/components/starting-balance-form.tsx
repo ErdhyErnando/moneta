@@ -19,7 +19,10 @@ import {
 } from "./ui/select";
 
 const startingBalanceSchema = z.object({
-	amount: z.string().min(1, "Amount is required"),
+	amount: z
+		.string()
+		.min(1, "Amount is required")
+		.regex(/^\d+(\.\d{1,2})?$/, "Invalid amount format (max 2 decimal places)"),
 	description: z.string().optional(),
 	date: z.date(),
 	categoryId: z.number().min(1, "Category is required"),

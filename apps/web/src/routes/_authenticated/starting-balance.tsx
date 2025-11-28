@@ -32,6 +32,9 @@ export const Route = createFileRoute("/_authenticated/starting-balance")({
 
 function StartingBalancePage() {
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
+	const [editingBalance, setEditingBalance] = useState<StartingBalance | null>(
+		null,
+	);
 	const { toast } = useToast();
 	const queryClient = useQueryClient();
 
@@ -68,6 +71,58 @@ function StartingBalancePage() {
 		},
 	});
 
+	const editMutation = useMutation({
+		mutationFn: async ({
+			id,
+			data,
+		}: {
+			id: number;
+			data: StartingBalanceFormData;
+		}) => {
+			await api.put(`/api/starting-balances/${id}`, data);
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["starting-balances"] });
+			queryClient.invalidateQueries({ queryKey: ["dashboard-summary"] });
+			setIsDialogOpen(false);
+			setEditingBalance(null);
+			toast({
+				title: "Success",
+				description: "Starting balance updated successfully",
+			});
+		},
+		onError: (error) => {
+			console.error("Failed to update starting balance:", error);
+			toast({
+				title: "Error",
+				description: "Failed to update starting balance",
+				variant: "destructive",
+			});
+		},
+	});
+
+	const deleteMutation = useMutation({
+		mutationFn: async (id: number) => {
+			await api.delete(`/api/starting-balances/${id}`);
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["starting-balances"] });
+			queryClient.invalidateQueries({ queryKey: ["dashboard-summary"] });
+			toast({
+				title: "Success",
+				description: "Starting balance deleted successfully",
+			});
+		},
+		onError: (error) => {
+			console.error("Failed to delete starting balance:", error);
+			toast({
+				title: "Error",
+				description: "Failed to delete starting balance",
+				variant: "destructive",
+			});
+		},
+	});
+
 	return (
 		<div className="flex flex-col gap-6 p-6">
 			<div className="flex items-center justify-between">
@@ -77,20 +132,47 @@ function StartingBalancePage() {
 					</div>
 					<h1 className="font-bold text-3xl">Starting Balance</h1>
 				</div>
-				<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+				<Dialog
+					open={isDialogOpen}
+					onOpenChange={(open) => {
+						setIsDialogOpen(open);
+						if (!open) setEditingBalance(null);
+					}}
+				>
 					<DialogTrigger asChild>
-						<Button>
+						<Button onClick={() => setEditingBalance(null)}>
 							<IconPlus className="mr-2 size-4" />
 							Add Balance
 						</Button>
 					</DialogTrigger>
 					<DialogContent>
 						<DialogHeader>
-							<DialogTitle>Add Starting Balance</DialogTitle>
+							<DialogTitle>
+								{editingBalance
+									? "Edit Starting Balance"
+									: "Add Starting Balance"}
+							</DialogTitle>
 						</DialogHeader>
 						<StartingBalanceForm
+							defaultValues={
+								editingBalance
+									? {
+											amount: editingBalance.amount,
+											description: editingBalance.description,
+											date: new Date(editingBalance.date),
+											categoryId: editingBalance.categoryId,
+										}
+									: undefined
+							}
 							onSubmit={async (data) => {
-								await createMutation.mutateAsync(data);
+								if (editingBalance) {
+									await editMutation.mutateAsync({
+										id: editingBalance.id,
+										data,
+									});
+								} else {
+									await createMutation.mutateAsync(data);
+								}
 							}}
 						/>
 					</DialogContent>
@@ -108,7 +190,23 @@ function StartingBalancePage() {
 					) : (
 						<StartingBalanceList
 							data={startingBalances}
-							onAddClick={() => setIsDialogOpen(true)}
+							onAddClick={() => {
+								setEditingBalance(null);
+								setIsDialogOpen(true);
+							}}
+							onEdit={(balance) => {
+								setEditingBalance(balance);
+								setIsDialogOpen(true);
+							}}
+							onDelete={(balance) => {
+								if (
+									confirm(
+										"Are you sure you want to delete this starting balance?",
+									)
+								) {
+									deleteMutation.mutate(balance.id);
+								}
+							}}
 						/>
 					)}
 				</div>

@@ -56,7 +56,9 @@ export const startingBalanceSchema = z.object({
 	id: z.number(),
 	date: z.string(),
 	description: z.string(),
+	categoryId: z.number(),
 	category: z.object({
+		id: z.number(),
 		name: z.string(),
 	}),
 	amount: z.string(),
@@ -140,36 +142,54 @@ const columns: ColumnDef<StartingBalance>[] = [
 	},
 	{
 		id: "actions",
-		cell: ({ row: _row }) => (
-			<DropdownMenu>
-				<DropdownMenuTrigger asChild>
-					<Button
-						variant="ghost"
-						className="flex size-8 text-muted-foreground data-[state=open]:bg-muted"
-						size="icon"
-					>
-						<IconDotsVertical className="size-4" />
-						<span className="sr-only">Open menu</span>
-					</Button>
-				</DropdownMenuTrigger>
-				<DropdownMenuContent align="end" className="w-32">
-					<DropdownMenuItem>Edit</DropdownMenuItem>
-					<DropdownMenuSeparator />
-					<DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
-				</DropdownMenuContent>
-			</DropdownMenu>
-		),
+		cell: ({ row, table }) => {
+			const meta = table.options.meta as {
+				onEdit: (balance: StartingBalance) => void;
+				onDelete: (balance: StartingBalance) => void;
+			};
+
+			return (
+				<DropdownMenu>
+					<DropdownMenuTrigger asChild>
+						<Button
+							variant="ghost"
+							className="flex size-8 text-muted-foreground data-[state=open]:bg-muted"
+							size="icon"
+						>
+							<IconDotsVertical className="size-4" />
+							<span className="sr-only">Open menu</span>
+						</Button>
+					</DropdownMenuTrigger>
+					<DropdownMenuContent align="end" className="w-32">
+						<DropdownMenuItem onClick={() => meta?.onEdit(row.original)}>
+							Edit
+						</DropdownMenuItem>
+						<DropdownMenuSeparator />
+						<DropdownMenuItem
+							variant="destructive"
+							onClick={() => meta?.onDelete(row.original)}
+						>
+							Delete
+						</DropdownMenuItem>
+					</DropdownMenuContent>
+				</DropdownMenu>
+			);
+		},
 	},
 ];
 
 interface StartingBalanceListProps {
 	data: StartingBalance[];
 	onAddClick?: () => void;
+	onEdit?: (balance: StartingBalance) => void;
+	onDelete?: (balance: StartingBalance) => void;
 }
 
 export function StartingBalanceList({
 	data,
 	onAddClick,
+	onEdit,
+	onDelete,
 }: StartingBalanceListProps) {
 	const { formatCurrency } = useCurrency();
 	const [rowSelection, setRowSelection] = React.useState({});
@@ -196,6 +216,8 @@ export function StartingBalanceList({
 		},
 		meta: {
 			formatCurrency,
+			onEdit,
+			onDelete,
 		},
 		getRowId: (row) => row.id.toString(),
 		enableRowSelection: true,
