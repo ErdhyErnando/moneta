@@ -336,4 +336,47 @@ app.get("/monthly-expenses", async (c) => {
 	}
 });
 
+// Get monthly income by year (for bar chart)
+app.get("/monthly-income", async (c) => {
+	try {
+		const user = c.get("user");
+		const year = c.req.query("year") || new Date().getFullYear().toString();
+
+		// Validate year
+		const yearNum = Number.parseInt(year, 10);
+		if (Number.isNaN(yearNum)) {
+			return c.json({ error: "Invalid year parameter" }, 400);
+		}
+
+		// Get income grouped by month for the specified year
+		const monthlyIncome = await db
+			.select({
+				month: sql<string>`TO_CHAR(${incomes.date}, 'YYYY-MM-01')`,
+				total: sql<number>`COALESCE(SUM(CAST(${incomes.amount} AS DECIMAL)), 0)`,
+			})
+			.from(incomes)
+			.where(
+				and(
+					eq(incomes.userId, user.id),
+					sql`EXTRACT(YEAR FROM ${incomes.date}) = ${yearNum}`,
+				),
+			)
+			.groupBy(sql`TO_CHAR(${incomes.date}, 'YYYY-MM-01')`);
+
+		// Transform to array with month string
+		const monthlyData = monthlyIncome.map((item) => ({
+			month: item.month,
+			amount: item.total.toString(),
+		}));
+
+		return c.json({ monthlyData });
+	} catch (error) {
+		console.error("Monthly income endpoint error:", error);
+		return c.json(
+			{ error: "Failed to fetch monthly income", monthlyData: [] },
+			500,
+		);
+	}
+});
+
 export default app;

@@ -11,6 +11,7 @@ import { useMemo, useState } from "react";
 
 import { ChartAreaInteractive } from "@/components/chart-area-interactive";
 import { ChartBarMonthlyExpenses } from "@/components/chart-bar-monthly-expenses";
+import { ChartBarMonthlyIncome } from "@/components/chart-bar-monthly-income";
 import { ChartPieExpenseCategories } from "@/components/chart-pie-expense-categories";
 import { CurrencySelector } from "@/components/currency-selector";
 import { DataTable, type Transaction } from "@/components/data-table";
@@ -78,6 +79,9 @@ async function fetchRecentTransactions(
 function HomeComponent() {
 	const { formatCurrency } = useCurrency();
 	const [timeRange, setTimeRange] = useState<TimeRange>("30d");
+	const [monthlyChartType, setMonthlyChartType] = useState<
+		"expense" | "income"
+	>("expense");
 	const [customStartDate, setCustomStartDate] = useState<Date>();
 	const [customEndDate, setCustomEndDate] = useState<Date>();
 
@@ -290,8 +294,16 @@ function HomeComponent() {
 				</div>
 			</div>
 
-			{/* Monthly Expense Bar Chart */}
-			<ChartBarMonthlyExpenses />
+			{/* Monthly Bar Chart */}
+			{monthlyChartType === "expense" ? (
+				<ChartBarMonthlyExpenses
+					onToggle={() => setMonthlyChartType("income")}
+				/>
+			) : (
+				<ChartBarMonthlyIncome
+					onToggle={() => setMonthlyChartType("expense")}
+				/>
+			)}
 
 			{/* Recent Transactions */}
 			<Card>

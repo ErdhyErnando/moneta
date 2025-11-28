@@ -34,11 +34,14 @@ interface ExpenseCategoriesResponse {
 }
 
 const CHART_COLORS = [
-	"hsl(var(--chart-1))",
-	"hsl(var(--chart-2))",
-	"hsl(var(--chart-3))",
-	"hsl(var(--chart-4))",
-	"hsl(var(--chart-5))",
+	"var(--destructive)",
+	"var(--chart-2)",
+	"var(--sidebar-foreground)",
+	"var(--sidebar)",
+	"var(--sidebar-primary)",
+	"var(--chart-6)",
+	"var(--foreground)",
+	"var(--chart-8)",
 ];
 
 export function ChartPieExpenseCategories() {
@@ -89,20 +92,20 @@ export function ChartPieExpenseCategories() {
 			</CardHeader>
 			<CardContent className="flex-1 pb-0">
 				{isLoading ? (
-					<div className="flex h-[250px] items-center justify-center">
+					<div className="flex h-[280px] items-center justify-center">
 						<div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
 					</div>
 				) : chartData.length === 0 ? (
-					<div className="flex h-[250px] items-center justify-center text-muted-foreground">
+					<div className="flex h-[280px] items-center justify-center text-muted-foreground">
 						No expense data available
 					</div>
 				) : (
 					<>
 						<ChartContainer
 							config={chartConfig}
-							className="mx-auto aspect-square max-h-[250px] pb-0 [&_.recharts-pie-label-text]:fill-foreground"
+							className="mx-auto aspect-square max-h-[280px] w-full"
 						>
-							<PieChart>
+							<PieChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
 								<ChartTooltip
 									content={
 										<ChartTooltipContent
@@ -122,7 +125,10 @@ export function ChartPieExpenseCategories() {
 									data={chartData}
 									dataKey="amount"
 									nameKey="category"
+									fill="#8884d8"
 									label={({ percentage }) => `${percentage.toFixed(1)}%`}
+									outerRadius="85%"
+									labelLine
 								/>
 							</PieChart>
 						</ChartContainer>

@@ -51,9 +51,9 @@ export function ChartAreaInteractive({
 					<CardDescription>Income vs Expenses over time</CardDescription>
 				</div>
 			</CardHeader>
-			<CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
+			<CardContent className="px-1 pt-1 sm:px-2 sm:pt-2 sm:pb-4">
 				{isLoading ? (
-					<div className="flex h-[250px] items-center justify-center">
+					<div className="flex h-[280px] items-center justify-center">
 						<div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
 					</div>
 				) : data.length === 0 ? (
@@ -71,6 +71,7 @@ export function ChartAreaInteractive({
 							margin={{
 								left: 12,
 								right: 12,
+								bottom: 10,
 							}}
 						>
 							<CartesianGrid vertical={false} />

@@ -1,5 +1,6 @@
 "use client";
 
+import { IconArrowRight } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import {
@@ -10,6 +11,7 @@ import {
 	XAxis,
 	YAxis,
 } from "recharts";
+import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -33,12 +35,12 @@ import {
 import { useCurrency } from "@/contexts/currency-context";
 import { api } from "@/lib/api";
 
-interface MonthlyExpenseData {
+interface MonthlyIncomeData {
 	month: string;
 	amount: number;
 }
 
-interface MonthlyExpensesResponse {
+interface MonthlyIncomeResponse {
 	monthlyData: Array<{
 		month: string;
 		amount: string;
@@ -47,8 +49,8 @@ interface MonthlyExpensesResponse {
 
 const chartConfig = {
 	amount: {
-		label: "Expenses",
-		color: "var(--destructive)",
+		label: "Income",
+		color: "#059669", // emerald-600
 	},
 } satisfies ChartConfig;
 
@@ -67,18 +69,13 @@ const MONTH_NAMES = [
 	"Dec",
 ];
 
-import { IconArrowRight } from "@tabler/icons-react";
-import { Button } from "@/components/ui/button";
-
-// ... existing imports ...
-
-interface ChartBarMonthlyExpensesProps {
+interface ChartBarMonthlyIncomeProps {
 	onToggle?: () => void;
 }
 
-export function ChartBarMonthlyExpenses({
+export function ChartBarMonthlyIncome({
 	onToggle,
-}: ChartBarMonthlyExpensesProps) {
+}: ChartBarMonthlyIncomeProps) {
 	const { formatCurrency } = useCurrency();
 	const currentYear = new Date().getFullYear();
 	const [selectedYear, setSelectedYear] = useState(currentYear.toString());
@@ -87,17 +84,17 @@ export function ChartBarMonthlyExpenses({
 	const yearOptions = Array.from({ length: 5 }, (_, i) => currentYear - i);
 
 	const { data, isLoading } = useQuery({
-		queryKey: ["monthly-expenses", selectedYear],
+		queryKey: ["monthly-income", selectedYear],
 		queryFn: async () => {
-			const response = await api.get<MonthlyExpensesResponse>(
-				`/api/dashboard/monthly-expenses?year=${selectedYear}`,
+			const response = await api.get<MonthlyIncomeResponse>(
+				`/api/dashboard/monthly-income?year=${selectedYear}`,
 			);
 			return response.data;
 		},
 	});
 
 	// Transform data for the chart - ensure all 12 months are present
-	const chartData: MonthlyExpenseData[] = MONTH_NAMES.map((month, index) => {
+	const chartData: MonthlyIncomeData[] = MONTH_NAMES.map((month, index) => {
 		const monthData = data?.monthlyData.find((d) => {
 			const monthIndex = new Date(d.month).getMonth();
 			return monthIndex === index;
@@ -109,7 +106,7 @@ export function ChartBarMonthlyExpenses({
 		};
 	});
 
-	const totalExpenses = chartData.reduce((sum, item) => sum + item.amount, 0);
+	const totalIncome = chartData.reduce((sum, item) => sum + item.amount, 0);
 
 	return (
 		<Card>
@@ -117,9 +114,9 @@ export function ChartBarMonthlyExpenses({
 				<div className="flex items-center justify-between">
 					<div className="flex items-center gap-2">
 						<div>
-							<CardTitle>Monthly Expenses</CardTitle>
+							<CardTitle>Monthly Income</CardTitle>
 							<CardDescription>
-								Expenses by month for {selectedYear}
+								Income by month for {selectedYear}
 							</CardDescription>
 						</div>
 						{onToggle && (
@@ -128,7 +125,7 @@ export function ChartBarMonthlyExpenses({
 								size="icon"
 								onClick={onToggle}
 								className="ml-2"
-								title="Switch to Income"
+								title="Switch to Expenses"
 							>
 								<IconArrowRight className="h-4 w-4" />
 							</Button>
@@ -217,7 +214,7 @@ export function ChartBarMonthlyExpenses({
 						</ChartContainer>
 						<div className="mt-4 text-center">
 							<p className="text-muted-foreground text-sm">
-								Total for {selectedYear}: {formatCurrency(totalExpenses)}
+								Total for {selectedYear}: {formatCurrency(totalIncome)}
 							</p>
 						</div>
 					</>

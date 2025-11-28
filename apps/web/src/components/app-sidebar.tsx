@@ -1,7 +1,6 @@
 import {
 	IconDashboard,
 	IconHelp,
-	IconInnerShadowTop,
 	IconLogout,
 	IconMoon,
 	IconSettings,
@@ -11,6 +10,7 @@ import {
 	IconWallet,
 } from "@tabler/icons-react";
 import { useNavigate } from "@tanstack/react-router";
+import { Currency } from "lucide-react";
 import type * as React from "react";
 import { NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
@@ -108,8 +108,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 							className="data-[slot=sidebar-menu-button]:p-1.5!"
 						>
 							<a href="/">
-								<IconInnerShadowTop className="size-5!" />
-								<span className="font-semibold text-base">Moneta</span>
+								<Currency className="size-5!" />
+								<h3 className="font-bold text-base">Moneta</h3>
 							</a>
 						</SidebarMenuButton>
 					</SidebarMenuItem>
