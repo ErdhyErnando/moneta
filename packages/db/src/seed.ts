@@ -24,6 +24,8 @@ const DEFAULT_CATEGORIES: (typeof categories.$inferInsert)[] = [
 	{ name: "Travel", type: "expense" },
 	{ name: "Education", type: "expense" },
 	{ name: "Other Expense", type: "expense" },
+	{ name: "Savings", type: "starting_balance" },
+	{ name: "Cash on Hand", type: "starting_balance" },
 ];
 
 async function main() {

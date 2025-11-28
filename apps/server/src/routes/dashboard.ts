@@ -1,5 +1,10 @@
 import { db } from "@moneta/db";
-import { expenses, incomes } from "@moneta/db/schema/moneta";
+import {
+	categories,
+	expenses,
+	incomes,
+	startingBalances,
+} from "@moneta/db/schema/moneta";
 import { and, eq, gte, lte, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
@@ -23,7 +28,7 @@ app.get("/summary", async (c) => {
 
 	const { startDate, endDate } = query.data;
 
-	// Build where conditions
+	// Build where conditions for filtered period
 	const incomeConditions = [eq(incomes.userId, user.id)];
 	const expenseConditions = [eq(expenses.userId, user.id)];
 
@@ -37,7 +42,7 @@ app.get("/summary", async (c) => {
 		expenseConditions.push(lte(expenses.date, new Date(endDate)));
 	}
 
-	// Calculate total income
+	// Calculate total income (filtered)
 	const [incomeResult] = await db
 		.select({
 			total: sql<number>`COALESCE(SUM(CAST(${incomes.amount} AS DECIMAL)), 0)`,
@@ -45,7 +50,7 @@ app.get("/summary", async (c) => {
 		.from(incomes)
 		.where(and(...incomeConditions));
 
-	// Calculate total expenses
+	// Calculate total expenses (filtered)
 	const [expenseResult] = await db
 		.select({
 			total: sql<number>`COALESCE(SUM(CAST(${expenses.amount} AS DECIMAL)), 0)`,
@@ -53,15 +58,44 @@ app.get("/summary", async (c) => {
 		.from(expenses)
 		.where(and(...expenseConditions));
 
+	// Calculate all-time totals for current balance
+	const [allIncomeResult] = await db
+		.select({
+			total: sql<number>`COALESCE(SUM(CAST(${incomes.amount} AS DECIMAL)), 0)`,
+		})
+		.from(incomes)
+		.where(eq(incomes.userId, user.id));
+
+	const [allExpenseResult] = await db
+		.select({
+			total: sql<number>`COALESCE(SUM(CAST(${expenses.amount} AS DECIMAL)), 0)`,
+		})
+		.from(expenses)
+		.where(eq(expenses.userId, user.id));
+
+	const [startingBalanceResult] = await db
+		.select({
+			total: sql<number>`COALESCE(SUM(CAST(${startingBalances.amount} AS DECIMAL)), 0)`,
+		})
+		.from(startingBalances)
+		.where(eq(startingBalances.userId, user.id));
+
 	const totalIncome = Number(incomeResult?.total || 0);
 	const totalExpenses = Number(expenseResult?.total || 0);
 	const netBalance = totalIncome - totalExpenses;
+
+	const allTimeIncome = Number(allIncomeResult?.total || 0);
+	const allTimeExpenses = Number(allExpenseResult?.total || 0);
+	const totalStartingBalance = Number(startingBalanceResult?.total || 0);
+	const currentBalance = totalStartingBalance + allTimeIncome - allTimeExpenses;
 
 	return c.json({
 		summary: {
 			totalIncome,
 			totalExpenses,
 			netBalance,
+			totalStartingBalance,
+			currentBalance,
 		},
 	});
 });
@@ -215,6 +249,133 @@ app.get("/chart", async (c) => {
 	} catch (error) {
 		console.error("Chart endpoint error:", error);
 		return c.json({ error: "Failed to fetch chart data", chartData: [] }, 500);
+	}
+});
+
+// Get expense category breakdown (for pie chart)
+app.get("/expense-categories", async (c) => {
+	try {
+		const user = c.get("user");
+
+		// Get all expenses grouped by category
+		const expensesByCategory = await db
+			.select({
+				categoryId: expenses.categoryId,
+				categoryName: sql<string>`${categories.name}`,
+				total: sql<number>`COALESCE(SUM(CAST(${expenses.amount} AS DECIMAL)), 0)`,
+			})
+			.from(expenses)
+			.innerJoin(categories, eq(expenses.categoryId, categories.id))
+			.where(eq(expenses.userId, user.id))
+			.groupBy(expenses.categoryId, categories.name);
+
+		// Calculate total expenses
+		const totalExpenses = expensesByCategory.reduce(
+			(sum, cat) => sum + Number(cat.total),
+			0,
+		);
+
+		// Calculate percentages
+		const categoriesWithPercentage = expensesByCategory.map((cat) => ({
+			name: cat.categoryName,
+			amount: cat.total.toString(),
+			percentage:
+				totalExpenses > 0 ? (Number(cat.total) / totalExpenses) * 100 : 0,
+		}));
+
+		return c.json({ categories: categoriesWithPercentage });
+	} catch (error) {
+		console.error("Expense categories endpoint error:", error);
+		return c.json(
+			{ error: "Failed to fetch expense categories", categories: [] },
+			500,
+		);
+	}
+});
+
+// Get monthly expenses by year (for bar chart)
+app.get("/monthly-expenses", async (c) => {
+	try {
+		const user = c.get("user");
+		const year = c.req.query("year") || new Date().getFullYear().toString();
+
+		// Validate year
+		const yearNum = Number.parseInt(year, 10);
+		if (Number.isNaN(yearNum)) {
+			return c.json({ error: "Invalid year parameter" }, 400);
+		}
+
+		// Get expenses grouped by month for the specified year
+		const monthlyExpenses = await db
+			.select({
+				month: sql<string>`TO_CHAR(${expenses.date}, 'YYYY-MM-01')`,
+				total: sql<number>`COALESCE(SUM(CAST(${expenses.amount} AS DECIMAL)), 0)`,
+			})
+			.from(expenses)
+			.where(
+				and(
+					eq(expenses.userId, user.id),
+					sql`EXTRACT(YEAR FROM ${expenses.date}) = ${yearNum}`,
+				),
+			)
+			.groupBy(sql`TO_CHAR(${expenses.date}, 'YYYY-MM-01')`);
+
+		// Transform to array with month string
+		const monthlyData = monthlyExpenses.map((item) => ({
+			month: item.month,
+			amount: item.total.toString(),
+		}));
+
+		return c.json({ monthlyData });
+	} catch (error) {
+		console.error("Monthly expenses endpoint error:", error);
+		return c.json(
+			{ error: "Failed to fetch monthly expenses", monthlyData: [] },
+			500,
+		);
+	}
+});
+
+// Get monthly income by year (for bar chart)
+app.get("/monthly-income", async (c) => {
+	try {
+		const user = c.get("user");
+		const year = c.req.query("year") || new Date().getFullYear().toString();
+
+		// Validate year
+		const yearNum = Number.parseInt(year, 10);
+		if (Number.isNaN(yearNum)) {
+			return c.json({ error: "Invalid year parameter" }, 400);
+		}
+
+		// Get income grouped by month for the specified year
+		const monthlyIncome = await db
+			.select({
+				month: sql<string>`TO_CHAR(${incomes.date}, 'YYYY-MM-01')`,
+				total: sql<number>`COALESCE(SUM(CAST(${incomes.amount} AS DECIMAL)), 0)`,
+			})
+			.from(incomes)
+			.where(
+				and(
+					eq(incomes.userId, user.id),
+					sql`EXTRACT(YEAR FROM ${incomes.date}) = ${yearNum}`,
+				),
+			)
+			.groupBy(sql`TO_CHAR(${incomes.date}, 'YYYY-MM-01')`);
+
+		// Transform to array with month string
+		const monthlyData = monthlyIncome.map((item) => ({
+			month: item.month,
+			amount: item.total.toString(),
+		}));
+
+		return c.json({ monthlyData });
+	} catch (error) {
+		console.error("Monthly income endpoint error:", error);
+		return c.json(
+			{ error: "Failed to fetch monthly income", monthlyData: [] },
+			500,
+		);
 	}
 });
 

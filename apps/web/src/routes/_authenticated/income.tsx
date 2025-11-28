@@ -4,7 +4,7 @@ import type { AxiosError } from "axios";
 import { format } from "date-fns";
 import { Edit, Plus, Trash } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 import { CurrencySelector } from "@/components/currency-selector";
 import TransactionForm from "@/components/transaction-form";
 import { Button } from "@/components/ui/button";
@@ -54,6 +54,7 @@ type TransactionFormData = {
 
 function IncomePage() {
 	const { formatCurrency } = useCurrency();
+	const { toast } = useToast();
 	const [isOpen, setIsOpen] = useState(false);
 	const [editingId, setEditingId] = useState<number | null>(null);
 	const [deleteId, setDeleteId] = useState<number | null>(null);
@@ -75,12 +76,18 @@ function IncomePage() {
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["incomes"] });
 			setIsOpen(false);
-			toast.success("Income added successfully");
+			toast({
+				title: "Success",
+				description: "Income added successfully",
+			});
 		},
 		onError: (error: AxiosError<{ error: { message: string } }>) => {
-			toast.error(
-				error.response?.data?.error?.message || "Failed to add income",
-			);
+			toast({
+				title: "Error",
+				description:
+					error.response?.data?.error?.message || "Failed to add income",
+				variant: "destructive",
+			});
 		},
 	});
 
@@ -98,12 +105,18 @@ function IncomePage() {
 			queryClient.invalidateQueries({ queryKey: ["incomes"] });
 			setIsOpen(false);
 			setEditingId(null);
-			toast.success("Income updated successfully");
+			toast({
+				title: "Success",
+				description: "Income updated successfully",
+			});
 		},
 		onError: (error: AxiosError<{ error: { message: string } }>) => {
-			toast.error(
-				error.response?.data?.error?.message || "Failed to update income",
-			);
+			toast({
+				title: "Error",
+				description:
+					error.response?.data?.error?.message || "Failed to update income",
+				variant: "destructive",
+			});
 		},
 	});
 
@@ -113,14 +126,20 @@ function IncomePage() {
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["incomes"] });
-			toast.success("Income deleted successfully");
+			toast({
+				title: "Success",
+				description: "Income deleted successfully",
+			});
 			setIsDeleteOpen(false);
 			setDeleteId(null);
 		},
 		onError: (error: AxiosError<{ error: { message: string } }>) => {
-			toast.error(
-				error.response?.data?.error?.message || "Failed to delete income",
-			);
+			toast({
+				title: "Error",
+				description:
+					error.response?.data?.error?.message || "Failed to delete income",
+				variant: "destructive",
+			});
 		},
 	});
 
@@ -183,11 +202,11 @@ function IncomePage() {
 										defaultValues={
 											editingIncome
 												? {
-														amount: editingIncome.amount,
-														description: editingIncome.description,
-														date: new Date(editingIncome.date),
-														categoryId: editingIncome.categoryId,
-													}
+													amount: editingIncome.amount,
+													description: editingIncome.description,
+													date: new Date(editingIncome.date),
+													categoryId: editingIncome.categoryId,
+												}
 												: undefined
 										}
 									/>

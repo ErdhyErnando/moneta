@@ -1,13 +1,14 @@
 import {
+	IconCloudDollar,
 	IconDashboard,
 	IconHelp,
-	IconInnerShadowTop,
 	IconLogout,
 	IconMoon,
 	IconSettings,
 	IconSun,
 	IconTrendingDown,
 	IconTrendingUp,
+	IconWallet,
 } from "@tabler/icons-react";
 import { useNavigate } from "@tanstack/react-router";
 import type * as React from "react";
@@ -49,6 +50,11 @@ const navMainItems = [
 		title: "Expense",
 		url: "/expense",
 		icon: IconTrendingDown,
+	},
+	{
+		title: "Starting Balance",
+		url: "/starting-balance",
+		icon: IconWallet,
 	},
 ];
 
@@ -102,8 +108,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 							className="data-[slot=sidebar-menu-button]:p-1.5!"
 						>
 							<a href="/">
-								<IconInnerShadowTop className="size-5!" />
-								<span className="font-semibold text-base">Moneta</span>
+								<IconCloudDollar className="size-5!" />
+								<h3 className="font-bold text-base">Moneta</h3>
 							</a>
 						</SidebarMenuButton>
 					</SidebarMenuItem>

@@ -4,7 +4,7 @@ import type { AxiosError } from "axios";
 import { format } from "date-fns";
 import { Edit, Plus, Trash } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 import { CurrencySelector } from "@/components/currency-selector";
 import TransactionForm from "@/components/transaction-form";
 import { Button } from "@/components/ui/button";
@@ -54,6 +54,7 @@ type TransactionFormData = {
 
 function ExpensePage() {
 	const { formatCurrency } = useCurrency();
+	const { toast } = useToast();
 	const [isOpen, setIsOpen] = useState(false);
 	const [editingId, setEditingId] = useState<number | null>(null);
 	const [deleteId, setDeleteId] = useState<number | null>(null);
@@ -75,12 +76,18 @@ function ExpensePage() {
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["expenses"] });
 			setIsOpen(false);
-			toast.success("Expense added successfully");
+			toast({
+				title: "Success",
+				description: "Expense added successfully",
+			});
 		},
 		onError: (error: AxiosError<{ error: { message: string } }>) => {
-			toast.error(
-				error.response?.data?.error?.message || "Failed to add expense",
-			);
+			toast({
+				title: "Error",
+				description:
+					error.response?.data?.error?.message || "Failed to add expense",
+				variant: "destructive",
+			});
 		},
 	});
 
@@ -98,12 +105,18 @@ function ExpensePage() {
 			queryClient.invalidateQueries({ queryKey: ["expenses"] });
 			setIsOpen(false);
 			setEditingId(null);
-			toast.success("Expense updated successfully");
+			toast({
+				title: "Success",
+				description: "Expense updated successfully",
+			});
 		},
 		onError: (error: AxiosError<{ error: { message: string } }>) => {
-			toast.error(
-				error.response?.data?.error?.message || "Failed to update expense",
-			);
+			toast({
+				title: "Error",
+				description:
+					error.response?.data?.error?.message || "Failed to update expense",
+				variant: "destructive",
+			});
 		},
 	});
 
@@ -113,14 +126,20 @@ function ExpensePage() {
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["expenses"] });
-			toast.success("Expense deleted successfully");
+			toast({
+				title: "Success",
+				description: "Expense deleted successfully",
+			});
 			setIsDeleteOpen(false);
 			setDeleteId(null);
 		},
 		onError: (error: AxiosError<{ error: { message: string } }>) => {
-			toast.error(
-				error.response?.data?.error?.message || "Failed to delete expense",
-			);
+			toast({
+				title: "Error",
+				description:
+					error.response?.data?.error?.message || "Failed to delete expense",
+				variant: "destructive",
+			});
 		},
 	});
 
@@ -183,11 +202,11 @@ function ExpensePage() {
 										defaultValues={
 											editingExpense
 												? {
-														amount: editingExpense.amount,
-														description: editingExpense.description,
-														date: new Date(editingExpense.date),
-														categoryId: editingExpense.categoryId,
-													}
+													amount: editingExpense.amount,
+													description: editingExpense.description,
+													date: new Date(editingExpense.date),
+													categoryId: editingExpense.categoryId,
+												}
 												: undefined
 										}
 									/>
