@@ -8,6 +8,7 @@ import {
 	IconSun,
 	IconTrendingDown,
 	IconTrendingUp,
+	IconWallet,
 } from "@tabler/icons-react";
 import { useNavigate } from "@tanstack/react-router";
 import type * as React from "react";
@@ -49,6 +50,11 @@ const navMainItems = [
 		title: "Expense",
 		url: "/expense",
 		icon: IconTrendingDown,
+	},
+	{
+		title: "Starting Balance",
+		url: "/starting-balance",
+		icon: IconWallet,
 	},
 ];
 

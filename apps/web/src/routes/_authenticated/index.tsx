@@ -240,10 +240,11 @@ function HomeComponent() {
 							<div className="h-8 w-32 animate-pulse rounded bg-muted" />
 						) : (
 							<div
-								className={`font-bold text-2xl ${(summary?.netBalance || 0) >= 0
+								className={`font-bold text-2xl ${
+									(summary?.netBalance || 0) >= 0
 										? "text-emerald-600"
 										: "text-rose-600"
-									}`}
+								}`}
 							>
 								{formatCurrency(summary?.netBalance || 0)}
 							</div>
@@ -253,7 +254,9 @@ function HomeComponent() {
 
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="font-medium text-sm">Current Balance</CardTitle>
+						<CardTitle className="font-medium text-sm">
+							Current Balance
+						</CardTitle>
 						<IconWallet className="size-4 text-blue-500" />
 					</CardHeader>
 					<CardContent>
@@ -261,10 +264,11 @@ function HomeComponent() {
 							<div className="h-8 w-32 animate-pulse rounded bg-muted" />
 						) : (
 							<div
-								className={`font-bold text-2xl ${(summary?.currentBalance || 0) >= 0
+								className={`font-bold text-2xl ${
+									(summary?.currentBalance || 0) >= 0
 										? "text-blue-600"
 										: "text-rose-600"
-									}`}
+								}`}
 							>
 								{formatCurrency(summary?.currentBalance || 0)}
 							</div>

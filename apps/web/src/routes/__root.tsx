@@ -5,7 +5,7 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { ThemeProvider } from "@/components/theme-provider";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/toaster";
 import "../index.css";
 
 export type RouterAppContext = {};
@@ -44,7 +44,7 @@ function RootComponent() {
 				<div className="h-svh">
 					<Outlet />
 				</div>
-				<Toaster richColors />
+				<Toaster />
 			</ThemeProvider>
 			<TanStackRouterDevtools position="bottom-left" />
 		</>

@@ -22,6 +22,7 @@ import categories from "./routes/categories";
 import dashboard from "./routes/dashboard";
 import expenses from "./routes/expenses";
 import incomes from "./routes/incomes";
+import startingBalances from "./routes/starting-balances";
 
 app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 
@@ -33,6 +34,7 @@ app.route("/api/categories", categories);
 app.route("/api/incomes", incomes);
 app.route("/api/expenses", expenses);
 app.route("/api/dashboard", dashboard);
+app.route("/api/starting-balances", startingBalances);
 
 app.get("/", (c) => {
 	return c.text("OK");
