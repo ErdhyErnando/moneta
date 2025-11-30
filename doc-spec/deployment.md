@@ -45,7 +45,20 @@ We will use **GitHub Actions** to build the Docker image and push it to **GitHub
 
 Create a file at `apps/server/Dockerfile`. This uses `turbo prune` to optimize the build context.
 
-*(See the `apps/server/Dockerfile` file created in your codebase for the content)*
+The Dockerfile includes several security and efficiency improvements:
+
+1. **`.dockerignore` file**: Excludes sensitive files (`.env`, `.git`) and unnecessary files from the build context
+2. **Pinned pnpm version**: Uses `corepack prepare pnpm@9.15.3 --activate` to ensure consistent builds
+3. **Production dependencies only**: Installs only production dependencies with `--prod --frozen-lockfile`
+4. **Minimal runtime image**: The runner stage copies only necessary files:
+   - `apps/server/dist/` (built application)
+   - `apps/server/package.json` (metadata)
+   - `node_modules/` (production dependencies)
+   - `packages/` (workspace packages if needed at runtime)
+
+This approach reduces the image size, attack surface, and ensures no sensitive files are included in the final image.
+
+*(See the `apps/server/Dockerfile` file created in your codebase for the full content)*
 
 ### Step 2.2: Configure GitHub Actions
 
@@ -151,81 +164,12 @@ Cloudflare Pages is the easiest way to deploy the Vite React app.
 
 ---
 
-## 4. DNS Configuration (Cloudflare)
-
-You need to configure DNS records in Cloudflare to point your domains to the correct services.
-
-### Step 4.1: Frontend Domain (Cloudflare Pages)
-
-When you add a custom domain in Cloudflare Pages (Step 3.2), Cloudflare **automatically creates** the necessary DNS records. However, if you need to verify or manually configure:
-
-1.  Go to **Cloudflare Dashboard** → **DNS** → **Records**.
-2.  You should see a **CNAME** record:
-    *   **Type**: `CNAME`
-    *   **Name**: `moneta` (or `@` if using root domain)
-    *   **Target**: `<your-pages-project>.pages.dev` (automatically set by Cloudflare Pages)
-    *   **Proxy status**: ✅ **Proxied** (orange cloud icon)
-
-> [!NOTE]
-> Cloudflare Pages handles this automatically. You typically don't need to create this record manually.
-
-### Step 4.2: Backend API Subdomain (VPS)
-
-For `api.moneta.erdhyernando.xyz` to point to your VPS, you need to **manually create** an **A record**:
-
-1.  Go to **Cloudflare Dashboard** → **DNS** → **Records**.
-2.  Click **Add record**.
-3.  Configure the record:
-    *   **Type**: `A`
-    *   **Name**: `api.moneta` (this creates `api.moneta.erdhyernando.xyz`)
-    *   **IPv4 address**: `<YOUR_VPS_IP_ADDRESS>` (e.g., `203.0.113.45`)
-    *   **Proxy status**: ✅ **Proxied** (orange cloud icon - recommended for DDoS protection and SSL)
-    *   **TTL**: `Auto`
-4.  Click **Save**.
-
-> [!IMPORTANT]
-> Replace `<YOUR_VPS_IP_ADDRESS>` with your actual VPS public IP address.
-
-### Step 4.3: Verify DNS Propagation
-
-After adding the DNS records, verify they are working:
-
-```bash
-# Check frontend domain
-nslookup moneta.erdhyernando.xyz
-
-# Check API subdomain
-nslookup api.moneta.erdhyernando.xyz
-```
-
-Both should resolve to IP addresses. If proxied through Cloudflare, they will show Cloudflare's IP addresses, not your actual VPS IP.
-
-### Step 4.4: SSL/TLS Configuration
-
-1.  Go to **Cloudflare Dashboard** → **SSL/TLS**.
-2.  Set encryption mode to **Full (strict)** for maximum security.
-3.  Cloudflare will automatically provision SSL certificates for both domains.
-
-> [!TIP]
-> Dokploy (via Traefik) will automatically handle SSL certificates for `api.moneta.erdhyernando.xyz` using Let's Encrypt when you configure the domain in Dokploy.
-
-### DNS Records Summary
-
-After configuration, your DNS records should look like this:
-
-| Type  | Name        | Target/Value                    | Proxy Status |
-|-------|-------------|---------------------------------|--------------|
-| CNAME | `moneta`    | `<project>.pages.dev`           | Proxied      |
-| A     | `api.moneta`| `<YOUR_VPS_IP>`                 | Proxied      |
-
----
-
-## 5. Summary of URLs
+## 4. Summary of URLs
 
 *   **Frontend**: `https://moneta.erdhyernando.xyz`
 *   **Backend API**: `https://api.moneta.erdhyernando.xyz`
 
-## 6. Potential Issues & Best Practices
+## 5. Potential Issues & Best Practices
 
 *   **CORS**: Ensure your Hono server's CORS middleware includes `https://moneta.erdhyernando.xyz`.
 *   **Database Migrations**:
