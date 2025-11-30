@@ -25,8 +25,8 @@ COPY --from=builder /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
 RUN corepack enable
 RUN corepack prepare pnpm@9.15.3 --activate
 
-# Install production dependencies only
-RUN pnpm install --prod --frozen-lockfile
+# Install all dependencies (including devDependencies needed for build)
+RUN pnpm install --frozen-lockfile
 
 # Build the project and its dependencies
 COPY --from=builder /app/out/full/ .
