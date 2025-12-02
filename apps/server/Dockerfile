@@ -30,7 +30,7 @@ RUN pnpm install --frozen-lockfile
 
 # Build the project and its dependencies
 COPY --from=builder /app/out/full/ .
-COPY turbo.json turbo.json
+COPY --from=builder /app/turbo.json .
 
 # Build the server
 RUN pnpm turbo build --filter=server...
@@ -55,4 +55,3 @@ EXPOSE 3000
 
 # Start the server
 CMD ["node", "apps/server/dist/index.js"]
-
