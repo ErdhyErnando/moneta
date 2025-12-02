@@ -32,7 +32,7 @@ RUN pnpm install --frozen-lockfile
 COPY --from=builder /app/out/full/ .
 COPY --from=builder /app/turbo.json .
 
-# Build the server
+# Build the server (this bundles everything into a single file)
 RUN pnpm turbo build --filter=server...
 
 FROM base AS runner
@@ -42,16 +42,13 @@ WORKDIR /app
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 hono
 
-# Copy only necessary runtime files
-COPY --from=installer --chown=hono:nodejs /app/apps/server/dist ./apps/server/dist
-COPY --from=installer --chown=hono:nodejs /app/apps/server/package.json ./apps/server/package.json
-COPY --from=installer --chown=hono:nodejs /app/node_modules ./node_modules
-COPY --from=installer --chown=hono:nodejs /app/packages ./packages
+# Copy only the bundled output (all dependencies are bundled inside)
+COPY --from=installer --chown=hono:nodejs /app/apps/server/dist ./dist
 
 USER hono
 
 # Expose the port the app runs on
 EXPOSE 3000
 
-# Start the server
-CMD ["npm", "run", "start", "--prefix", "apps/server"]
+# Start the server directly with node
+CMD ["node", "dist/index.mjs"]
