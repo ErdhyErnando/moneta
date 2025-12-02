@@ -1,8 +1,8 @@
 # Moneta
 
-Moneta is a personal finance management web application designed for individual use. The primary objective is to provide a fast, efficient, and user-friendly tool for tracking income and expenses, visualizing financial health, and gaining insights into spending habits.
+Moneta is a personal finance management web application designed designed and develop with the plan of testing google's Antigravity. The primary objective is to provide a fast, efficient, and user-friendly tool for tracking income and expenses, visualizing financial health, and gaining insights into spending habits. (not really i just want to see the capabilities of gemini 3 pro 😝)
 
-This project is built for tech-savvy individuals who prefer a simple, self-hosted solution for privacy and control over their financial data.
+This project is built for tech-savvy individuals who prefer a simple, self-hosted solution for privacy and control over their financial data.(non tech-savy could use it too)
 
 ## ✨ Core Features
 
