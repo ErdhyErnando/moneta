@@ -54,4 +54,4 @@ USER hono
 EXPOSE 3000
 
 # Start the server
-CMD ["node", "apps/server/dist/index.js"]
+CMD ["npm", "run", "start", "--prefix", "apps/server"]

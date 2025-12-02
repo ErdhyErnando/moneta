@@ -8,13 +8,15 @@ const app = new Hono();
 
 app.use(logger());
 app.use(
-	"/*",
-	cors({
-		origin: process.env.CORS_ORIGIN || "http://localhost:3001",
-		allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-		allowHeaders: ["Content-Type", "Authorization"],
-		credentials: true,
-	}),
+  "/*",
+  cors({
+    origin: (process.env.CORS_ORIGIN || "http://localhost:3001")
+      .split(",")
+      .map((o) => o.trim()),
+    allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  }),
 );
 
 import { authMiddleware } from "./middleware";
@@ -37,21 +39,21 @@ app.route("/api/dashboard", dashboard);
 app.route("/api/starting-balances", startingBalances);
 
 app.get("/", (c) => {
-	return c.text("OK");
+  return c.text("OK");
 });
 
 app.get("/test", (c) => {
-	return c.json({ message: "Test route works!" });
+  return c.json({ message: "Test route works!" });
 });
 
 import { serve } from "@hono/node-server";
 
 serve(
-	{
-		fetch: app.fetch,
-		port: 3000,
-	},
-	(info) => {
-		console.log(`Server is running on http://localhost:${info.port}`);
-	},
+  {
+    fetch: app.fetch,
+    port: 3000,
+  },
+  (info) => {
+    console.log(`Server is running on http://localhost:${info.port}`);
+  },
 );
