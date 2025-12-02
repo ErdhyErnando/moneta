@@ -12,7 +12,8 @@ app.use(
   cors({
     origin: (process.env.CORS_ORIGIN || "http://localhost:3001")
       .split(",")
-      .map((o) => o.trim()),
+      .map((o) => o.trim())
+      .filter((o) => o.length > 0),
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],
     credentials: true,
