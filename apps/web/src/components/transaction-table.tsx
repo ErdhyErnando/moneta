@@ -38,6 +38,7 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
 	Popover,
 	PopoverContent,
@@ -61,6 +62,32 @@ import {
 import { useCurrency } from "@/contexts/currency-context";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
+
+// Helper function to get start of day timestamp without mutating
+const getStartOfDay = (date: Date): number => {
+	return new Date(
+		date.getFullYear(),
+		date.getMonth(),
+		date.getDate(),
+		0,
+		0,
+		0,
+		0,
+	).getTime();
+};
+
+// Helper function to get end of day timestamp without mutating
+const getEndOfDay = (date: Date): number => {
+	return new Date(
+		date.getFullYear(),
+		date.getMonth(),
+		date.getDate(),
+		23,
+		59,
+		59,
+		999,
+	).getTime();
+};
 
 export type Transaction = {
 	id: number;
@@ -125,32 +152,6 @@ export function TransactionTable({
 			return res.data.categories.filter((c) => c.type === type);
 		},
 	});
-
-	// Helper function to get start of day timestamp without mutating
-	const getStartOfDay = (date: Date): number => {
-		return new Date(
-			date.getFullYear(),
-			date.getMonth(),
-			date.getDate(),
-			0,
-			0,
-			0,
-			0,
-		).getTime();
-	};
-
-	// Helper function to get end of day timestamp without mutating
-	const getEndOfDay = (date: Date): number => {
-		return new Date(
-			date.getFullYear(),
-			date.getMonth(),
-			date.getDate(),
-			23,
-			59,
-			59,
-			999,
-		).getTime();
-	};
 
 	// Filter data based on filter states
 	const filteredData = React.useMemo(() => {
@@ -346,16 +347,25 @@ export function TransactionTable({
 			{/* Toolbar */}
 			<div className="flex flex-col gap-4">
 				<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-					<Input
-						placeholder="Filter descriptions..."
-						value={
-							(table.getColumn("description")?.getFilterValue() as string) ?? ""
-						}
-						onChange={(event) =>
-							table.getColumn("description")?.setFilterValue(event.target.value)
-						}
-						className="max-w-sm"
-					/>
+					<div className="flex flex-col gap-1.5">
+						<Label htmlFor="description-filter" className="sr-only">
+							Filter by description
+						</Label>
+						<Input
+							id="description-filter"
+							placeholder="Filter descriptions..."
+							value={
+								(table.getColumn("description")?.getFilterValue() as string) ??
+								""
+							}
+							onChange={(event) =>
+								table
+									.getColumn("description")
+									?.setFilterValue(event.target.value)
+							}
+							className="max-w-sm"
+						/>
+					</div>
 					<div className="flex flex-wrap items-center gap-2">
 						<Button
 							variant={showFilters ? "secondary" : "outline"}
@@ -411,12 +421,16 @@ export function TransactionTable({
 						<div className="flex flex-wrap items-end gap-4">
 							{/* Date Range Filter */}
 							<div className="flex flex-col gap-1.5">
-								<label className="font-medium text-muted-foreground text-xs">
+								<Label
+									htmlFor="start-date-filter"
+									className="font-medium text-muted-foreground text-xs"
+								>
 									Start Date
-								</label>
+								</Label>
 								<Popover>
 									<PopoverTrigger asChild>
 										<Button
+											id="start-date-filter"
 											variant="outline"
 											size="sm"
 											className={cn(
@@ -441,12 +455,16 @@ export function TransactionTable({
 							</div>
 
 							<div className="flex flex-col gap-1.5">
-								<label className="font-medium text-muted-foreground text-xs">
+								<Label
+									htmlFor="end-date-filter"
+									className="font-medium text-muted-foreground text-xs"
+								>
 									End Date
-								</label>
+								</Label>
 								<Popover>
 									<PopoverTrigger asChild>
 										<Button
+											id="end-date-filter"
 											variant="outline"
 											size="sm"
 											className={cn(
@@ -470,14 +488,17 @@ export function TransactionTable({
 
 							{/* Category Filter */}
 							<div className="flex flex-col gap-1.5">
-								<label className="font-medium text-muted-foreground text-xs">
+								<Label
+									htmlFor="category-filter"
+									className="font-medium text-muted-foreground text-xs"
+								>
 									Category
-								</label>
+								</Label>
 								<Select
 									value={selectedCategory}
 									onValueChange={setSelectedCategory}
 								>
-									<SelectTrigger className="h-8 w-40">
+									<SelectTrigger id="category-filter" className="h-8 w-40">
 										<SelectValue placeholder="All categories" />
 									</SelectTrigger>
 									<SelectContent>
@@ -493,10 +514,14 @@ export function TransactionTable({
 
 							{/* Amount Range Filter */}
 							<div className="flex flex-col gap-1.5">
-								<label className="font-medium text-muted-foreground text-xs">
+								<Label
+									htmlFor="min-amount-filter"
+									className="font-medium text-muted-foreground text-xs"
+								>
 									Min Amount
-								</label>
+								</Label>
 								<Input
+									id="min-amount-filter"
 									type="number"
 									placeholder="0"
 									value={minAmount}
@@ -506,10 +531,14 @@ export function TransactionTable({
 							</div>
 
 							<div className="flex flex-col gap-1.5">
-								<label className="font-medium text-muted-foreground text-xs">
+								<Label
+									htmlFor="max-amount-filter"
+									className="font-medium text-muted-foreground text-xs"
+								>
 									Max Amount
-								</label>
+								</Label>
 								<Input
+									id="max-amount-filter"
 									type="number"
 									placeholder="No limit"
 									value={maxAmount}
