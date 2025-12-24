@@ -22,8 +22,8 @@ import {
 } from "@tanstack/react-table";
 import * as React from "react";
 import { z } from "zod";
+import { CategoryBadge } from "@/components/category-badge";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -115,11 +115,7 @@ const columns: ColumnDef<StartingBalance>[] = [
 		header: "Category",
 		cell: ({ row }) => {
 			const category = row.original.category;
-			return (
-				<Badge variant="outline" className="font-normal">
-					{category.name}
-				</Badge>
-			);
+			return <CategoryBadge name={category.name} />;
 		},
 	},
 	{
@@ -364,7 +360,7 @@ export function StartingBalanceList({
 					</div>
 					<div className="flex w-[100px] items-center justify-center font-medium text-sm">
 						Page {table.getState().pagination.pageIndex + 1} of{" "}
-						{table.getPageCount()}
+						{table.getPageCount() || 1}
 					</div>
 					<div className="flex items-center space-x-2">
 						<Button

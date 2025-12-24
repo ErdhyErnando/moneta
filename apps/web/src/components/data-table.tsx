@@ -22,8 +22,8 @@ import {
 } from "@tanstack/react-table";
 import * as React from "react";
 import { z } from "zod";
+import { CategoryBadge } from "@/components/category-badge";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -110,11 +110,10 @@ const columns: ColumnDef<Transaction>[] = [
 	{
 		accessorKey: "category",
 		header: "Category",
-		cell: ({ row }) => (
-			<Badge variant="outline" className="font-normal">
-				{row.getValue("category")}
-			</Badge>
-		),
+		cell: ({ row }) => {
+			const category = row.getValue("category") as string;
+			return <CategoryBadge name={category} />;
+		},
 	},
 	{
 		accessorKey: "type",
@@ -122,12 +121,15 @@ const columns: ColumnDef<Transaction>[] = [
 		cell: ({ row }) => {
 			const type = row.getValue("type") as string;
 			return (
-				<Badge
-					variant={type === "income" ? "default" : "destructive"}
-					className="capitalize"
+				<span
+					className={`inline-flex items-center justify-center whitespace-nowrap rounded-full px-2.5 py-0.5 font-medium text-xs ${
+						type === "income"
+							? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
+							: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300"
+					}`}
 				>
-					{type}
-				</Badge>
+					{type.charAt(0).toUpperCase() + type.slice(1)}
+				</span>
 			);
 		},
 	},
