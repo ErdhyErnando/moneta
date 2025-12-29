@@ -12,7 +12,7 @@ import { useMemo, useState } from "react";
 import { ChartAreaInteractive } from "@/components/chart-area-interactive";
 import { ChartBarMonthlyExpenses } from "@/components/chart-bar-monthly-expenses";
 import { ChartBarMonthlyIncome } from "@/components/chart-bar-monthly-income";
-import { ChartPieExpenseCategories } from "@/components/chart-pie-expense-categories";
+import { ChartPieCategories } from "@/components/chart-pie-categories";
 import { CurrencySelector } from "@/components/currency-selector";
 import { DataTable, type Transaction } from "@/components/data-table";
 import { Button } from "@/components/ui/button";
@@ -82,6 +82,7 @@ function HomeComponent() {
 	const [monthlyChartType, setMonthlyChartType] = useState<
 		"expense" | "income"
 	>("expense");
+
 	const [customStartDate, setCustomStartDate] = useState<Date>();
 	const [customEndDate, setCustomEndDate] = useState<Date>();
 
@@ -281,7 +282,7 @@ function HomeComponent() {
 				</Card>
 			</div>
 
-			{/* Chart and Expense Pie */}
+			{/* Chart and Category Pie */}
 			<div className="grid gap-6 md:grid-cols-7">
 				<div className="md:col-span-4">
 					<ChartAreaInteractive
@@ -290,7 +291,7 @@ function HomeComponent() {
 					/>
 				</div>
 				<div className="md:col-span-3">
-					<ChartPieExpenseCategories />
+					<ChartPieCategories startDate={startDate} endDate={endDate} />
 				</div>
 			</div>
 
@@ -313,9 +314,15 @@ function HomeComponent() {
 				<CardContent>
 					{transactionsLoading ? (
 						<div className="space-y-2">
-							{[...Array(5)].map((_, i) => (
+							{[
+								"skeleton-1",
+								"skeleton-2",
+								"skeleton-3",
+								"skeleton-4",
+								"skeleton-5",
+							].map((key) => (
 								<div
-									key={`skeleton-${i}`}
+									key={key}
 									className="h-12 w-full animate-pulse rounded bg-muted"
 								/>
 							))}

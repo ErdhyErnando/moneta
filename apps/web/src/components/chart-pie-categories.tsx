@@ -1,13 +1,13 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { Pie, PieChart } from "recharts";
 import {
 	Card,
 	CardContent,
 	CardDescription,
 	CardHeader,
-	CardTitle,
 } from "@/components/ui/card";
 import {
 	type ChartConfig,
@@ -15,17 +15,29 @@ import {
 	ChartTooltip,
 	ChartTooltipContent,
 } from "@/components/ui/chart";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import { useCurrency } from "@/contexts/currency-context";
 import { api } from "@/lib/api";
 
-interface ExpenseCategoryData {
+interface ChartPieCategoriesProps {
+	startDate?: string;
+	endDate?: string;
+}
+
+interface CategoryData {
 	category: string;
 	amount: number;
 	percentage: number;
 	fill: string;
 }
 
-interface ExpenseCategoriesResponse {
+interface CategoriesResponse {
 	categories: Array<{
 		name: string;
 		amount: string;
@@ -33,7 +45,7 @@ interface ExpenseCategoriesResponse {
 	}>;
 }
 
-const CHART_COLORS = [
+const EXPENSE_CHART_COLORS = [
 	"var(--destructive)",
 	"var(--chart-2)",
 	"var(--sidebar-foreground)",
@@ -44,26 +56,59 @@ const CHART_COLORS = [
 	"var(--chart-8)",
 ];
 
-export function ChartPieExpenseCategories() {
+const INCOME_CHART_COLORS = [
+	"var(--chart-2)",
+	"var(--sidebar-primary)",
+	"var(--chart-6)",
+	"var(--sidebar-foreground)",
+	"var(--sidebar)",
+	"var(--foreground)",
+	"var(--chart-8)",
+	"var(--destructive)",
+];
+
+export function ChartPieCategories({
+	startDate,
+	endDate,
+}: ChartPieCategoriesProps) {
 	const { formatCurrency } = useCurrency();
+	const [categoryType, setCategoryType] = useState<"expense" | "income">(
+		"expense",
+	);
 
 	const { data, isLoading } = useQuery({
-		queryKey: ["expense-categories"],
+		queryKey: [
+			categoryType === "expense" ? "expense-categories" : "income-categories",
+			startDate,
+			endDate,
+		],
 		queryFn: async () => {
-			const response = await api.get<ExpenseCategoriesResponse>(
-				"/api/dashboard/expense-categories",
+			const params = new URLSearchParams();
+			if (startDate) params.append("startDate", startDate);
+			if (endDate) params.append("endDate", endDate);
+
+			const endpoint =
+				categoryType === "expense"
+					? "/api/dashboard/expense-categories"
+					: "/api/dashboard/income-categories";
+
+			const response = await api.get<CategoriesResponse>(
+				`${endpoint}?${params.toString()}`,
 			);
 			return response.data;
 		},
 	});
 
+	const chartColors =
+		categoryType === "expense" ? EXPENSE_CHART_COLORS : INCOME_CHART_COLORS;
+
 	// Transform data for the chart
-	const chartData: ExpenseCategoryData[] =
+	const chartData: CategoryData[] =
 		data?.categories.map((cat, index) => ({
 			category: cat.name,
 			amount: Number(cat.amount),
 			percentage: cat.percentage,
-			fill: CHART_COLORS[index % CHART_COLORS.length],
+			fill: chartColors[index % chartColors.length],
 		})) || [];
 
 	// Build chart config dynamically
@@ -82,12 +127,31 @@ export function ChartPieExpenseCategories() {
 		} as ChartConfig,
 	);
 
-	const totalExpenses = chartData.reduce((sum, item) => sum + item.amount, 0);
+	const total = chartData.reduce((sum, item) => sum + item.amount, 0);
+	const emptyMessage =
+		categoryType === "expense"
+			? "No expense data available"
+			: "No income data available";
+	const totalLabel =
+		categoryType === "expense" ? "Total Expenses" : "Total Income";
 
 	return (
 		<Card className="flex flex-col">
 			<CardHeader className="items-center pb-0">
-				<CardTitle>Expense Categories</CardTitle>
+				<Select
+					value={categoryType}
+					onValueChange={(value) =>
+						setCategoryType(value as "expense" | "income")
+					}
+				>
+					<SelectTrigger className="w-[180px] border-none font-semibold text-lg shadow-none focus:ring-0">
+						<SelectValue placeholder="Select category type" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="expense">Expense</SelectItem>
+						<SelectItem value="income">Income</SelectItem>
+					</SelectContent>
+				</Select>
 				<CardDescription>Breakdown by category</CardDescription>
 			</CardHeader>
 			<CardContent className="flex-1 pb-0">
@@ -97,7 +161,7 @@ export function ChartPieExpenseCategories() {
 					</div>
 				) : chartData.length === 0 ? (
 					<div className="flex h-[280px] items-center justify-center text-muted-foreground">
-						No expense data available
+						{emptyMessage}
 					</div>
 				) : (
 					<>
@@ -134,7 +198,7 @@ export function ChartPieExpenseCategories() {
 						</ChartContainer>
 						<div className="mt-4 text-center">
 							<p className="text-muted-foreground text-sm">
-								Total Expenses: {formatCurrency(totalExpenses)}
+								{totalLabel}: {formatCurrency(total)}
 							</p>
 						</div>
 					</>
