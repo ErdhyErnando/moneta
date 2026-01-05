@@ -8,7 +8,7 @@ const app = new Hono();
 
 const categorySchema = z.object({
 	name: z.string().min(1),
-	type: z.enum(["income", "expense"]),
+	type: z.enum(["income", "expense", "starting_balance"]),
 });
 
 app.get("/", async (c) => {
