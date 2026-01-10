@@ -17,6 +17,8 @@ import { Route as AuthenticatedStartingBalanceRouteImport } from './routes/_auth
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedIncomeRouteImport } from './routes/_authenticated/income'
 import { Route as AuthenticatedExpenseRouteImport } from './routes/_authenticated/expense'
+import { Route as AuthenticatedIncomeBreakdownRouteImport } from './routes/_authenticated/income_.breakdown'
+import { Route as AuthenticatedExpenseBreakdownRouteImport } from './routes/_authenticated/expense_.breakdown'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -58,6 +60,18 @@ const AuthenticatedExpenseRoute = AuthenticatedExpenseRouteImport.update({
   path: '/expense',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedIncomeBreakdownRoute =
+  AuthenticatedIncomeBreakdownRouteImport.update({
+    id: '/income_/breakdown',
+    path: '/income/breakdown',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedExpenseBreakdownRoute =
+  AuthenticatedExpenseBreakdownRouteImport.update({
+    id: '/expense_/breakdown',
+    path: '/expense/breakdown',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
@@ -67,6 +81,8 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/starting-balance': typeof AuthenticatedStartingBalanceRoute
   '/': typeof AuthenticatedIndexRoute
+  '/expense/breakdown': typeof AuthenticatedExpenseBreakdownRoute
+  '/income/breakdown': typeof AuthenticatedIncomeBreakdownRoute
 }
 export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
@@ -76,6 +92,8 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/starting-balance': typeof AuthenticatedStartingBalanceRoute
   '/': typeof AuthenticatedIndexRoute
+  '/expense/breakdown': typeof AuthenticatedExpenseBreakdownRoute
+  '/income/breakdown': typeof AuthenticatedIncomeBreakdownRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -87,6 +105,8 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/starting-balance': typeof AuthenticatedStartingBalanceRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/expense_/breakdown': typeof AuthenticatedExpenseBreakdownRoute
+  '/_authenticated/income_/breakdown': typeof AuthenticatedIncomeBreakdownRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -98,6 +118,8 @@ export interface FileRouteTypes {
     | '/settings'
     | '/starting-balance'
     | '/'
+    | '/expense/breakdown'
+    | '/income/breakdown'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/dashboard'
@@ -107,6 +129,8 @@ export interface FileRouteTypes {
     | '/settings'
     | '/starting-balance'
     | '/'
+    | '/expense/breakdown'
+    | '/income/breakdown'
   id:
     | '__root__'
     | '/_authenticated'
@@ -117,6 +141,8 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/starting-balance'
     | '/_authenticated/'
+    | '/_authenticated/expense_/breakdown'
+    | '/_authenticated/income_/breakdown'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -183,6 +209,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedExpenseRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/income_/breakdown': {
+      id: '/_authenticated/income_/breakdown'
+      path: '/income/breakdown'
+      fullPath: '/income/breakdown'
+      preLoaderRoute: typeof AuthenticatedIncomeBreakdownRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/expense_/breakdown': {
+      id: '/_authenticated/expense_/breakdown'
+      path: '/expense/breakdown'
+      fullPath: '/expense/breakdown'
+      preLoaderRoute: typeof AuthenticatedExpenseBreakdownRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
@@ -192,6 +232,8 @@ interface AuthenticatedRouteChildren {
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedStartingBalanceRoute: typeof AuthenticatedStartingBalanceRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedExpenseBreakdownRoute: typeof AuthenticatedExpenseBreakdownRoute
+  AuthenticatedIncomeBreakdownRoute: typeof AuthenticatedIncomeBreakdownRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -200,6 +242,8 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedStartingBalanceRoute: AuthenticatedStartingBalanceRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedExpenseBreakdownRoute: AuthenticatedExpenseBreakdownRoute,
+  AuthenticatedIncomeBreakdownRoute: AuthenticatedIncomeBreakdownRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
