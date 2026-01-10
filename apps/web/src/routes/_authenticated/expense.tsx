@@ -186,11 +186,11 @@ function ExpensePage() {
 								defaultValues={
 									editingExpense
 										? {
-											amount: editingExpense.amount,
-											description: editingExpense.description,
-											date: new Date(editingExpense.date),
-											categoryId: editingExpense.categoryId,
-										}
+												amount: editingExpense.amount,
+												description: editingExpense.description,
+												date: new Date(editingExpense.date),
+												categoryId: editingExpense.categoryId,
+											}
 										: undefined
 								}
 							/>

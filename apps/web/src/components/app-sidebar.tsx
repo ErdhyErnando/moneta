@@ -87,15 +87,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
 	const user = session
 		? {
-			name: session.user.name || "User",
-			email: session.user.email,
-			avatar: "/avatars/shadcn.jpg",
-		}
+				name: session.user.name || "User",
+				email: session.user.email,
+				avatar: "/avatars/shadcn.jpg",
+			}
 		: {
-			name: "Guest",
-			email: "guest@example.com",
-			avatar: "/avatars/shadcn.jpg",
-		};
+				name: "Guest",
+				email: "guest@example.com",
+				avatar: "/avatars/shadcn.jpg",
+			};
 
 	return (
 		<Sidebar collapsible="offcanvas" {...props}>

@@ -186,11 +186,11 @@ function IncomePage() {
 								defaultValues={
 									editingIncome
 										? {
-											amount: editingIncome.amount,
-											description: editingIncome.description,
-											date: new Date(editingIncome.date),
-											categoryId: editingIncome.categoryId,
-										}
+												amount: editingIncome.amount,
+												description: editingIncome.description,
+												date: new Date(editingIncome.date),
+												categoryId: editingIncome.categoryId,
+											}
 										: undefined
 								}
 							/>
