@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
-import { Plus } from "lucide-react";
+import { BarChart3, Plus } from "lucide-react";
 import { useState } from "react";
 import { CurrencySelector } from "@/components/currency-selector";
 import TransactionForm from "@/components/transaction-form";
@@ -156,6 +156,11 @@ function ExpensePage() {
 			<div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 				<h1 className="font-bold text-2xl sm:text-3xl">Expenses</h1>
 				<div className="flex items-center gap-2">
+					<Button variant="outline" asChild>
+						<Link to="/expense/breakdown">
+							<BarChart3 className="mr-2 h-4 w-4" /> Breakdown
+						</Link>
+					</Button>
 					<CurrencySelector />
 					<Dialog
 						open={isOpen}

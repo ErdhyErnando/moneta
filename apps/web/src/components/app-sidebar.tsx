@@ -1,5 +1,4 @@
 import {
-	IconCloudDollar,
 	IconDashboard,
 	IconHelp,
 	IconLogout,
@@ -108,7 +107,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 							className="data-[slot=sidebar-menu-button]:p-1.5!"
 						>
 							<a href="/">
-								<IconCloudDollar className="size-5!" />
+								<img src="/logo.png" alt="Logo" className="size-6 rounded-md" />
 								<h3 className="font-bold text-base">Moneta</h3>
 							</a>
 						</SidebarMenuButton>
