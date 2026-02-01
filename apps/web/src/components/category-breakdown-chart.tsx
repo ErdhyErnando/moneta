@@ -109,16 +109,23 @@ export function CategoryBreakdownChart({ type }: CategoryBreakdownChartProps) {
 	};
 
 	const { start, end } = getDateRange();
+	const startDateISO = start.toISOString();
+	const endDateISO = end.toISOString();
 
 	const { data, isLoading } = useQuery({
-		queryKey: [`${type}-categories-breakdown`, period, start, end],
+		queryKey: [
+			`${type}-categories-breakdown`,
+			period,
+			startDateISO,
+			endDateISO,
+		],
 		queryFn: async () => {
 			const res = await api.get<CategoriesResponse>(
 				`/api/dashboard/${type}-categories`,
 				{
 					params: {
-						startDate: format(start, "yyyy-MM-dd"),
-						endDate: format(end, "yyyy-MM-dd"),
+						startDate: startDateISO,
+						endDate: endDateISO,
 					},
 				},
 			);

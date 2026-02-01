@@ -18,6 +18,72 @@ const querySchema = z.object({
 	limit: z.string().transform(Number).optional(),
 });
 
+function normalizeStartDate(value?: string) {
+	if (!value) {
+		return undefined;
+	}
+
+	const trimmed = value.trim();
+	if (!trimmed) {
+		return undefined;
+	}
+
+	const parsed = new Date(trimmed);
+	if (Number.isNaN(parsed.getTime())) {
+		return undefined;
+	}
+
+	const hasExplicitTime = trimmed.includes("T") || trimmed.includes(":");
+	if (hasExplicitTime) {
+		return parsed;
+	}
+
+	return new Date(
+		Date.UTC(
+			parsed.getUTCFullYear(),
+			parsed.getUTCMonth(),
+			parsed.getUTCDate(),
+			0,
+			0,
+			0,
+			0,
+		),
+	);
+}
+
+function normalizeEndDate(value?: string) {
+	if (!value) {
+		return undefined;
+	}
+
+	const trimmed = value.trim();
+	if (!trimmed) {
+		return undefined;
+	}
+
+	const parsed = new Date(trimmed);
+	if (Number.isNaN(parsed.getTime())) {
+		return undefined;
+	}
+
+	const hasExplicitTime = trimmed.includes("T") || trimmed.includes(":");
+	if (hasExplicitTime) {
+		return parsed;
+	}
+
+	return new Date(
+		Date.UTC(
+			parsed.getUTCFullYear(),
+			parsed.getUTCMonth(),
+			parsed.getUTCDate(),
+			23,
+			59,
+			59,
+			999,
+		),
+	);
+}
+
 // Shared helper function for category breakdown (used by both expense-categories and income-categories)
 async function getCategoryBreakdown(
 	table: typeof expenses | typeof incomes,
@@ -28,12 +94,14 @@ async function getCategoryBreakdown(
 	// Build where conditions
 	const conditions: SQL[] = [eq(table.userId, userId)];
 
-	if (startDate) {
-		conditions.push(gte(table.date, new Date(startDate)));
+	const normalizedStart = normalizeStartDate(startDate);
+	if (normalizedStart) {
+		conditions.push(gte(table.date, normalizedStart));
 	}
 
-	if (endDate) {
-		conditions.push(lte(table.date, new Date(endDate)));
+	const normalizedEnd = normalizeEndDate(endDate);
+	if (normalizedEnd) {
+		conditions.push(lte(table.date, normalizedEnd));
 	}
 
 	// Get all records grouped by category
@@ -97,19 +165,21 @@ app.get("/summary", async (c) => {
 	}
 
 	const { startDate, endDate } = query.data;
+	const normalizedStart = normalizeStartDate(startDate);
+	const normalizedEnd = normalizeEndDate(endDate);
 
 	// Build where conditions for filtered period
 	const incomeConditions = [eq(incomes.userId, user.id)];
 	const expenseConditions = [eq(expenses.userId, user.id)];
 
-	if (startDate) {
-		incomeConditions.push(gte(incomes.date, new Date(startDate)));
-		expenseConditions.push(gte(expenses.date, new Date(startDate)));
+	if (normalizedStart) {
+		incomeConditions.push(gte(incomes.date, normalizedStart));
+		expenseConditions.push(gte(expenses.date, normalizedStart));
 	}
 
-	if (endDate) {
-		incomeConditions.push(lte(incomes.date, new Date(endDate)));
-		expenseConditions.push(lte(expenses.date, new Date(endDate)));
+	if (normalizedEnd) {
+		incomeConditions.push(lte(incomes.date, normalizedEnd));
+		expenseConditions.push(lte(expenses.date, normalizedEnd));
 	}
 
 	// Calculate total income (filtered)
@@ -180,19 +250,21 @@ app.get("/transactions", async (c) => {
 	}
 
 	const { startDate, endDate, limit = 10 } = query.data;
+	const normalizedStart = normalizeStartDate(startDate);
+	const normalizedEnd = normalizeEndDate(endDate);
 
 	// Build where conditions
 	const incomeConditions = [eq(incomes.userId, user.id)];
 	const expenseConditions = [eq(expenses.userId, user.id)];
 
-	if (startDate) {
-		incomeConditions.push(gte(incomes.date, new Date(startDate)));
-		expenseConditions.push(gte(expenses.date, new Date(startDate)));
+	if (normalizedStart) {
+		incomeConditions.push(gte(incomes.date, normalizedStart));
+		expenseConditions.push(gte(expenses.date, normalizedStart));
 	}
 
-	if (endDate) {
-		incomeConditions.push(lte(incomes.date, new Date(endDate)));
-		expenseConditions.push(lte(expenses.date, new Date(endDate)));
+	if (normalizedEnd) {
+		incomeConditions.push(lte(incomes.date, normalizedEnd));
+		expenseConditions.push(lte(expenses.date, normalizedEnd));
 	}
 
 	// Fetch incomes
@@ -249,19 +321,21 @@ app.get("/chart", async (c) => {
 		}
 
 		const { startDate, endDate } = query.data;
+		const normalizedStart = normalizeStartDate(startDate);
+		const normalizedEnd = normalizeEndDate(endDate);
 
 		// Build where conditions
 		const incomeConditions = [eq(incomes.userId, user.id)];
 		const expenseConditions = [eq(expenses.userId, user.id)];
 
-		if (startDate) {
-			incomeConditions.push(gte(incomes.date, new Date(startDate)));
-			expenseConditions.push(gte(expenses.date, new Date(startDate)));
+		if (normalizedStart) {
+			incomeConditions.push(gte(incomes.date, normalizedStart));
+			expenseConditions.push(gte(expenses.date, normalizedStart));
 		}
 
-		if (endDate) {
-			incomeConditions.push(lte(incomes.date, new Date(endDate)));
-			expenseConditions.push(lte(expenses.date, new Date(endDate)));
+		if (normalizedEnd) {
+			incomeConditions.push(lte(incomes.date, normalizedEnd));
+			expenseConditions.push(lte(expenses.date, normalizedEnd));
 		}
 
 		// Fetch incomes grouped by date
