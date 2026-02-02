@@ -96,9 +96,11 @@ export function ChartBarMonthlyExpenses({
 	});
 
 	// Transform data for the chart - ensure all 12 months are present
+	// Parse month directly from string (format: "YYYY-MM-01") to avoid timezone issues
 	const chartData: MonthlyExpenseData[] = MONTH_NAMES.map((month, index) => {
 		const monthData = data?.monthlyData.find((d) => {
-			const monthIndex = new Date(d.month).getMonth();
+			// Extract month from "YYYY-MM-01" format (MM is 1-indexed, so subtract 1)
+			const monthIndex = Number.parseInt(d.month.split("-")[1], 10) - 1;
 			return monthIndex === index;
 		});
 

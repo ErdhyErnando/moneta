@@ -135,24 +135,48 @@ async function getMonthlyData(
 	userId: string,
 	year: number,
 ) {
-	const monthlyData = await db
+	// Query all data for the year using proper date range (UTC boundaries)
+	const startOfYear = new Date(Date.UTC(year, 0, 1, 0, 0, 0, 0));
+	const endOfYear = new Date(Date.UTC(year, 11, 31, 23, 59, 59, 999));
+
+	const rawData = await db
 		.select({
-			month: sql<string>`TO_CHAR(${table.date}, 'YYYY-MM-01')`,
-			total: sql<number>`COALESCE(SUM(CAST(${table.amount} AS DECIMAL)), 0)`,
+			date: table.date,
+			amount: table.amount,
 		})
 		.from(table)
 		.where(
 			and(
 				eq(table.userId, userId),
-				sql`EXTRACT(YEAR FROM ${table.date}) = ${year}`,
+				gte(table.date, startOfYear),
+				lte(table.date, endOfYear),
 			),
-		)
-		.groupBy(sql`TO_CHAR(${table.date}, 'YYYY-MM-01')`);
+		);
 
-	return monthlyData.map((item) => ({
-		month: item.month,
-		amount: item.total.toString(),
-	}));
+	// Group by month using UTC to ensure consistency
+	const monthlyTotals = new Map<number, number>();
+
+	for (const item of rawData) {
+		const monthIndex = item.date.getUTCMonth();
+		const amount = Number(item.amount);
+		monthlyTotals.set(
+			monthIndex,
+			(monthlyTotals.get(monthIndex) || 0) + amount,
+		);
+	}
+
+	// Convert to array format with proper month string
+	const result: Array<{ month: string; amount: string }> = [];
+	for (const [monthIndex, total] of monthlyTotals) {
+		// Format as YYYY-MM-01 for consistency with existing frontend parsing
+		const monthStr = `${year}-${String(monthIndex + 1).padStart(2, "0")}-01`;
+		result.push({
+			month: monthStr,
+			amount: total.toString(),
+		});
+	}
+
+	return result;
 }
 
 // Get dashboard summary (total income, expenses, net balance)
