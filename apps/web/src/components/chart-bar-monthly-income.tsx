@@ -2,6 +2,7 @@
 
 import { IconArrowRight } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
+import { endOfYear, startOfYear } from "date-fns";
 import { useState } from "react";
 import {
 	Bar,
@@ -83,11 +84,22 @@ export function ChartBarMonthlyIncome({
 	// Generate year options (current year + 4 previous years)
 	const yearOptions = Array.from({ length: 5 }, (_, i) => currentYear - i);
 
+	// Calculate year boundaries using date-fns (like breakdown does) for timezone-aware boundaries
+	const yearDate = new Date(Number(selectedYear), 0, 1);
+	const startDate = startOfYear(yearDate).toISOString();
+	const endDate = endOfYear(yearDate).toISOString();
+
 	const { data, isLoading } = useQuery({
-		queryKey: ["monthly-income", selectedYear],
+		queryKey: ["monthly-income", startDate, endDate],
 		queryFn: async () => {
 			const response = await api.get<MonthlyIncomeResponse>(
-				`/api/dashboard/monthly-income?year=${selectedYear}`,
+				"/api/dashboard/monthly-income",
+				{
+					params: {
+						startDate,
+						endDate,
+					},
+				},
 			);
 			return response.data;
 		},
