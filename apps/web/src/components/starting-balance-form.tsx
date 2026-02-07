@@ -1,15 +1,11 @@
 import { useForm } from "@tanstack/react-form";
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
 import { z } from "zod";
 import { api } from "@/lib/api";
-import { cn } from "@/lib/utils";
 import { Button } from "./ui/button";
-import { Calendar } from "./ui/calendar";
+import { DateInput } from "./ui/date-input";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import {
 	Select,
 	SelectContent,
@@ -92,6 +88,22 @@ export default function StartingBalanceForm({
 			className="space-y-4"
 		>
 			<div>
+				<form.Field name="date">
+					{(field) => (
+						<DateInput
+							id={field.name}
+							label="Date"
+							value={field.state.value}
+							onChange={(date) => field.handleChange(date)}
+							disabled={(date) =>
+								date > new Date() || date < new Date("1900-01-01")
+							}
+						/>
+					)}
+				</form.Field>
+			</div>
+
+			<div>
 				<form.Field name="amount">
 					{(field) => (
 						<div className="space-y-2">
@@ -164,45 +176,6 @@ export default function StartingBalanceForm({
 								onBlur={field.handleBlur}
 								onChange={(e) => field.handleChange(e.target.value)}
 							/>
-						</div>
-					)}
-				</form.Field>
-			</div>
-
-			<div>
-				<form.Field name="date">
-					{(field) => (
-						<div className="flex flex-col space-y-2">
-							<Label htmlFor={field.name}>Date</Label>
-							<Popover>
-								<PopoverTrigger asChild>
-									<Button
-										variant={"outline"}
-										className={cn(
-											"w-full pl-3 text-left font-normal",
-											!field.state.value && "text-muted-foreground",
-										)}
-									>
-										{field.state.value ? (
-											format(field.state.value, "PPP")
-										) : (
-											<span>Pick a date</span>
-										)}
-										<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-									</Button>
-								</PopoverTrigger>
-								<PopoverContent className="w-auto p-0" align="start">
-									<Calendar
-										mode="single"
-										selected={field.state.value}
-										onSelect={(date) => date && field.handleChange(date)}
-										disabled={(date) =>
-											date > new Date() || date < new Date("1900-01-01")
-										}
-										initialFocus
-									/>
-								</PopoverContent>
-							</Popover>
 						</div>
 					)}
 				</form.Field>
