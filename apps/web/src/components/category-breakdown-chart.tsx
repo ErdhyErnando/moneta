@@ -9,6 +9,8 @@ import {
 	endOfWeek,
 	endOfYear,
 	format,
+	setMonth,
+	setYear,
 	startOfMonth,
 	startOfWeek,
 	startOfYear,
@@ -40,6 +42,13 @@ import {
 	ChartTooltip,
 	ChartTooltipContent,
 } from "@/components/ui/chart";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCurrency } from "@/contexts/currency-context";
 import { api } from "@/lib/api";
@@ -181,16 +190,40 @@ export function CategoryBreakdownChart({ type }: CategoryBreakdownChartProps) {
 		} as ChartConfig,
 	);
 
-	const getHeaderText = () => {
-		switch (period) {
-			case "weekly":
-				return `${format(start, "MMM d")} - ${format(end, "MMM d, yyyy")}`;
-			case "yearly":
-				return format(currentDate, "yyyy");
-			default:
-				return format(currentDate, "MMMM yyyy");
-		}
+	const currentYear = currentDate.getFullYear();
+	const currentMonth = currentDate.getMonth();
+
+	const MONTHS = [
+		"January",
+		"February",
+		"March",
+		"April",
+		"May",
+		"June",
+		"July",
+		"August",
+		"September",
+		"October",
+		"November",
+		"December",
+	];
+
+	const START_YEAR = 2020;
+	const END_YEAR = new Date().getFullYear();
+	const yearOptions = Array.from(
+		{ length: END_YEAR - START_YEAR + 1 },
+		(_, i) => START_YEAR + i,
+	);
+
+	const handleYearChange = (year: string) => {
+		setCurrentDate(setYear(currentDate, Number(year)));
 	};
+
+	const handleMonthChange = (month: string) => {
+		setCurrentDate(setMonth(currentDate, Number(month)));
+	};
+
+	const chartHeight = Math.max(300, chartData.length * 56);
 
 	const total = chartData.reduce((sum, item) => sum + item.amount, 0);
 
@@ -222,18 +255,62 @@ export function CategoryBreakdownChart({ type }: CategoryBreakdownChartProps) {
 				</div>
 			</CardHeader>
 			<CardContent>
-				<div className="mb-6 flex items-center justify-between">
+				<div className="mb-6 flex items-center justify-center gap-2">
 					<Button
 						variant="outline"
 						size="icon"
+						className="shrink-0"
 						onClick={() => navigatePeriod("prev")}
 					>
 						<ChevronLeft className="h-4 w-4" />
 					</Button>
-					<h3 className="font-semibold text-lg">{getHeaderText()}</h3>
+
+					<div className="flex items-center gap-2">
+						{period !== "yearly" && (
+							<Select
+								value={String(currentMonth)}
+								onValueChange={handleMonthChange}
+							>
+								<SelectTrigger className="w-[130px]">
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent>
+									{MONTHS.map((month, index) => (
+										<SelectItem key={month} value={String(index)}>
+											{month}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						)}
+
+						<Select
+							value={String(currentYear)}
+							onValueChange={handleYearChange}
+						>
+							<SelectTrigger className="w-[90px]">
+								<SelectValue />
+							</SelectTrigger>
+							<SelectContent>
+								{yearOptions.map((year) => (
+									<SelectItem key={year} value={String(year)}>
+										{year}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+
+						{period === "weekly" && (
+							<span className="text-muted-foreground text-sm">
+								{format(start, "MMM d")} - {format(end, "MMM d")}
+							</span>
+						)}
+					</div>
+
 					<Button
 						variant="outline"
 						size="icon"
+						className="shrink-0"
 						onClick={() => navigatePeriod("next")}
 					>
 						<ChevronRight className="h-4 w-4" />
@@ -241,15 +318,19 @@ export function CategoryBreakdownChart({ type }: CategoryBreakdownChartProps) {
 				</div>
 
 				{isLoading ? (
-					<div className="flex h-[400px] items-center justify-center">
+					<div className="flex h-[300px] items-center justify-center">
 						<div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
 					</div>
 				) : chartData.length === 0 ? (
-					<div className="flex h-[400px] items-center justify-center text-muted-foreground">
+					<div className="flex h-[300px] items-center justify-center text-muted-foreground">
 						No {type} data found for this period
 					</div>
 				) : (
-					<ChartContainer config={chartConfig} className="min-h-[400px] w-full">
+					<ChartContainer
+						config={chartConfig}
+						className="w-full"
+						style={{ height: `${chartHeight}px` }}
+					>
 						<BarChart
 							accessibilityLayer
 							data={chartData}
