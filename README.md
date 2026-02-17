@@ -6,29 +6,29 @@ This project is built for tech-savvy individuals who prefer a simple, self-hoste
 
 ## ✨ Core Features
 
--   **User Authentication:** Secure user authentication and authorization using email and password.
--   **Dashboard:** A comprehensive dashboard with financial summaries and data visualizations (bar charts, line charts).
--   **Filtering:** Filter dashboard data by weekly, monthly, and yearly views.
--   **Income Management:** A dedicated page to add and view income entries with categories.
--   **Expense Management:** A dedicated page to add and view expense entries with categories.
--   **Predefined Categories:** A set of predefined categories for income and expenses.
+- **User Authentication:** Secure user authentication and authorization using email and password.
+- **Dashboard:** A comprehensive dashboard with financial summaries and data visualizations (bar charts, line charts).
+- **Filtering:** Filter dashboard data by weekly, monthly, and yearly views.
+- **Income Management:** A dedicated page to add and view income entries with categories.
+- **Expense Management:** A dedicated page to add and view expense entries with categories.
+- **Predefined Categories:** A set of predefined categories for income and expenses.
 
 ## 🚀 Technology Stack
 
--   **TypeScript** - For type safety and improved developer experience
--   **React** - For building the user interface
--   **TanStack Router** - File-based routing with full type safety
--   **TailwindCSS** - Utility-first CSS for rapid UI development
--   **shadcn/ui** - Reusable UI components
--   **Recharts** - For data visualization
--   **Hono** - Lightweight, performant server framework for the backend API
--   **Node.js** - Runtime environment
--   **Drizzle** - TypeScript-first ORM
--   **PostgreSQL** - Database engine
--   **Authentication** - Better-Auth
--   **Biome** - Linting and formatting
--   **PWA** - Progressive Web App support
--   **Turborepo** - Optimized monorepo build system
+- **TypeScript** - For type safety and improved developer experience
+- **React** - For building the user interface
+- **TanStack Router** - File-based routing with full type safety
+- **TailwindCSS** - Utility-first CSS for rapid UI development
+- **shadcn/ui** - Reusable UI components
+- **Recharts** - For data visualization
+- **Hono** - Lightweight, performant server framework for the backend API
+- **Node.js** - Runtime environment
+- **Drizzle** - TypeScript-first ORM
+- **PostgreSQL** - Database engine
+- **Authentication** - Better-Auth
+- **Biome** - Linting and formatting
+- **PWA** - Progressive Web App support
+- **Turborepo** - Optimized monorepo build system
 
 ## 📦 Project Structure
 
@@ -47,9 +47,9 @@ moneta/
 
 ### Prerequisites
 
--   [Node.js](https://nodejs.org/en/) (v18 or higher)
--   [pnpm](https://pnpm.io/installation)
--   [PostgreSQL](https://www.postgresql.org/download/)
+- [Node.js](https://nodejs.org/en/) (v18 or higher)
+- [pnpm](https://pnpm.io/installation)
+- [PostgreSQL](https://www.postgresql.org/download/)
 
 ### Installation
 
@@ -90,22 +90,22 @@ Run the development server:
 pnpm run dev
 ```
 
--   The web application will be available at [http://localhost:5173](http://localhost:5173).
--   The API server will be running at [http://localhost:3000](http://localhost:3000).
+- The web application will be available at [http://localhost:3001](http://localhost:3001).
+- The API server will be running at [http://localhost:3000](http://localhost:3000).
 
 ## 📜 Available Scripts
 
--   `pnpm run dev`: Start all applications in development mode
--   `pnpm run build`: Build all applications
--   `pnpm run dev:web`: Start only the web application
--   `pnpm run dev:server`: Start only the server
--   `pnpm run check-types`: Check TypeScript types across all apps
--   `pnpm run db:push`: Push schema changes to the database
--   `pnpm run db:studio`: Open Drizzle Studio to view and manage your data
--   `pnpm run format`: Format the code using Biome
--   `pnpm run lint`: Lint the code using Biome
--   `pnpm run check`: Run both formatting and linting
--   `cd apps/web && pnpm run generate-pwa-assets`: Generate PWA assets
+- `pnpm run dev`: Start all applications in development mode
+- `pnpm run build`: Build all applications
+- `pnpm run dev:web`: Start only the web application
+- `pnpm run dev:server`: Start only the server
+- `pnpm run check-types`: Check TypeScript types across all apps
+- `pnpm run db:push`: Push schema changes to the database
+- `pnpm run db:studio`: Open Drizzle Studio to view and manage your data
+- `pnpm run format`: Format the code using Biome
+- `pnpm run lint`: Lint the code using Biome
+- `pnpm run check`: Run both formatting and linting
+- `cd apps/web && pnpm run generate-pwa-assets`: Generate PWA assets
 
 ## 🌐 API Endpoints
 
@@ -113,22 +113,22 @@ A brief overview of the available API endpoints.
 
 ### Authentication
 
--   `POST /auth/sign-in`: User login.
--   `POST /auth/sign-out`: User logout.
+- `POST /auth/sign-in`: User login.
+- `POST /auth/sign-out`: User logout.
 
 ### Income Management
 
--   `GET /api/incomes`: Get all income records for the authenticated user.
--   `POST /api/incomes`: Add a new income record.
+- `GET /api/incomes`: Get all income records for the authenticated user.
+- `POST /api/incomes`: Add a new income record.
 
 ### Expense Management
 
--   `GET /api/expenses`: Get all expense records for the authenticated user.
--   `POST /api/expenses`: Add a new expense record.
+- `GET /api/expenses`: Get all expense records for the authenticated user.
+- `POST /api/expenses`: Add a new expense record.
 
 ### Category Management
 
--   `GET /api/categories`: Get all predefined categories.
+- `GET /api/categories`: Get all predefined categories.
 
 ## 🚀 Deployment
 
