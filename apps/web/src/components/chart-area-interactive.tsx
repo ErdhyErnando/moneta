@@ -44,26 +44,26 @@ export function ChartAreaInteractive({
 	isLoading = false,
 }: ChartAreaInteractiveProps) {
 	return (
-		<Card>
+		<Card className="flex h-full flex-col">
 			<CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
 				<div className="grid flex-1 gap-1 text-center sm:text-left">
 					<CardTitle>Cash Flow</CardTitle>
 					<CardDescription>Income vs Expenses over time</CardDescription>
 				</div>
 			</CardHeader>
-			<CardContent className="px-1 pt-1 sm:px-2 sm:pt-2 sm:pb-4">
+			<CardContent className="flex min-h-[250px] flex-1 flex-col px-1 pt-1 sm:px-2 sm:pt-2 sm:pb-4">
 				{isLoading ? (
-					<div className="flex h-[280px] items-center justify-center">
+					<div className="flex h-full flex-1 items-center justify-center">
 						<div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
 					</div>
 				) : data.length === 0 ? (
-					<div className="flex h-[250px] items-center justify-center text-muted-foreground">
+					<div className="flex h-full flex-1 items-center justify-center text-muted-foreground">
 						No data available for the selected time range
 					</div>
 				) : (
 					<ChartContainer
 						config={chartConfig}
-						className="aspect-auto h-[250px] w-full"
+						className="!flex-1 aspect-auto h-full w-full"
 					>
 						<AreaChart
 							accessibilityLayer

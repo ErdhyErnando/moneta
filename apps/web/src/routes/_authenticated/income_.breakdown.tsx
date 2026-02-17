@@ -9,9 +9,9 @@ export const Route = createFileRoute("/_authenticated/income_/breakdown")({
 
 function IncomeBreakdownPage() {
 	return (
-		<div className="container mx-auto px-4 py-6 sm:px-6 sm:py-10">
-			<div className="mb-6">
-				<Button variant="ghost" asChild className="-ml-2 mb-4">
+		<div className="container mx-auto min-h-0 px-4 py-3 sm:px-6 sm:py-4">
+			<div className="mb-3">
+				<Button variant="ghost" asChild className="-ml-2 mb-2">
 					<Link to="/income">
 						<ChevronLeft className="mr-2 h-4 w-4" />
 						Back to Income

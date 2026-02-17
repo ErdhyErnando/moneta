@@ -107,7 +107,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 							className="data-[slot=sidebar-menu-button]:p-1.5!"
 						>
 							<a href="/">
-								<img src="/logo.png" alt="Logo" className="size-6 rounded-md" />
+								<img src="/logo.png" alt="Logo" className="size-7 rounded-md" />
 								<h3 className="font-bold text-base">Moneta</h3>
 							</a>
 						</SidebarMenuButton>

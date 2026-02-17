@@ -136,7 +136,7 @@ export function ChartPieCategories({
 		categoryType === "expense" ? "Total Expenses" : "Total Income";
 
 	return (
-		<Card className="flex flex-col">
+		<Card className="flex h-full flex-col">
 			<CardHeader className="items-center pb-0">
 				<Select
 					value={categoryType}
