@@ -1,4 +1,5 @@
 import * as dotenv from "dotenv";
+import { sql } from "drizzle-orm";
 
 // Try to load .env from root or apps/server
 dotenv.config({ path: "../../.env" });
@@ -32,24 +33,29 @@ async function main() {
 	if (!process.env.DATABASE_URL) {
 		throw new Error("DATABASE_URL is not defined");
 	}
-	console.log("🌱 Seeding categories...");
+	console.log("Seeding template categories...");
 	console.log(`DB URL found: ${process.env.DATABASE_URL.substring(0, 10)}...`);
 
 	try {
-		await db
-			.insert(categories)
-			.values(DEFAULT_CATEGORIES)
-			.onConflictDoNothing();
+		for (const category of DEFAULT_CATEGORIES) {
+			await db.execute(sql`
+				insert into ${categories} (name, type, user_id, is_archived)
+				values (${category.name}, ${category.type}, null, false)
+				on conflict (type, lower(name))
+				where user_id is null and is_archived = false
+				do nothing
+			`);
+		}
 
-		console.log("✅ Categories seeded!");
+		console.log("Template categories seeded!");
 		process.exit(0);
 	} catch (err) {
-		console.error("❌ Seeding failed:", err);
+		console.error("Seeding failed:", err);
 		process.exit(1);
 	}
 }
 
 main().catch((err) => {
-	console.error("❌ Seeding failed:", err);
+	console.error("Seeding failed:", err);
 	process.exit(1);
 });

@@ -3,6 +3,7 @@ import { startingBalances } from "@moneta/db/schema/moneta";
 import { and, desc, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
+import { isActiveUserCategory } from "../category-utils";
 
 const app = new Hono<{ Variables: { user: { id: string } } }>();
 
@@ -34,6 +35,16 @@ app.post("/", async (c) => {
 		return c.json({ error: result.error }, 400);
 	}
 
+	const hasCategoryAccess = await isActiveUserCategory(
+		user.id,
+		result.data.categoryId,
+		"starting_balance",
+	);
+
+	if (!hasCategoryAccess) {
+		return c.json({ error: { message: "Category not found" } }, 400);
+	}
+
 	const [newBalance] = await db
 		.insert(startingBalances)
 		.values({
@@ -55,6 +66,29 @@ app.put("/:id", async (c) => {
 		return c.json({ error: result.error }, 400);
 	}
 
+	const existingBalance = await db.query.startingBalances.findFirst({
+		where: and(
+			eq(startingBalances.id, id),
+			eq(startingBalances.userId, user.id),
+		),
+	});
+
+	if (!existingBalance) {
+		return c.json({ error: "Starting balance not found" }, 404);
+	}
+
+	if (existingBalance.categoryId !== result.data.categoryId) {
+		const hasCategoryAccess = await isActiveUserCategory(
+			user.id,
+			result.data.categoryId,
+			"starting_balance",
+		);
+
+		if (!hasCategoryAccess) {
+			return c.json({ error: { message: "Category not found" } }, 400);
+		}
+	}
+
 	const [updatedBalance] = await db
 		.update(startingBalances)
 		.set(result.data)
@@ -62,10 +96,6 @@ app.put("/:id", async (c) => {
 			and(eq(startingBalances.id, id), eq(startingBalances.userId, user.id)),
 		)
 		.returning();
-
-	if (!updatedBalance) {
-		return c.json({ error: "Starting balance not found" }, 404);
-	}
 
 	return c.json({ startingBalance: updatedBalance });
 });
