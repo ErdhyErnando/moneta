@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { ArchiveRestore, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,16 +25,130 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { api } from "@/lib/api";
 
+const categoryTypes = ["income", "expense", "starting_balance"] as const;
+
+type CategoryType = (typeof categoryTypes)[number];
+
 type Category = {
 	id: number;
 	name: string;
-	type: "income" | "expense" | "starting_balance";
+	type: CategoryType;
+	isArchived: boolean;
 };
 
 type CategoryFormData = {
 	name: string;
-	type: "income" | "expense" | "starting_balance";
+	type: CategoryType;
 };
+
+type CategoryUpdateData = {
+	name: string;
+};
+
+type CategoryError = AxiosError<{ error?: { message?: string } | string }>;
+
+type CategoryTableProps = {
+	categories: Category[];
+	isLoading: boolean;
+	type: CategoryType;
+	isRestoring: boolean;
+	onEdit: (category: Category) => void;
+	onArchive: (category: Category) => void;
+	onRestore: (id: number) => void;
+};
+
+function getErrorMessage(error: CategoryError, fallback: string) {
+	const errorPayload = error.response?.data?.error;
+	if (typeof errorPayload === "string") {
+		return errorPayload;
+	}
+
+	return errorPayload?.message || fallback;
+}
+
+function CategoryTable({
+	categories,
+	isLoading,
+	type,
+	isRestoring,
+	onEdit,
+	onArchive,
+	onRestore,
+}: CategoryTableProps) {
+	const filteredCategories = categories.filter(
+		(category) => category.type === type,
+	);
+
+	return (
+		<div className="rounded-md border">
+			<Table>
+				<TableHeader>
+					<TableRow>
+						<TableHead>Name</TableHead>
+						<TableHead>Status</TableHead>
+						<TableHead className="w-[140px] text-right">Actions</TableHead>
+					</TableRow>
+				</TableHeader>
+				<TableBody>
+					{isLoading ? (
+						<TableRow>
+							<TableCell colSpan={3} className="text-center">
+								Loading...
+							</TableCell>
+						</TableRow>
+					) : filteredCategories.length === 0 ? (
+						<TableRow>
+							<TableCell colSpan={3} className="text-center">
+								No categories found
+							</TableCell>
+						</TableRow>
+					) : (
+						filteredCategories.map((category) => (
+							<TableRow key={category.id}>
+								<TableCell className="font-medium">{category.name}</TableCell>
+								<TableCell className="text-muted-foreground">
+									{category.isArchived ? "Archived" : "Active"}
+								</TableCell>
+								<TableCell className="text-right">
+									<div className="flex justify-end gap-2">
+										{category.isArchived ? (
+											<Button
+												variant="ghost"
+												size="icon"
+												onClick={() => onRestore(category.id)}
+												disabled={isRestoring}
+											>
+												<ArchiveRestore className="h-4 w-4" />
+											</Button>
+										) : (
+											<>
+												<Button
+													variant="ghost"
+													size="icon"
+													onClick={() => onEdit(category)}
+												>
+													<Pencil className="h-4 w-4" />
+												</Button>
+												<Button
+													variant="ghost"
+													size="icon"
+													onClick={() => onArchive(category)}
+													className="text-destructive hover:text-destructive"
+												>
+													<Trash2 className="h-4 w-4" />
+												</Button>
+											</>
+										)}
+									</div>
+								</TableCell>
+							</TableRow>
+						))
+					)}
+				</TableBody>
+			</Table>
+		</div>
+	);
+}
 
 export function CategorySettings() {
 	const { toast } = useToast();
@@ -45,13 +159,15 @@ export function CategorySettings() {
 	const [deletingCategory, setDeletingCategory] = useState<Category | null>(
 		null,
 	);
-	const [activeTab, setActiveTab] = useState<string>("income");
+	const [activeTab, setActiveTab] = useState<CategoryType>("income");
 	const [name, setName] = useState("");
 
 	const { data: categories = [], isLoading } = useQuery({
-		queryKey: ["categories"],
+		queryKey: ["categories", "includeArchived"],
 		queryFn: async () => {
-			const res = await api.get<{ categories: Category[] }>("/api/categories");
+			const res = await api.get<{ categories: Category[] }>(
+				"/api/categories?includeArchived=true",
+			);
 			return res.data.categories;
 		},
 	});
@@ -69,11 +185,10 @@ export function CategorySettings() {
 				description: "Category added successfully",
 			});
 		},
-		onError: (error: AxiosError<{ error: { message: string } }>) => {
+		onError: (error: CategoryError) => {
 			toast({
 				title: "Error",
-				description:
-					error.response?.data?.error?.message || "Failed to add category",
+				description: getErrorMessage(error, "Failed to add category"),
 				variant: "destructive",
 			});
 		},
@@ -85,7 +200,7 @@ export function CategorySettings() {
 			data,
 		}: {
 			id: number;
-			data: CategoryFormData;
+			data: CategoryUpdateData;
 		}) => {
 			await api.put(`/api/categories/${id}`, data);
 		},
@@ -99,17 +214,16 @@ export function CategorySettings() {
 				description: "Category updated successfully",
 			});
 		},
-		onError: (error: AxiosError<{ error: { message: string } }>) => {
+		onError: (error: CategoryError) => {
 			toast({
 				title: "Error",
-				description:
-					error.response?.data?.error?.message || "Failed to update category",
+				description: getErrorMessage(error, "Failed to update category"),
 				variant: "destructive",
 			});
 		},
 	});
 
-	const deleteMutation = useMutation({
+	const archiveMutation = useMutation({
 		mutationFn: async (id: number) => {
 			await api.delete(`/api/categories/${id}`);
 		},
@@ -119,14 +233,33 @@ export function CategorySettings() {
 			setDeletingCategory(null);
 			toast({
 				title: "Success",
-				description: "Category deleted successfully",
+				description: "Category archived successfully",
 			});
 		},
-		onError: (error: AxiosError<{ error: { message: string } }>) => {
+		onError: (error: CategoryError) => {
 			toast({
 				title: "Error",
-				description:
-					error.response?.data?.error?.message || "Failed to delete category",
+				description: getErrorMessage(error, "Failed to archive category"),
+				variant: "destructive",
+			});
+		},
+	});
+
+	const restoreMutation = useMutation({
+		mutationFn: async (id: number) => {
+			await api.post(`/api/categories/${id}/restore`);
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["categories"] });
+			toast({
+				title: "Success",
+				description: "Category restored successfully",
+			});
+		},
+		onError: (error: CategoryError) => {
+			toast({
+				title: "Error",
+				description: getErrorMessage(error, "Failed to restore category"),
 				variant: "destructive",
 			});
 		},
@@ -134,15 +267,19 @@ export function CategorySettings() {
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		const data: CategoryFormData = {
-			name,
-			type: activeTab as "income" | "expense" | "starting_balance",
-		};
+		const trimmedName = name.trim();
+
+		if (!trimmedName) {
+			return;
+		}
 
 		if (editingCategory) {
-			updateMutation.mutate({ id: editingCategory.id, data });
+			updateMutation.mutate({
+				id: editingCategory.id,
+				data: { name: trimmedName },
+			});
 		} else {
-			createMutation.mutate(data);
+			createMutation.mutate({ name: trimmedName, type: activeTab });
 		}
 	};
 
@@ -152,101 +289,71 @@ export function CategorySettings() {
 		setIsOpen(true);
 	};
 
-	const handleDelete = (category: Category) => {
+	const handleArchive = (category: Category) => {
 		setDeletingCategory(category);
 		setIsDeleteOpen(true);
 	};
 
-	const renderCategoryTable = (type: string) => {
-		const filteredCategories = categories.filter((c) => c.type === type);
-
-		return (
-			<div className="rounded-md border">
-				<Table>
-					<TableHeader>
-						<TableRow>
-							<TableHead>Name</TableHead>
-							<TableHead className="w-[100px] text-right">Actions</TableHead>
-						</TableRow>
-					</TableHeader>
-					<TableBody>
-						{isLoading ? (
-							<TableRow>
-								<TableCell colSpan={2} className="text-center">
-									Loading...
-								</TableCell>
-							</TableRow>
-						) : filteredCategories.length === 0 ? (
-							<TableRow>
-								<TableCell colSpan={2} className="text-center">
-									No categories found
-								</TableCell>
-							</TableRow>
-						) : (
-							filteredCategories.map((category) => (
-								<TableRow key={category.id}>
-									<TableCell className="font-medium">{category.name}</TableCell>
-									<TableCell className="text-right">
-										<div className="flex justify-end gap-2">
-											<Button
-												variant="ghost"
-												size="icon"
-												onClick={() => handleEdit(category)}
-											>
-												<Pencil className="h-4 w-4" />
-											</Button>
-											<Button
-												variant="ghost"
-												size="icon"
-												onClick={() => handleDelete(category)}
-												className="text-destructive hover:text-destructive"
-											>
-												<Trash2 className="h-4 w-4" />
-											</Button>
-										</div>
-									</TableCell>
-								</TableRow>
-							))
-						)}
-					</TableBody>
-				</Table>
-			</div>
-		);
+	const openCreateDialog = () => {
+		setEditingCategory(null);
+		setName("");
+		setIsOpen(true);
 	};
 
 	return (
 		<div className="space-y-6">
 			<div className="flex items-center justify-between">
 				<h2 className="font-semibold text-xl">Categories</h2>
-				<Button
-					onClick={() => {
-						setEditingCategory(null);
-						setName("");
-						setIsOpen(true);
-					}}
-				>
+				<Button onClick={openCreateDialog}>
 					<Plus className="mr-2 h-4 w-4" /> Add Category
 				</Button>
 			</div>
 
-			<Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+			<Tabs
+				value={activeTab}
+				onValueChange={(value) => setActiveTab(value as CategoryType)}
+				className="w-full"
+			>
 				<TabsList className="grid w-full grid-cols-3">
 					<TabsTrigger value="income">Income</TabsTrigger>
 					<TabsTrigger value="expense">Expense</TabsTrigger>
 					<TabsTrigger value="starting_balance">Starting Balance</TabsTrigger>
 				</TabsList>
 				<TabsContent value="income" className="mt-4">
-					{renderCategoryTable("income")}
+					<CategoryTable
+						categories={categories}
+						isLoading={isLoading}
+						type="income"
+						isRestoring={restoreMutation.isPending}
+						onEdit={handleEdit}
+						onArchive={handleArchive}
+						onRestore={restoreMutation.mutate}
+					/>
 				</TabsContent>
 				<TabsContent value="expense" className="mt-4">
-					{renderCategoryTable("expense")}
+					<CategoryTable
+						categories={categories}
+						isLoading={isLoading}
+						type="expense"
+						isRestoring={restoreMutation.isPending}
+						onEdit={handleEdit}
+						onArchive={handleArchive}
+						onRestore={restoreMutation.mutate}
+					/>
 				</TabsContent>
 				<TabsContent value="starting_balance" className="mt-4">
-					{renderCategoryTable("starting_balance")}
+					<CategoryTable
+						categories={categories}
+						isLoading={isLoading}
+						type="starting_balance"
+						isRestoring={restoreMutation.isPending}
+						onEdit={handleEdit}
+						onArchive={handleArchive}
+						onRestore={restoreMutation.mutate}
+					/>
 				</TabsContent>
 			</Tabs>
 
-			{/* Add/Edit Dialog */}
 			<Dialog
 				open={isOpen}
 				onOpenChange={(open) => {
@@ -293,15 +400,14 @@ export function CategorySettings() {
 				</DialogContent>
 			</Dialog>
 
-			{/* Delete Confirmation Dialog */}
 			<Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
 				<DialogContent>
 					<DialogHeader>
-						<DialogTitle>Delete Category</DialogTitle>
+						<DialogTitle>Archive Category</DialogTitle>
 						<DialogDescription>
-							Are you sure you want to delete the category "
-							{deletingCategory?.name}"? This might affect existing transactions
-							assigned to this category.
+							Archive "{deletingCategory?.name}"? Existing records will keep
+							this category, but it will no longer appear when adding new
+							records.
 						</DialogDescription>
 					</DialogHeader>
 					<DialogFooter>
@@ -311,11 +417,11 @@ export function CategorySettings() {
 						<Button
 							variant="destructive"
 							onClick={() =>
-								deletingCategory && deleteMutation.mutate(deletingCategory.id)
+								deletingCategory && archiveMutation.mutate(deletingCategory.id)
 							}
-							disabled={deleteMutation.isPending}
+							disabled={archiveMutation.isPending}
 						>
-							{deleteMutation.isPending ? "Deleting..." : "Delete"}
+							{archiveMutation.isPending ? "Archiving..." : "Archive"}
 						</Button>
 					</DialogFooter>
 				</DialogContent>

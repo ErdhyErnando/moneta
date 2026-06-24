@@ -1,5 +1,6 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
+	boolean,
 	integer,
 	numeric,
 	pgEnum,
@@ -7,6 +8,7 @@ import {
 	serial,
 	text,
 	timestamp,
+	uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { user } from "./auth";
 
@@ -16,11 +18,29 @@ export const categoryTypeEnum = pgEnum("category_type", [
 	"starting_balance",
 ]);
 
-export const categories = pgTable("categories", {
-	id: serial("id").primaryKey(),
-	name: text("name").notNull().unique(),
-	type: categoryTypeEnum("type").notNull(),
-});
+export const categories = pgTable(
+	"categories",
+	{
+		id: serial("id").primaryKey(),
+		name: text("name").notNull(),
+		type: categoryTypeEnum("type").notNull(),
+		userId: text("user_id").references(() => user.id, { onDelete: "cascade" }),
+		isArchived: boolean("is_archived").default(false).notNull(),
+		createdAt: timestamp("created_at").defaultNow().notNull(),
+		updatedAt: timestamp("updated_at")
+			.defaultNow()
+			.$onUpdate(() => new Date())
+			.notNull(),
+	},
+	(table) => [
+		uniqueIndex("categories_user_active_name_type_unique")
+			.on(table.userId, table.type, sql`lower(${table.name})`)
+			.where(sql`${table.userId} is not null and ${table.isArchived} = false`),
+		uniqueIndex("categories_template_active_name_type_unique")
+			.on(table.type, sql`lower(${table.name})`)
+			.where(sql`${table.userId} is null and ${table.isArchived} = false`),
+	],
+);
 
 export const incomes = pgTable("incomes", {
 	id: serial("id").primaryKey(),
@@ -76,7 +96,11 @@ export const startingBalances = pgTable("starting_balances", {
 		.notNull(),
 });
 
-export const categoriesRelations = relations(categories, ({ many }) => ({
+export const categoriesRelations = relations(categories, ({ many, one }) => ({
+	user: one(user, {
+		fields: [categories.userId],
+		references: [user.id],
+	}),
 	incomes: many(incomes),
 	expenses: many(expenses),
 	startingBalances: many(startingBalances),

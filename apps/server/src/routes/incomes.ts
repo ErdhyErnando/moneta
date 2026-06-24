@@ -3,6 +3,7 @@ import { incomes } from "@moneta/db/schema/moneta";
 import { and, desc, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
+import { isActiveUserCategory } from "../category-utils";
 
 const app = new Hono<{ Variables: { user: { id: string } } }>();
 
@@ -34,6 +35,16 @@ app.post("/", async (c) => {
 		return c.json({ error: result.error }, 400);
 	}
 
+	const hasCategoryAccess = await isActiveUserCategory(
+		user.id,
+		result.data.categoryId,
+		"income",
+	);
+
+	if (!hasCategoryAccess) {
+		return c.json({ error: { message: "Category not found" } }, 400);
+	}
+
 	const [newIncome] = await db
 		.insert(incomes)
 		.values({
@@ -55,15 +66,31 @@ app.put("/:id", async (c) => {
 		return c.json({ error: result.error }, 400);
 	}
 
+	const existingIncome = await db.query.incomes.findFirst({
+		where: and(eq(incomes.id, id), eq(incomes.userId, user.id)),
+	});
+
+	if (!existingIncome) {
+		return c.json({ error: "Income not found" }, 404);
+	}
+
+	if (existingIncome.categoryId !== result.data.categoryId) {
+		const hasCategoryAccess = await isActiveUserCategory(
+			user.id,
+			result.data.categoryId,
+			"income",
+		);
+
+		if (!hasCategoryAccess) {
+			return c.json({ error: { message: "Category not found" } }, 400);
+		}
+	}
+
 	const [updatedIncome] = await db
 		.update(incomes)
 		.set(result.data)
 		.where(and(eq(incomes.id, id), eq(incomes.userId, user.id)))
 		.returning();
-
-	if (!updatedIncome) {
-		return c.json({ error: "Income not found" }, 404);
-	}
 
 	return c.json({ income: updatedIncome });
 });
