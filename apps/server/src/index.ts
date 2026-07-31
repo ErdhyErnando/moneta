@@ -39,12 +39,10 @@ app.route("/api/expenses", expenses);
 app.route("/api/dashboard", dashboard);
 app.route("/api/starting-balances", startingBalances);
 
+// Root remains a simple liveness probe. Structured health is optional; keep
+// the existing text response so current deploy healthchecks stay valid.
 app.get("/", (c) => {
 	return c.text("OK");
-});
-
-app.get("/test", (c) => {
-	return c.json({ message: "Test route works!" });
 });
 
 import { serve } from "@hono/node-server";
