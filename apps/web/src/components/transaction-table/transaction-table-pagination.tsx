@@ -4,56 +4,51 @@ import {
 	IconChevronsLeft,
 	IconChevronsRight,
 } from "@tabler/icons-react";
-import type { Table } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
-import type { Transaction } from "./transaction-table";
 
-type Props = { table: Table<Transaction> };
+type Props = {
+	selectedCount: number;
+	totalMonths: number;
+	pageIndex: number;
+	pageCount: number;
+	onFirst: () => void;
+	onPrevious: () => void;
+	onNext: () => void;
+	onLast: () => void;
+};
 
-export function TransactionTablePagination({ table }: Props) {
+/**
+ * Pagination for the #32 monthly accordion: pages are MONTH GROUPS
+ * (MONTHS_PER_PAGE months per page), never individual rows, so a month is
+ * never split across pages.
+ */
+export function TransactionTablePagination({
+	selectedCount,
+	totalMonths,
+	pageIndex,
+	pageCount,
+	onFirst,
+	onPrevious,
+	onNext,
+	onLast,
+}: Props) {
 	return (
 		<div className="flex flex-col gap-4 px-2 sm:flex-row sm:items-center sm:justify-between">
 			<div className="text-muted-foreground text-sm">
-				{table.getFilteredSelectedRowModel().rows.length} of{" "}
-				{table.getFilteredRowModel().rows.length} row(s) selected.
+				{selectedCount} row(s) selected.
 			</div>
 			<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:space-x-6 lg:space-x-8">
-				<div className="flex items-center space-x-2">
-					<p className="whitespace-nowrap font-medium text-sm">Rows per page</p>
-					<Select
-						value={`${table.getState().pagination.pageSize}`}
-						onValueChange={(value) => table.setPageSize(Number(value))}
-					>
-						<SelectTrigger className="h-8 w-[70px]">
-							<SelectValue placeholder={table.getState().pagination.pageSize} />
-						</SelectTrigger>
-						<SelectContent side="top">
-							{[10, 20, 30, 40, 50].map((pageSize) => (
-								<SelectItem key={pageSize} value={`${pageSize}`}>
-									{pageSize}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
-				</div>
 				<div className="flex items-center justify-between gap-2 sm:justify-center">
-					<div className="flex w-[100px] items-center justify-center font-medium text-sm">
-						Page {table.getState().pagination.pageIndex + 1} of{" "}
-						{table.getPageCount() || 1}
+					<div className="flex w-[180px] items-center justify-center font-medium text-sm">
+						Page {pageIndex + 1} of {pageCount} · {totalMonths} month
+						{totalMonths === 1 ? "" : "s"}
 					</div>
 					<div className="flex items-center space-x-2">
 						<Button
 							variant="outline"
 							className="hidden h-8 w-8 p-0 lg:flex"
-							onClick={() => table.setPageIndex(0)}
-							disabled={!table.getCanPreviousPage()}
+							onClick={onFirst}
+							disabled={pageIndex === 0}
 						>
 							<span className="sr-only">Go to first page</span>
 							<IconChevronsLeft className="size-4" />
@@ -61,8 +56,8 @@ export function TransactionTablePagination({ table }: Props) {
 						<Button
 							variant="outline"
 							className="h-8 w-8 p-0"
-							onClick={() => table.previousPage()}
-							disabled={!table.getCanPreviousPage()}
+							onClick={onPrevious}
+							disabled={pageIndex === 0}
 						>
 							<span className="sr-only">Go to previous page</span>
 							<IconChevronLeft className="size-4" />
@@ -70,8 +65,8 @@ export function TransactionTablePagination({ table }: Props) {
 						<Button
 							variant="outline"
 							className="h-8 w-8 p-0"
-							onClick={() => table.nextPage()}
-							disabled={!table.getCanNextPage()}
+							onClick={onNext}
+							disabled={pageIndex >= pageCount - 1}
 						>
 							<span className="sr-only">Go to next page</span>
 							<IconChevronRight className="size-4" />
@@ -79,8 +74,8 @@ export function TransactionTablePagination({ table }: Props) {
 						<Button
 							variant="outline"
 							className="hidden h-8 w-8 p-0 lg:flex"
-							onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-							disabled={!table.getCanNextPage()}
+							onClick={onLast}
+							disabled={pageIndex >= pageCount - 1}
 						>
 							<span className="sr-only">Go to last page</span>
 							<IconChevronsRight className="size-4" />

@@ -81,6 +81,7 @@ export function AddTransactionDialog() {
 			queryClient.invalidateQueries({ queryKey: ["monthly-income"] });
 			queryClient.invalidateQueries({ queryKey: ["expense-categories"] });
 			queryClient.invalidateQueries({ queryKey: ["income-categories"] });
+			queryClient.invalidateQueries({ queryKey: ["mutations"] });
 			toast({
 				title: "Success",
 				description: `${type === "expense" ? "Expense" : "Income"} added`,

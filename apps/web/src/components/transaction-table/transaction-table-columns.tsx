@@ -27,12 +27,10 @@ export function getTransactionTableColumns(
 				<div className="flex items-center justify-center">
 					<Checkbox
 						checked={
-							table.getIsAllPageRowsSelected() ||
-							(table.getIsSomePageRowsSelected() && "indeterminate")
+							table.getIsAllRowsSelected() ||
+							(table.getIsSomeRowsSelected() && "indeterminate")
 						}
-						onCheckedChange={(value) =>
-							table.toggleAllPageRowsSelected(!!value)
-						}
+						onCheckedChange={(value) => table.toggleAllRowsSelected(!!value)}
 						aria-label="Select all"
 					/>
 				</div>

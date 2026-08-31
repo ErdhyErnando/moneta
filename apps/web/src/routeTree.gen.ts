@@ -15,6 +15,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedStartingBalanceRouteImport } from './routes/_authenticated/starting-balance'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedMutationsRouteImport } from './routes/_authenticated/mutations'
 import { Route as AuthenticatedIncomeRouteImport } from './routes/_authenticated/income'
 import { Route as AuthenticatedExpenseRouteImport } from './routes/_authenticated/expense'
 import { Route as AuthenticatedIncomeBreakdownRouteImport } from './routes/_authenticated/income_.breakdown'
@@ -50,6 +51,11 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedMutationsRoute = AuthenticatedMutationsRouteImport.update({
+  id: '/mutations',
+  path: '/mutations',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedIncomeRoute = AuthenticatedIncomeRouteImport.update({
   id: '/income',
   path: '/income',
@@ -78,6 +84,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/expense': typeof AuthenticatedExpenseRoute
   '/income': typeof AuthenticatedIncomeRoute
+  '/mutations': typeof AuthenticatedMutationsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/starting-balance': typeof AuthenticatedStartingBalanceRoute
   '/': typeof AuthenticatedIndexRoute
@@ -89,6 +96,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/expense': typeof AuthenticatedExpenseRoute
   '/income': typeof AuthenticatedIncomeRoute
+  '/mutations': typeof AuthenticatedMutationsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/starting-balance': typeof AuthenticatedStartingBalanceRoute
   '/': typeof AuthenticatedIndexRoute
@@ -102,6 +110,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/_authenticated/expense': typeof AuthenticatedExpenseRoute
   '/_authenticated/income': typeof AuthenticatedIncomeRoute
+  '/_authenticated/mutations': typeof AuthenticatedMutationsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/starting-balance': typeof AuthenticatedStartingBalanceRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
@@ -115,6 +124,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/expense'
     | '/income'
+    | '/mutations'
     | '/settings'
     | '/starting-balance'
     | '/'
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/expense'
     | '/income'
+    | '/mutations'
     | '/settings'
     | '/starting-balance'
     | '/'
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/_authenticated/expense'
     | '/_authenticated/income'
+    | '/_authenticated/mutations'
     | '/_authenticated/settings'
     | '/_authenticated/starting-balance'
     | '/_authenticated/'
@@ -195,6 +207,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/mutations': {
+      id: '/_authenticated/mutations'
+      path: '/mutations'
+      fullPath: '/mutations'
+      preLoaderRoute: typeof AuthenticatedMutationsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/income': {
       id: '/_authenticated/income'
       path: '/income'
@@ -229,6 +248,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteChildren {
   AuthenticatedExpenseRoute: typeof AuthenticatedExpenseRoute
   AuthenticatedIncomeRoute: typeof AuthenticatedIncomeRoute
+  AuthenticatedMutationsRoute: typeof AuthenticatedMutationsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedStartingBalanceRoute: typeof AuthenticatedStartingBalanceRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
@@ -239,6 +259,7 @@ interface AuthenticatedRouteChildren {
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedExpenseRoute: AuthenticatedExpenseRoute,
   AuthenticatedIncomeRoute: AuthenticatedIncomeRoute,
+  AuthenticatedMutationsRoute: AuthenticatedMutationsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedStartingBalanceRoute: AuthenticatedStartingBalanceRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
