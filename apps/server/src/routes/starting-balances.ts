@@ -8,11 +8,42 @@ import { isActiveUserCategory } from "../category-utils";
 const app = new Hono<{ Variables: { user: { id: string } } }>();
 
 const startingBalanceSchema = z.object({
-	amount: z.string(),
-	description: z.string().optional(),
-	date: z.string().transform((str) => new Date(str)),
-	categoryId: z.number(),
+	amount: z
+		.string()
+		.trim()
+		.regex(
+			/^\d+(\.\d{1,2})?$/,
+			"amount must be a non-negative decimal with up to 2 fractional digits",
+		)
+		.refine((v) => Number(v) > 0, "amount must be positive"),
+	description: z.string().trim().max(280).optional(),
+	date: z
+		.string()
+		.refine(
+			(s) => !Number.isNaN(new Date(s).getTime()),
+			"date must be a valid ISO date",
+		)
+		.transform((s) => new Date(s)),
+	categoryId: z.number().int().positive(),
 });
+
+function parseId(c: {
+	req: { param: (name: string) => string };
+}): number | null {
+	const n = Number(c.req.param("id"));
+	if (!Number.isInteger(n) || n <= 0) return null;
+	return n;
+}
+
+async function readJson<T>(c: {
+	req: { json: () => Promise<T> };
+}): Promise<T | null> {
+	try {
+		return (await c.req.json()) as T;
+	} catch {
+		return null;
+	}
+}
 
 app.get("/", async (c) => {
 	const user = c.get("user");
@@ -28,7 +59,10 @@ app.get("/", async (c) => {
 
 app.post("/", async (c) => {
 	const user = c.get("user");
-	const body = await c.req.json();
+	const body = await readJson(c);
+	if (!body) {
+		return c.json({ error: { message: "Invalid JSON body" } }, 400);
+	}
 	const result = startingBalanceSchema.safeParse(body);
 
 	if (!result.success) {
@@ -58,8 +92,14 @@ app.post("/", async (c) => {
 
 app.put("/:id", async (c) => {
 	const user = c.get("user");
-	const id = Number(c.req.param("id"));
-	const body = await c.req.json();
+	const id = parseId(c);
+	if (id === null) {
+		return c.json({ error: { message: "Invalid id parameter" } }, 400);
+	}
+	const body = await readJson(c);
+	if (!body) {
+		return c.json({ error: { message: "Invalid JSON body" } }, 400);
+	}
 	const result = startingBalanceSchema.safeParse(body);
 
 	if (!result.success) {
@@ -102,7 +142,10 @@ app.put("/:id", async (c) => {
 
 app.delete("/:id", async (c) => {
 	const user = c.get("user");
-	const id = Number(c.req.param("id"));
+	const id = parseId(c);
+	if (id === null) {
+		return c.json({ error: { message: "Invalid id parameter" } }, 400);
+	}
 	const [deletedBalance] = await db
 		.delete(startingBalances)
 		.where(
