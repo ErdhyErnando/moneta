@@ -14,7 +14,8 @@
 		"db:studio": "drizzle-kit studio",
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate",
-		"db:seed": "tsx src/seed.ts"
+		"db:seed": "tsx src/seed.ts",
+		"db:backfill-journal": "tsx scripts/backfill-journal.ts"
 	},
 	"devDependencies": {
 		"@moneta/config": "workspace:*",

@@ -29,14 +29,10 @@ Locked via `ask_user_question` + `grill-me`:
 
 | # | Title | Labels | Body Status | Type |
 |---|-------|--------|-------------|------|
-| 35 | redesign for login and other page | enhancement | **rewritten 08-31** (2.8k) | Feature — Design (login-only) |
-| 34 | add page for asset tracking and progress | enhancement | **rewritten 08-31** (4.2k) | Feature — Assets MVP |
-| 33 | create new mutation page to see combination of expense and income in a list | enhancement | **rewritten 08-31** (3.5k) | Feature — Ledger — **done in phase-4 branch, closes on merge** |
-| 32 | Expense and Income should be formatted as monthly list | enhancement, tech-debt | **rewritten 08-31** (3.7k) | Enhancement — Monthly grouping — **done in phase-4 branch, closes on merge** |
-| 27 | [Refactor] Split giant TransactionTable (709 LoC) and CategoryBreakdownChart — adopt useReducer | maintainability, react-doctor, tech-debt, web | detailed (3.6k) — ready | Refactor — **done in phase-3-followup, closes on merge** |
-| 26 | [Maintainability] Remove 7 unused deps, 12 dead files, 3 unused exports, 7 mixed-export files | good first issue, maintainability, react-doctor, tech-debt, web | detailed (4.9k) — ready | Tech-debt — **done in phase-3-followup, closes on merge** |
+| 35 | redesign for login and other page | enhancement | **rewritten 08-31** (2.8k) | Feature — Design (login-only) — Phase 5 |
+| 34 | add page for asset tracking and progress | enhancement | **rewritten 08-31** (4.2k) | Feature — Assets MVP — Phase 5 |
 
-> Closed for reference: #31 quick-add [CLOSED 08-31], #19 palette [CLOSED 08-31], #20 avatar [CLOSED 08-31], #29 a11y [CLOSED], #25 perf render [CLOSED], #24 validation [CLOSED], #23 CVEs [CLOSED], #22 monthly mismatch [CLOSED], #18 categories global [CLOSED], #28 /test route [CLOSED]
+> Closed for reference: #33 mutations ledger [CLOSED PR #40], #32 monthly groups [CLOSED PR #40], #27 giant split [CLOSED PR #39], #26 dead code [CLOSED PR #39], #31 quick-add [CLOSED 08-31], #19 palette [CLOSED 08-31], #20 avatar [CLOSED 08-31], #29 a11y [CLOSED], #25 perf render [CLOSED], #24 validation [CLOSED], #23 CVEs [CLOSED], #22 monthly mismatch [CLOSED — root cause re-fixed at UTC-calendar-day canonicalization, PR #40], #18 categories global [CLOSED], #28 /test route [CLOSED]
 
 **Rewritten bodies:** Use `gh issue view 35 --json body` to verify. All vague issues (empty/one-line) now have Summary/Goals/Proposed implementation/Acceptance/Triage notes.
 
@@ -69,10 +65,11 @@ Locked via `ask_user_question` + `grill-me`:
 
 > **Exit criteria:** No `no-giant-component`/`prefer-useReducer` findings on split targets ✅, `pnpm run check` + `check-types` + build green ✅. Remaining `no-giant-component` on `category-settings.tsx` (495 LoC) was **not** in #27 scope — file a follow-up issue if desired.
 
-### Phase 4 — Ledger UX (W4) — after #27 + #22 — 🚧 code done on `feat/phase-4-ledger-ux`, closes on PR merge
+### Phase 4 — Ledger UX (W4) — after #27 + #22 — ✅ DONE (PR #40; #32/#33 closed)
 
-- [x] **#32** Monthly groups — accordion by UTC month on `/expense` + `/income`, header totals via `formatCurrency`, 6 months/page (**pagination model chosen: group-based — pages are 6 UTC-month accordion sections, a month is never split; row-level pagination was replaced per issue's "paginate groups" option**)
+- [x] **#32** Monthly groups — accordion by UTC month on `/expense` + `/income`, header totals via `formatCurrency`, 6 months/page (**pagination model chosen and implemented: group-based — pages are 6 UTC-month accordion sections, a month is never split; row-level pagination removed from these two pages**)
 - [x] **#33** `/mutations` ledger — UNION ALL `incomes`+`expenses` at DB level (`drizzle-orm/pg-core` `unionAll`, smoke-tested against dev Postgres), filters via Zod (invalid params → 400), server pagination 20/page, type badge, all filters/sort/page in URL query params (shareable), AddTransactionDialog wired + invalidates `["mutations"]`
+- [x] **Bonus:** UTC calendar-day canonicalization (root cause of the residual #22 mismatch class, found during smoke) + `0005_utc_calendar_days` migration + `db:backfill-journal` script for push-created DBs
 
 > **Exit criteria:** Monthly scan + full ledger both usable ✅ (pending owner smoke test), share table logic from #27 ✅ (`useTransactionFilters`, columns pattern reused).
 
@@ -99,11 +96,35 @@ Locked via `ask_user_question` + `grill-me`:
 ## For the Next Agent — Checklist
 
 - [ ] Read this doc + run `gh issue list` to confirm no new issues created since 08-31
-- [ ] Phases 1–3 merged. Phase 4 code done (branch `feat/phase-4-ledger-ux`, PR pending owner smoke test) — after merge, next up is **Phase 5** (#34 assets MVP, #35 login redesign)
+- [ ] Phases 1–4 merged (PRs #36–#40). Next up: **Phase 5** — #34 assets MVP, then #35 login redesign. ⚠️ Before deploying: see “Deploying (DB migrations)” below.
 - [ ] Before coding, read issue body: `gh issue view <n> --json body | jq -r .body > /tmp/body.md && cat /tmp/body.md`
 - [ ] Follow issue's Proposed implementation + Acceptance exactly — bodies are now detailed with code snippets
 - [ ] Run `pnpm run check` + `pnpm run check-types` before PR (per `AGENTS.md`)
 - [ ] Update this doc's checklist when issue closes (`gh issue close <n>`)
+
+## Deploying (DB migrations) — one-time per environment
+
+Prod/dev were created with `db:push`, so the drizzle journal
+(`drizzle.__drizzle_migrations`) is incomplete and a plain `pnpm run db:migrate`
+fails replaying old schema files (`column "issuer" ... already exists`).
+One-time fix, then migrations are normal forever:
+
+```bash
+# 1) reconcile the journal against the migration files (idempotent)
+DATABASE_URL=postgresql://<prod-credentials>@<host>/<db> \
+  pnpm -F @moneta/db db:backfill-journal
+
+# 2) apply pending migrations (first run applies 0005_utc_calendar_days — idempotent)
+DATABASE_URL=postgresql://<prod-credentials>@<host>/<db> pnpm run db:migrate
+```
+
+Recommended permanent setup (deployment.md Option C): add migrate to server
+startup so every deploy self-migrates:
+`"start": "pnpm db:migrate && node dist/index.js"`
+
+NOTE: `0005_utc_calendar_days` interprets *legacy* rows (entered before PR #40)
+as Europe/Amsterdam. It only ever truncates to calendar days, is idempotent,
+and does not affect how NEW data is stored (canonical UTC midnight, any TZ).
 
 ## Verification Commands
 
