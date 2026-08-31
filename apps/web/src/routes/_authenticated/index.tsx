@@ -7,12 +7,29 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { format } from "date-fns";
-import { useMemo, useState } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 
-import { ChartAreaInteractive } from "@/components/chart-area-interactive";
-import { ChartBarMonthlyExpenses } from "@/components/chart-bar-monthly-expenses";
-import { ChartBarMonthlyIncome } from "@/components/chart-bar-monthly-income";
-import { ChartPieCategories } from "@/components/chart-pie-categories";
+const ChartAreaInteractive = lazy(() =>
+	import("@/components/chart-area-interactive").then((m) => ({
+		default: m.ChartAreaInteractive,
+	})),
+);
+const ChartBarMonthlyExpenses = lazy(() =>
+	import("@/components/chart-bar-monthly-expenses").then((m) => ({
+		default: m.ChartBarMonthlyExpenses,
+	})),
+);
+const ChartBarMonthlyIncome = lazy(() =>
+	import("@/components/chart-bar-monthly-income").then((m) => ({
+		default: m.ChartBarMonthlyIncome,
+	})),
+);
+const ChartPieCategories = lazy(() =>
+	import("@/components/chart-pie-categories").then((m) => ({
+		default: m.ChartPieCategories,
+	})),
+);
+
 import { CurrencySelector } from "@/components/currency-selector";
 import { AddTransactionDialog } from "@/components/dashboard/add-transaction-dialog";
 import { DataTable, type Transaction } from "@/components/data-table";
@@ -57,7 +74,9 @@ async function fetchDashboardSummary(
 	if (startDate) params.append("startDate", startDate);
 	if (endDate) params.append("endDate", endDate);
 
-	const response = await api.get<{ summary: DashboardSummary }>(`/api/dashboard/summary?${params.toString()}`);
+	const response = await api.get<{ summary: DashboardSummary }>(
+		`/api/dashboard/summary?${params.toString()}`,
+	);
 	return response.data.summary;
 }
 
@@ -127,9 +146,9 @@ function HomeComponent() {
 			if (startDate) params.append("startDate", startDate);
 			if (endDate) params.append("endDate", endDate);
 
-			const response = await api.get<{ chartData: Array<{ date: string; income: number; expense: number }> }>(
-				`/api/dashboard/chart?${params.toString()}`,
-			);
+			const response = await api.get<{
+				chartData: Array<{ date: string; income: number; expense: number }>;
+			}>(`/api/dashboard/chart?${params.toString()}`);
 			return response.data.chartData;
 		},
 	});
@@ -287,26 +306,42 @@ function HomeComponent() {
 			{/* Chart and Category Pie */}
 			<div className="grid gap-6 md:grid-cols-7">
 				<div className="md:col-span-4">
-					<ChartAreaInteractive
-						data={chartDataResponse}
-						isLoading={chartLoading}
-					/>
+					<Suspense
+						fallback={
+							<div className="h-[280px] animate-pulse rounded bg-muted" />
+						}
+					>
+						<ChartAreaInteractive
+							data={chartDataResponse}
+							isLoading={chartLoading}
+						/>
+					</Suspense>
 				</div>
 				<div className="md:col-span-3">
-					<ChartPieCategories startDate={startDate} endDate={endDate} />
+					<Suspense
+						fallback={
+							<div className="h-[280px] animate-pulse rounded bg-muted" />
+						}
+					>
+						<ChartPieCategories startDate={startDate} endDate={endDate} />
+					</Suspense>
 				</div>
 			</div>
 
-			{/* Monthly Bar Chart */}
-			{monthlyChartType === "expense" ? (
-				<ChartBarMonthlyExpenses
-					onToggle={() => setMonthlyChartType("income")}
-				/>
-			) : (
-				<ChartBarMonthlyIncome
-					onToggle={() => setMonthlyChartType("expense")}
-				/>
-			)}
+			{/* Monthly Bar Chart — lazy per #25 */}
+			<Suspense
+				fallback={<div className="h-[300px] animate-pulse rounded bg-muted" />}
+			>
+				{monthlyChartType === "expense" ? (
+					<ChartBarMonthlyExpenses
+						onToggle={() => setMonthlyChartType("income")}
+					/>
+				) : (
+					<ChartBarMonthlyIncome
+						onToggle={() => setMonthlyChartType("expense")}
+					/>
+				)}
+			</Suspense>
 
 			{/* Recent Transactions */}
 			<Card>

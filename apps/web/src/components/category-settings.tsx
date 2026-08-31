@@ -69,10 +69,16 @@ function getErrorMessage(error: CategoryError, fallback: string) {
 	return errorPayload?.message || fallback;
 }
 
-function CategoryBadgePreview({ color, name }: { color: string; name: string }) {
+function CategoryBadgePreview({
+	color,
+	name,
+}: {
+	color: string;
+	name: string;
+}) {
 	return (
 		<span
-			className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-2.5 py-0.5 font-medium text-xs text-white"
+			className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-2.5 py-0.5 font-medium text-white text-xs"
 			style={{ backgroundColor: color }}
 		>
 			{name}
@@ -125,7 +131,10 @@ function CategoryTable({
 											className="inline-block h-3 w-3 rounded-full border"
 											style={{ backgroundColor: category.color }}
 										/>
-										<CategoryBadgePreview color={category.color} name={category.name} />
+										<CategoryBadgePreview
+											color={category.color}
+											name={category.name}
+										/>
 									</div>
 								</TableCell>
 								<TableCell className="text-muted-foreground">
@@ -431,7 +440,10 @@ export function CategorySettings() {
 									aria-hidden
 								/>
 							</div>
-							<p className="text-muted-foreground text-xs">Hex color used for pie + pill (solid badge, white text) — same for dashboard and income/expense tables</p>
+							<p className="text-muted-foreground text-xs">
+								Hex color used for pie + pill (solid badge, white text) — same
+								for dashboard and income/expense tables
+							</p>
 						</div>
 						<DialogFooter>
 							<Button

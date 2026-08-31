@@ -22,7 +22,7 @@ import {
 import * as React from "react";
 import { z } from "zod";
 import { CategoryBadge } from "@/components/category-badge";
-
+import { AddTransactionDialog } from "@/components/dashboard/add-transaction-dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -49,10 +49,9 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { AddTransactionDialog } from "@/components/dashboard/add-transaction-dialog";
 import { useCurrency } from "@/contexts/currency-context";
 
-export const schema = z.object({
+const schema = z.object({
 	id: z.number(),
 	date: z.string(),
 	description: z.string(),

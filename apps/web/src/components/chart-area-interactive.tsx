@@ -1,5 +1,3 @@
-"use client";
-
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 import {
 	Card,
@@ -15,7 +13,7 @@ import {
 	ChartTooltipContent,
 } from "@/components/ui/chart";
 
-export const description = "An interactive area chart for cash flow";
+const description = "An interactive area chart for cash flow";
 
 const chartConfig = {
 	income: {

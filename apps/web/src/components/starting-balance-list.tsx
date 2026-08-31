@@ -52,7 +52,7 @@ import {
 } from "@/components/ui/table";
 import { useCurrency } from "@/contexts/currency-context";
 
-export const startingBalanceSchema = z.object({
+const startingBalanceSchema = z.object({
 	id: z.number(),
 	date: z.string(),
 	description: z.string(),
