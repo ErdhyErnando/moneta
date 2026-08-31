@@ -1,9 +1,11 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Plus } from "lucide-react";
 import { useState } from "react";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
+import { DateInput } from "@/components/ui/date-input";
 import {
 	Dialog,
 	DialogContent,
@@ -20,16 +22,17 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { DateInput } from "@/components/ui/date-input";
 import { useToast } from "@/hooks/use-toast";
-import { api, type AxiosError } from "@/lib/api";
-import { Plus } from "lucide-react";
+import { type AxiosError, api } from "@/lib/api";
 
 const transactionSchema = z.object({
 	amount: z
 		.string()
 		.trim()
-		.regex(/^\d+(\.\d{1,2})?$/, "amount must be a decimal with up to 2 decimals")
+		.regex(
+			/^\d+(\.\d{1,2})?$/,
+			"amount must be a decimal with up to 2 decimals",
+		)
 		.refine((v) => Number(v) > 0, "amount must be positive"),
 	description: z.string().trim().max(280).optional(),
 	date: z.date(),
@@ -55,9 +58,7 @@ export function AddTransactionDialog() {
 	const { data: categories = [] } = useQuery({
 		queryKey: ["categories", type],
 		queryFn: async () => {
-			const res = await api.get<{ categories: Category[] }>(
-				"/api/categories",
-			);
+			const res = await api.get<{ categories: Category[] }>("/api/categories");
 			return res.data.categories.filter((c) => c.type === type);
 		},
 		enabled: open,
@@ -82,7 +83,10 @@ export function AddTransactionDialog() {
 			queryClient.invalidateQueries({ queryKey: ["monthly-income"] });
 			queryClient.invalidateQueries({ queryKey: ["expense-categories"] });
 			queryClient.invalidateQueries({ queryKey: ["income-categories"] });
-			toast({ title: "Success", description: `${type === "expense" ? "Expense" : "Income"} added` });
+			toast({
+				title: "Success",
+				description: `${type === "expense" ? "Expense" : "Income"} added`,
+			});
 			setOpen(false);
 			setAmount("");
 			setDescription("");
@@ -92,7 +96,8 @@ export function AddTransactionDialog() {
 		onError: (error: AxiosError<{ error: { message: string } }>) => {
 			toast({
 				title: "Error",
-				description: error.response?.data?.error?.message || `Failed to add ${type}`,
+				description:
+					error.response?.data?.error?.message || `Failed to add ${type}`,
 				variant: "destructive",
 			});
 		},
@@ -100,7 +105,12 @@ export function AddTransactionDialog() {
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		const result = transactionSchema.safeParse({ amount, description, date, categoryId });
+		const result = transactionSchema.safeParse({
+			amount,
+			description,
+			date,
+			categoryId,
+		});
 		if (!result.success) {
 			toast({
 				title: "Validation error",
@@ -121,7 +131,9 @@ export function AddTransactionDialog() {
 			</DialogTrigger>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Add {type === "expense" ? "Expense" : "Income"}</DialogTitle>
+					<DialogTitle>
+						Add {type === "expense" ? "Expense" : "Income"}
+					</DialogTitle>
 				</DialogHeader>
 				<form onSubmit={handleSubmit} className="space-y-4">
 					<div className="flex gap-2">
@@ -192,7 +204,11 @@ export function AddTransactionDialog() {
 							placeholder="Note"
 						/>
 					</div>
-					<Button type="submit" className="w-full" disabled={mutation.isPending}>
+					<Button
+						type="submit"
+						className="w-full"
+						disabled={mutation.isPending}
+					>
 						{mutation.isPending ? "Saving..." : "Save"}
 					</Button>
 				</form>

@@ -1,25 +1,7 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import {
-	addMonths,
-	addWeeks,
-	addYears,
-	endOfMonth,
-	endOfWeek,
-	endOfYear,
-	format,
-	setMonth,
-	setYear,
-	startOfMonth,
-	startOfWeek,
-	startOfYear,
-	subMonths,
-	subWeeks,
-	subYears,
-} from "date-fns";
+import { format } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useState } from "react";
 import {
 	Bar,
 	BarChart,
@@ -51,31 +33,9 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCurrency } from "@/contexts/currency-context";
-import { api } from "@/lib/api";
+import { useCategoryBreakdownData } from "./use-category-breakdown-data";
 
-type Period = "weekly" | "monthly" | "yearly";
-
-interface CategoryBreakdownChartProps {
-	type: "income" | "expense";
-}
-
-interface CategoryData {
-	name: string;
-	amount: number;
-	percentage: number;
-	fill: string;
-}
-
-interface CategoriesResponse {
-	categories: Array<{
-		name: string;
-		amount: string;
-		percentage: number;
-		color: string;
-	}>;
-}
-
-// Module-scope statics per #25 prefer-module-scope-static-value
+// Module-scope per #25
 const MONTHS = [
 	"January",
 	"February",
@@ -91,121 +51,36 @@ const MONTHS = [
 	"December",
 ] as const;
 
-const FALLBACK_COLORS = [
-	"oklch(0.6368 0.2078 25.3313)",
-	"oklch(0.65 0.2 45)",
-	"oklch(0.7 0.15 70)",
-	"oklch(0.6 0.2 15)",
-	"oklch(0.55 0.18 35)",
-	"oklch(0.5 0.2 25)",
-	"oklch(0.68 0.18 160)",
-	"oklch(0.65 0.15 190)",
-] as const;
-
-function getCategoryFill(color: string | undefined, index: number): string {
-	if (color && /^#[0-9a-fA-F]{6}$/.test(color)) return color;
-	return FALLBACK_COLORS[index % FALLBACK_COLORS.length];
+interface Props {
+	type: "income" | "expense";
 }
 
-export function CategoryBreakdownChart({ type }: CategoryBreakdownChartProps) {
+export function CategoryBreakdownChart({ type }: Props) {
 	const { formatCurrency } = useCurrency();
-	const [period, setPeriod] = useState<Period>("monthly");
-	const [currentDate, setCurrentDate] = useState(new Date());
-
-	const getDateRange = () => {
-		switch (period) {
-			case "weekly":
-				return {
-					start: startOfWeek(currentDate),
-					end: endOfWeek(currentDate),
-				};
-			case "yearly":
-				return {
-					start: startOfYear(currentDate),
-					end: endOfYear(currentDate),
-				};
-			default:
-				return {
-					start: startOfMonth(currentDate),
-					end: endOfMonth(currentDate),
-				};
-		}
-	};
-
-	const { start, end } = getDateRange();
-	const startDateISO = start.toISOString();
-	const endDateISO = end.toISOString();
-
-	const { data, isLoading } = useQuery({
-		queryKey: [
-			`${type}-categories-breakdown`,
-			period,
-			startDateISO,
-			endDateISO,
-		],
-		queryFn: async () => {
-			const res = await api.get<CategoriesResponse>(
-				`/api/dashboard/${type}-categories`,
-				{
-					params: {
-						startDate: startDateISO,
-						endDate: endDateISO,
-					},
-				},
-			);
-			return res.data;
-		},
-	});
-
-	const navigatePeriod = (direction: "prev" | "next") => {
-		const amount = direction === "prev" ? -1 : 1;
-		switch (period) {
-			case "weekly":
-				setCurrentDate(
-					amount === -1 ? subWeeks(currentDate, 1) : addWeeks(currentDate, 1),
-				);
-				break;
-			case "monthly":
-				setCurrentDate(
-					amount === -1 ? subMonths(currentDate, 1) : addMonths(currentDate, 1),
-				);
-				break;
-			case "yearly":
-				setCurrentDate(
-					amount === -1 ? subYears(currentDate, 1) : addYears(currentDate, 1),
-				);
-				break;
-		}
-	};
-
-	// Use shared category palette per #19 (color from DB), fallback to static palette
-	const chartData: CategoryData[] = (data?.categories || [])
-		.map((cat, index) => ({
-			name: cat.name,
-			amount: Number(cat.amount),
-			percentage: cat.percentage,
-			fill: getCategoryFill(cat.color, index),
-		}))
-		.sort((a, b) => b.amount - a.amount);
+	const {
+		period,
+		setPeriod,
+		currentDate,
+		setCurrentDate,
+		start,
+		end,
+		isLoading,
+		chartData,
+		total,
+		navigatePeriod,
+		currentYear,
+		currentMonth,
+		handleYearChange,
+		handleMonthChange,
+	} = useCategoryBreakdownData(type);
 
 	const chartConfig: ChartConfig = chartData.reduce(
 		(config, item) => {
-			config[item.name] = {
-				label: item.name,
-				color: item.fill,
-			};
+			config[item.name] = { label: item.name, color: item.fill };
 			return config;
 		},
-		{
-			amount: {
-				label: "Amount",
-			},
-		} as ChartConfig,
+		{ amount: { label: "Amount" } } as ChartConfig,
 	);
-
-	// Use UTC for year/month to match server DATE_TRUNC UTC grouping per #22
-	const currentYear = currentDate.getUTCFullYear();
-	const currentMonth = currentDate.getUTCMonth();
 
 	const START_YEAR = 2020;
 	const END_YEAR = new Date().getUTCFullYear();
@@ -213,18 +88,7 @@ export function CategoryBreakdownChart({ type }: CategoryBreakdownChartProps) {
 		{ length: END_YEAR - START_YEAR + 1 },
 		(_, i) => START_YEAR + i,
 	);
-
-	const handleYearChange = (year: string) => {
-		setCurrentDate(setYear(currentDate, Number(year)));
-	};
-
-	const handleMonthChange = (month: string) => {
-		setCurrentDate(setMonth(currentDate, Number(month)));
-	};
-
 	const chartHeight = Math.max(300, chartData.length * 56);
-
-	const total = chartData.reduce((sum, item) => sum + item.amount, 0);
 
 	return (
 		<Card className="w-full">
@@ -241,7 +105,7 @@ export function CategoryBreakdownChart({ type }: CategoryBreakdownChartProps) {
 					<Tabs
 						value={period}
 						onValueChange={(v) => {
-							setPeriod(v as Period);
+							setPeriod(v as never);
 							setCurrentDate(new Date());
 						}}
 					>
@@ -263,7 +127,6 @@ export function CategoryBreakdownChart({ type }: CategoryBreakdownChartProps) {
 					>
 						<ChevronLeft className="h-4 w-4" />
 					</Button>
-
 					<div className="flex items-center gap-2">
 						{period !== "yearly" && (
 							<Select
@@ -282,7 +145,6 @@ export function CategoryBreakdownChart({ type }: CategoryBreakdownChartProps) {
 								</SelectContent>
 							</Select>
 						)}
-
 						<Select
 							value={String(currentYear)}
 							onValueChange={handleYearChange}
@@ -298,14 +160,12 @@ export function CategoryBreakdownChart({ type }: CategoryBreakdownChartProps) {
 								))}
 							</SelectContent>
 						</Select>
-
 						{period === "weekly" && (
 							<span className="text-muted-foreground text-sm">
 								{format(start, "MMM d")} - {format(end, "MMM d")}
 							</span>
 						)}
 					</div>
-
 					<Button
 						variant="outline"
 						size="icon"
@@ -315,7 +175,6 @@ export function CategoryBreakdownChart({ type }: CategoryBreakdownChartProps) {
 						<ChevronRight className="h-4 w-4" />
 					</Button>
 				</div>
-
 				{isLoading ? (
 					<div className="flex h-[300px] items-center justify-center">
 						<div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -334,12 +193,7 @@ export function CategoryBreakdownChart({ type }: CategoryBreakdownChartProps) {
 							accessibilityLayer
 							data={chartData}
 							layout="vertical"
-							margin={{
-								right: 32,
-								left: 32,
-								top: 8,
-								bottom: 8,
-							}}
+							margin={{ right: 32, left: 32, top: 8, bottom: 8 }}
 						>
 							<CartesianGrid horizontal={false} />
 							<YAxis
@@ -385,7 +239,6 @@ export function CategoryBreakdownChart({ type }: CategoryBreakdownChartProps) {
 						</BarChart>
 					</ChartContainer>
 				)}
-
 				{!isLoading && chartData.length > 0 && (
 					<div className="mt-6 border-t pt-4 text-center">
 						<p className="text-muted-foreground text-sm">

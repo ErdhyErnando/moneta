@@ -1,5 +1,12 @@
 import { relations } from "drizzle-orm";
-import { boolean, index, pgTable, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
+import {
+	boolean,
+	index,
+	pgTable,
+	text,
+	timestamp,
+	uniqueIndex,
+} from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
 	id: text("id").primaryKey(),
@@ -57,7 +64,10 @@ export const account = pgTable(
 	},
 	(table) => [
 		index("account_userId_idx").on(table.userId),
-		uniqueIndex("account_issuer_accountId_idx").on(table.issuer, table.accountId),
+		uniqueIndex("account_issuer_accountId_idx").on(
+			table.issuer,
+			table.accountId,
+		),
 	],
 );
 

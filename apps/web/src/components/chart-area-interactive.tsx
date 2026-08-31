@@ -15,7 +15,7 @@ import {
 	ChartTooltipContent,
 } from "@/components/ui/chart";
 
-export const description = "An interactive area chart for cash flow";
+const description = "An interactive area chart for cash flow";
 
 const chartConfig = {
 	income: {

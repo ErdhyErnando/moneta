@@ -128,7 +128,7 @@ export function CategoryBadge({ name, color, className }: CategoryBadgeProps) {
 		return (
 			<span
 				className={cn(
-					"inline-flex items-center justify-center whitespace-nowrap rounded-full px-2.5 py-0.5 font-medium text-xs text-white",
+					"inline-flex items-center justify-center whitespace-nowrap rounded-full px-2.5 py-0.5 font-medium text-white text-xs",
 					className,
 				)}
 				style={{ backgroundColor: color }}

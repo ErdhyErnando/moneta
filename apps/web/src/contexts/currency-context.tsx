@@ -1,28 +1,22 @@
 import type React from "react";
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+	createContext,
+	useCallback,
+	useContext,
+	useEffect,
+	useMemo,
+	useState,
+} from "react";
 
-export type CurrencyCode = "USD" | "EUR" | "GBP" | "IDR" | "JPY" | "CNY";
+import {
+	CURRENCIES,
+	type Currency,
+	type CurrencyCode,
+} from "./currency-constants";
 
-export interface Currency {
-	code: CurrencyCode;
-	symbol: string;
-	name: string;
-	locale: string;
-}
-
-export const CURRENCIES: Record<CurrencyCode, Currency> = {
-	USD: { code: "USD", symbol: "$", name: "US Dollar", locale: "en-US" },
-	EUR: { code: "EUR", symbol: "€", name: "Euro", locale: "de-DE" },
-	GBP: { code: "GBP", symbol: "£", name: "British Pound", locale: "en-GB" },
-	IDR: {
-		code: "IDR",
-		symbol: "Rp",
-		name: "Indonesian Rupiah",
-		locale: "id-ID",
-	},
-	JPY: { code: "JPY", symbol: "¥", name: "Japanese Yen", locale: "ja-JP" },
-	CNY: { code: "CNY", symbol: "¥", name: "Chinese Yuan", locale: "zh-CN" },
-};
+// re-export for external consumers (keeps import path stable)
+export type { Currency, CurrencyCode } from "./currency-constants";
+export { CURRENCIES } from "./currency-constants";
 
 interface CurrencyContextType {
 	currency: Currency;
@@ -43,8 +37,10 @@ function getFormatter(currency: Currency): Intl.NumberFormat {
 			new Intl.NumberFormat(currency.locale, {
 				style: "currency",
 				currency: currency.code,
-				minimumFractionDigits: currency.code === "IDR" || currency.code === "JPY" ? 0 : 2,
-				maximumFractionDigits: currency.code === "IDR" || currency.code === "JPY" ? 0 : 2,
+				minimumFractionDigits:
+					currency.code === "IDR" || currency.code === "JPY" ? 0 : 2,
+				maximumFractionDigits:
+					currency.code === "IDR" || currency.code === "JPY" ? 0 : 2,
 			}),
 		);
 	}

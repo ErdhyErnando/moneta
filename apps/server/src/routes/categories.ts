@@ -162,16 +162,16 @@ app.put("/:id", async (c) => {
 	}
 
 	const updatePayload: Partial<typeof categories.$inferInsert> = {
-			name: result.data.name,
-		};
-		if (result.data.color) {
-			updatePayload.color = result.data.color;
-		}
-		const [updatedCategory] = await db
-			.update(categories)
-			.set(updatePayload)
-			.where(and(eq(categories.id, id), eq(categories.userId, user.id)))
-			.returning();
+		name: result.data.name,
+	};
+	if (result.data.color) {
+		updatePayload.color = result.data.color;
+	}
+	const [updatedCategory] = await db
+		.update(categories)
+		.set(updatePayload)
+		.where(and(eq(categories.id, id), eq(categories.userId, user.id)))
+		.returning();
 
 	if (!updatedCategory) {
 		return c.json({ error: "Category not found" }, 404);
