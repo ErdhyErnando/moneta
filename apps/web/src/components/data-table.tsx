@@ -50,6 +50,7 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { useCurrency } from "@/contexts/currency-context";
+import { asUtcDay } from "@/lib/date";
 
 const schema = z.object({
 	id: z.number(),
@@ -94,7 +95,7 @@ const columns: ColumnDef<Transaction>[] = [
 		accessorKey: "date",
 		header: "Date",
 		cell: ({ row }) => {
-			const date = new Date(row.getValue("date"));
+			const date = asUtcDay(row.getValue("date"));
 			return <div className="font-medium">{date.toLocaleDateString()}</div>;
 		},
 	},

@@ -1,4 +1,5 @@
 import {
+	IconArrowsExchange,
 	IconDashboard,
 	IconHelp,
 	IconLogout,
@@ -49,6 +50,11 @@ const navMainItems = [
 		title: "Expense",
 		url: "/expense",
 		icon: IconTrendingDown,
+	},
+	{
+		title: "Mutations",
+		url: "/mutations",
+		icon: IconArrowsExchange,
 	},
 	{
 		title: "Starting Balance",

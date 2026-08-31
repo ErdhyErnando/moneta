@@ -4,6 +4,7 @@ import { and, desc, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
 import { isActiveUserCategory } from "../category-utils";
+import { nearestUtcDay } from "../date-utils";
 
 const app = new Hono<{ Variables: { user: { id: string } } }>();
 
@@ -23,7 +24,7 @@ const expenseSchema = z.object({
 			(s) => !Number.isNaN(new Date(s).getTime()),
 			"date must be a valid ISO date",
 		)
-		.transform((s) => new Date(s)),
+		.transform((s) => nearestUtcDay(new Date(s))),
 	categoryId: z.number().int().positive(),
 });
 

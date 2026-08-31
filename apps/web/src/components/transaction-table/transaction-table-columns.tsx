@@ -11,6 +11,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { asUtcDay } from "@/lib/date";
 import { cn } from "@/lib/utils";
 import type { Transaction } from "./transaction-table";
 
@@ -27,12 +28,10 @@ export function getTransactionTableColumns(
 				<div className="flex items-center justify-center">
 					<Checkbox
 						checked={
-							table.getIsAllPageRowsSelected() ||
-							(table.getIsSomePageRowsSelected() && "indeterminate")
+							table.getIsAllRowsSelected() ||
+							(table.getIsSomeRowsSelected() && "indeterminate")
 						}
-						onCheckedChange={(value) =>
-							table.toggleAllPageRowsSelected(!!value)
-						}
+						onCheckedChange={(value) => table.toggleAllRowsSelected(!!value)}
 						aria-label="Select all"
 					/>
 				</div>
@@ -53,7 +52,7 @@ export function getTransactionTableColumns(
 			accessorKey: "date",
 			header: "Date",
 			cell: ({ row }) => {
-				const date = new Date(row.getValue("date") as string);
+				const date = asUtcDay(row.getValue("date"));
 				return (
 					<div className="whitespace-nowrap font-medium">
 						{format(date, "MMM d, yyyy")}

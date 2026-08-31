@@ -6,6 +6,7 @@ import {
 	endOfMonth,
 	endOfWeek,
 	endOfYear,
+	format,
 	setMonth,
 	setYear,
 	startOfMonth,
@@ -64,21 +65,23 @@ export function useCategoryBreakdownData(type: "income" | "expense") {
 	};
 
 	const { start, end } = getDateRange();
-	const startDateISO = start.toISOString();
-	const endDateISO = end.toISOString();
+	// Date-only "YYYY-MM-DD" params → dashboard.ts normalizes to UTC day
+	// boundaries, so breakdown months match UTC bucketing everywhere (#22).
+	const startDateParam = format(start, "yyyy-MM-dd");
+	const endDateParam = format(end, "yyyy-MM-dd");
 
 	const { data, isLoading } = useQuery({
 		queryKey: [
 			`${type}-categories-breakdown`,
 			period,
-			startDateISO,
-			endDateISO,
+			startDateParam,
+			endDateParam,
 		],
 		queryFn: async () => {
 			const res = await api.get<CategoriesResponse>(
 				`/api/dashboard/${type}-categories`,
 				{
-					params: { startDate: startDateISO, endDate: endDateISO },
+					params: { startDate: startDateParam, endDate: endDateParam },
 				},
 			);
 			return res.data;

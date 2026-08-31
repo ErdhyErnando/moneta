@@ -21,6 +21,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import type { AxiosError } from "@/lib/api";
 import { api } from "@/lib/api";
+import { asUtcDay, toUtcDayIso } from "@/lib/date";
 
 export const Route = createFileRoute("/_authenticated/expense")({
 	component: ExpensePage,
@@ -51,7 +52,10 @@ function ExpensePage() {
 
 	const createMutation = useMutation({
 		mutationFn: async (data: TransactionFormData) => {
-			await api.post("/api/expenses", data);
+			await api.post("/api/expenses", {
+				...data,
+				date: toUtcDayIso(data.date),
+			});
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["expenses"] });
@@ -79,7 +83,10 @@ function ExpensePage() {
 			id: number;
 			data: TransactionFormData;
 		}) => {
-			await api.put(`/api/expenses/${id}`, data);
+			await api.put(`/api/expenses/${id}`, {
+				...data,
+				date: toUtcDayIso(data.date),
+			});
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["expenses"] });
@@ -188,7 +195,7 @@ function ExpensePage() {
 										? {
 												amount: editingExpense.amount,
 												description: editingExpense.description,
-												date: new Date(editingExpense.date),
+												date: asUtcDay(editingExpense.date),
 												categoryId: editingExpense.categoryId,
 											}
 										: undefined
