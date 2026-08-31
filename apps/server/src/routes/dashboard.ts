@@ -109,12 +109,13 @@ async function getCategoryBreakdown(
 		.select({
 			categoryId: table.categoryId,
 			categoryName: sql<string>`${categories.name}`,
+			categoryColor: sql<string>`${categories.color}`,
 			total: sql<number>`COALESCE(SUM(CAST(${table.amount} AS DECIMAL)), 0)`,
 		})
 		.from(table)
 		.innerJoin(categories, eq(table.categoryId, categories.id))
 		.where(and(...conditions))
-		.groupBy(table.categoryId, categories.name);
+		.groupBy(table.categoryId, categories.name, categories.color);
 
 	// Calculate total
 	const total = dataByCategory.reduce((sum, cat) => sum + Number(cat.total), 0);
@@ -124,6 +125,7 @@ async function getCategoryBreakdown(
 		name: cat.categoryName,
 		amount: cat.total.toString(),
 		percentage: total > 0 ? (Number(cat.total) / total) * 100 : 0,
+		color: cat.categoryColor || "#71717a",
 	}));
 
 	return categoriesWithPercentage;
@@ -295,13 +297,14 @@ app.get("/transactions", async (c) => {
 		limit,
 	});
 
-	// Combine and transform
+	// Combine and transform — include category color per #19 shared palette
 	const transactions = [
 		...userIncomes.map((income) => ({
 			id: income.id,
 			date: income.date.toISOString(),
 			description: income.description || "",
 			category: income.category.name,
+			categoryColor: income.category.color,
 			amount: Number(income.amount),
 			type: "income" as const,
 		})),
@@ -310,6 +313,7 @@ app.get("/transactions", async (c) => {
 			date: expense.date.toISOString(),
 			description: expense.description || "",
 			category: expense.category.name,
+			categoryColor: expense.category.color,
 			amount: Number(expense.amount),
 			type: "expense" as const,
 		})),

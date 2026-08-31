@@ -1,5 +1,5 @@
 import type React from "react";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 export type CurrencyCode = "USD" | "EUR" | "GBP" | "IDR" | "JPY" | "CNY";
 
@@ -34,6 +34,23 @@ const CurrencyContext = createContext<CurrencyContextType | undefined>(
 	undefined,
 );
 
+// Hoisted Intl formatters per #25 js-hoist-intl
+const FORMATTERS = new Map<string, Intl.NumberFormat>();
+function getFormatter(currency: Currency): Intl.NumberFormat {
+	if (!FORMATTERS.has(currency.code)) {
+		FORMATTERS.set(
+			currency.code,
+			new Intl.NumberFormat(currency.locale, {
+				style: "currency",
+				currency: currency.code,
+				minimumFractionDigits: currency.code === "IDR" || currency.code === "JPY" ? 0 : 2,
+				maximumFractionDigits: currency.code === "IDR" || currency.code === "JPY" ? 0 : 2,
+			}),
+		);
+	}
+	return FORMATTERS.get(currency.code)!;
+}
+
 export function CurrencyProvider({ children }: { children: React.ReactNode }) {
 	const [currencyCode, setCurrencyCode] = useState<CurrencyCode>(() => {
 		// Load from localStorage or default to USD
@@ -61,25 +78,18 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
 		}
 	}, [currencyCode]);
 
-	const formatCurrency = (amount: number): string => {
-		return new Intl.NumberFormat(currency.locale, {
-			style: "currency",
-			currency: currency.code,
-			minimumFractionDigits:
-				currency.code === "IDR" || currency.code === "JPY" ? 0 : 2,
-			maximumFractionDigits:
-				currency.code === "IDR" || currency.code === "JPY" ? 0 : 2,
-		}).format(amount);
-	};
+	const formatCurrency = useCallback(
+		(amount: number) => getFormatter(currency).format(amount),
+		[currency],
+	);
+
+	const value = useMemo(
+		() => ({ currency, setCurrency: setCurrencyCode, formatCurrency }),
+		[currency, formatCurrency],
+	);
 
 	return (
-		<CurrencyContext.Provider
-			value={{
-				currency,
-				setCurrency: setCurrencyCode,
-				formatCurrency,
-			}}
-		>
+		<CurrencyContext.Provider value={value}>
 			{children}
 		</CurrencyContext.Provider>
 	);

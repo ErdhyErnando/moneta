@@ -42,10 +42,12 @@ interface CategoriesResponse {
 		name: string;
 		amount: string;
 		percentage: number;
+		color: string;
 	}>;
 }
 
-const EXPENSE_CHART_COLORS = [
+// Fallback palette if category has no color (should not happen, but keep for safety)
+const FALLBACK_COLORS = [
 	"var(--destructive)",
 	"var(--chart-2)",
 	"var(--sidebar-foreground)",
@@ -56,16 +58,10 @@ const EXPENSE_CHART_COLORS = [
 	"var(--chart-8)",
 ];
 
-const INCOME_CHART_COLORS = [
-	"var(--chart-2)",
-	"var(--sidebar-primary)",
-	"var(--chart-6)",
-	"var(--sidebar-foreground)",
-	"var(--sidebar)",
-	"var(--foreground)",
-	"var(--chart-8)",
-	"var(--destructive)",
-];
+function getCategoryFill(color: string | undefined, index: number): string {
+	if (color && /^#[0-9a-fA-F]{6}$/.test(color)) return color;
+	return FALLBACK_COLORS[index % FALLBACK_COLORS.length];
+}
 
 export function ChartPieCategories({
 	startDate,
@@ -99,16 +95,13 @@ export function ChartPieCategories({
 		},
 	});
 
-	const chartColors =
-		categoryType === "expense" ? EXPENSE_CHART_COLORS : INCOME_CHART_COLORS;
-
-	// Transform data for the chart
+	// Transform data for the chart — use shared category palette (color from DB per #19)
 	const chartData: CategoryData[] =
 		data?.categories.map((cat, index) => ({
 			category: cat.name,
 			amount: Number(cat.amount),
 			percentage: cat.percentage,
-			fill: chartColors[index % chartColors.length],
+			fill: getCategoryFill(cat.color, index),
 		})) || [];
 
 	// Build chart config dynamically

@@ -6,7 +6,6 @@ import {
 	IconChevronsRight,
 	IconDotsVertical,
 	IconLayoutColumns,
-	IconPlus,
 } from "@tabler/icons-react";
 import {
 	type ColumnDef,
@@ -50,6 +49,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { AddTransactionDialog } from "@/components/dashboard/add-transaction-dialog";
 import { useCurrency } from "@/contexts/currency-context";
 
 export const schema = z.object({
@@ -57,6 +57,7 @@ export const schema = z.object({
 	date: z.string(),
 	description: z.string(),
 	category: z.string(),
+	categoryColor: z.string().optional(),
 	amount: z.number(),
 	type: z.enum(["income", "expense"]),
 });
@@ -112,7 +113,8 @@ const columns: ColumnDef<Transaction>[] = [
 		header: "Category",
 		cell: ({ row }) => {
 			const category = row.getValue("category") as string;
-			return <CategoryBadge name={category} />;
+			const color = (row.original as { categoryColor?: string }).categoryColor;
+			return <CategoryBadge name={category} color={color} />;
 		},
 	},
 	{
@@ -270,10 +272,7 @@ function DataTableComponent({ data }: { data: Transaction[] }) {
 								})}
 						</DropdownMenuContent>
 					</DropdownMenu>
-					<Button size="sm">
-						<IconPlus className="mr-2 size-4" />
-						Add Transaction
-					</Button>
+					<AddTransactionDialog />
 				</div>
 			</div>
 			<div className="rounded-md border">

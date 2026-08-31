@@ -15,10 +15,20 @@ const categoryTypeSchema = z.enum(["income", "expense", "starting_balance"]);
 const createCategorySchema = z.object({
 	name: z.string().trim().min(1).max(100),
 	type: categoryTypeSchema,
+	color: z
+		.string()
+		.trim()
+		.regex(/^#[0-9a-fA-F]{6}$/, "color must be a valid hex code (e.g. #0ea5e9)")
+		.optional(),
 });
 
 const updateCategorySchema = z.object({
 	name: z.string().trim().min(1).max(100),
+	color: z
+		.string()
+		.trim()
+		.regex(/^#[0-9a-fA-F]{6}$/, "color must be a valid hex code (e.g. #0ea5e9)")
+		.optional(),
 });
 
 function parseId(c: {
@@ -48,6 +58,7 @@ function serializeCategory(category: typeof categories.$inferSelect) {
 		id: category.id,
 		name: category.name,
 		type: category.type,
+		color: category.color,
 		isArchived: category.isArchived,
 	};
 }
@@ -150,11 +161,17 @@ app.put("/:id", async (c) => {
 		return c.json({ error: { message: "Category already exists" } }, 409);
 	}
 
-	const [updatedCategory] = await db
-		.update(categories)
-		.set({ name: result.data.name })
-		.where(and(eq(categories.id, id), eq(categories.userId, user.id)))
-		.returning();
+	const updatePayload: Partial<typeof categories.$inferInsert> = {
+			name: result.data.name,
+		};
+		if (result.data.color) {
+			updatePayload.color = result.data.color;
+		}
+		const [updatedCategory] = await db
+			.update(categories)
+			.set(updatePayload)
+			.where(and(eq(categories.id, id), eq(categories.userId, user.id)))
+			.returning();
 
 	if (!updatedCategory) {
 		return c.json({ error: "Category not found" }, 404);

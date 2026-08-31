@@ -60,6 +60,7 @@ export const startingBalanceSchema = z.object({
 	category: z.object({
 		id: z.number(),
 		name: z.string(),
+		color: z.string().optional(),
 	}),
 	amount: z.string(),
 });
@@ -115,7 +116,7 @@ const columns: ColumnDef<StartingBalance>[] = [
 		header: "Category",
 		cell: ({ row }) => {
 			const category = row.original.category;
-			return <CategoryBadge name={category.name} />;
+			return <CategoryBadge name={category.name} color={category.color} />;
 		},
 	},
 	{

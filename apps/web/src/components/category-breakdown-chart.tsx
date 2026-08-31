@@ -71,26 +71,41 @@ interface CategoriesResponse {
 		name: string;
 		amount: string;
 		percentage: number;
+		color: string;
 	}>;
 }
 
-const EXPENSE_CHART_COLORS = [
-	"oklch(0.6368 0.2078 25.3313)", // Original Destructive
-	"oklch(0.65 0.2 45)", // Orange
-	"oklch(0.7 0.15 70)", // Amber
-	"oklch(0.6 0.2 15)", // Rose
-	"oklch(0.55 0.18 35)", // Burnt Orange
-	"oklch(0.5 0.2 25)", // Maroon
-];
+// Module-scope statics per #25 prefer-module-scope-static-value
+const MONTHS = [
+	"January",
+	"February",
+	"March",
+	"April",
+	"May",
+	"June",
+	"July",
+	"August",
+	"September",
+	"October",
+	"November",
+	"December",
+] as const;
 
-const INCOME_CHART_COLORS = [
-	"oklch(0.68 0.18 160)", // Emerald
-	"oklch(0.65 0.15 190)", // Teal
-	"oklch(0.6 0.18 220)", // Cyan
-	"oklch(0.55 0.2 250)", // Blue
-	"oklch(0.62 0.16 280)", // Indigo
-	"oklch(0.7 0.12 140)", // Light Green
-];
+const FALLBACK_COLORS = [
+	"oklch(0.6368 0.2078 25.3313)",
+	"oklch(0.65 0.2 45)",
+	"oklch(0.7 0.15 70)",
+	"oklch(0.6 0.2 15)",
+	"oklch(0.55 0.18 35)",
+	"oklch(0.5 0.2 25)",
+	"oklch(0.68 0.18 160)",
+	"oklch(0.65 0.15 190)",
+] as const;
+
+function getCategoryFill(color: string | undefined, index: number): string {
+	if (color && /^#[0-9a-fA-F]{6}$/.test(color)) return color;
+	return FALLBACK_COLORS[index % FALLBACK_COLORS.length];
+}
 
 export function CategoryBreakdownChart({ type }: CategoryBreakdownChartProps) {
 	const { formatCurrency } = useCurrency();
@@ -163,15 +178,13 @@ export function CategoryBreakdownChart({ type }: CategoryBreakdownChartProps) {
 		}
 	};
 
-	const chartColors =
-		type === "expense" ? EXPENSE_CHART_COLORS : INCOME_CHART_COLORS;
-
+	// Use shared category palette per #19 (color from DB), fallback to static palette
 	const chartData: CategoryData[] = (data?.categories || [])
 		.map((cat, index) => ({
 			name: cat.name,
 			amount: Number(cat.amount),
 			percentage: cat.percentage,
-			fill: chartColors[index % chartColors.length],
+			fill: getCategoryFill(cat.color, index),
 		}))
 		.sort((a, b) => b.amount - a.amount);
 
@@ -190,26 +203,12 @@ export function CategoryBreakdownChart({ type }: CategoryBreakdownChartProps) {
 		} as ChartConfig,
 	);
 
-	const currentYear = currentDate.getFullYear();
-	const currentMonth = currentDate.getMonth();
-
-	const MONTHS = [
-		"January",
-		"February",
-		"March",
-		"April",
-		"May",
-		"June",
-		"July",
-		"August",
-		"September",
-		"October",
-		"November",
-		"December",
-	];
+	// Use UTC for year/month to match server DATE_TRUNC UTC grouping per #22
+	const currentYear = currentDate.getUTCFullYear();
+	const currentMonth = currentDate.getUTCMonth();
 
 	const START_YEAR = 2020;
-	const END_YEAR = new Date().getFullYear();
+	const END_YEAR = new Date().getUTCFullYear();
 	const yearOptions = Array.from(
 		{ length: END_YEAR - START_YEAR + 1 },
 		(_, i) => START_YEAR + i,

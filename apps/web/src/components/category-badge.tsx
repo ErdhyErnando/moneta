@@ -118,10 +118,25 @@ export function getCategoryColor(categoryName: string) {
 
 type CategoryBadgeProps = {
 	name: string;
+	color?: string;
 	className?: string;
 };
 
-export function CategoryBadge({ name, className }: CategoryBadgeProps) {
+export function CategoryBadge({ name, color, className }: CategoryBadgeProps) {
+	// Use DB color per #19 if valid hex, else hash fallback (preserves old behavior)
+	if (color && /^#[0-9a-fA-F]{6}$/.test(color)) {
+		return (
+			<span
+				className={cn(
+					"inline-flex items-center justify-center whitespace-nowrap rounded-full px-2.5 py-0.5 font-medium text-xs text-white",
+					className,
+				)}
+				style={{ backgroundColor: color }}
+			>
+				{name}
+			</span>
+		);
+	}
 	const colors = getCategoryColor(name);
 
 	return (

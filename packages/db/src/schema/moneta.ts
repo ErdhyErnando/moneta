@@ -26,6 +26,7 @@ export const categories = pgTable(
 		type: categoryTypeEnum("type").notNull(),
 		userId: text("user_id").references(() => user.id, { onDelete: "cascade" }),
 		isArchived: boolean("is_archived").default(false).notNull(),
+		color: text("color").notNull().default("#71717a"),
 		createdAt: timestamp("created_at").defaultNow().notNull(),
 		updatedAt: timestamp("updated_at")
 			.defaultNow()
