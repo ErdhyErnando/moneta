@@ -6,7 +6,6 @@ import {
 	IconChevronsRight,
 	IconDotsVertical,
 	IconLayoutColumns,
-	IconPlus,
 } from "@tabler/icons-react";
 import {
 	type ColumnDef,
@@ -50,6 +49,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { AddTransactionDialog } from "@/components/dashboard/add-transaction-dialog";
 import { useCurrency } from "@/contexts/currency-context";
 
 export const schema = z.object({
@@ -272,10 +272,7 @@ function DataTableComponent({ data }: { data: Transaction[] }) {
 								})}
 						</DropdownMenuContent>
 					</DropdownMenu>
-					<Button size="sm">
-						<IconPlus className="mr-2 size-4" />
-						Add Transaction
-					</Button>
+					<AddTransactionDialog />
 				</div>
 			</div>
 			<div className="rounded-md border">
