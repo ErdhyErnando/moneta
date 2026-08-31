@@ -88,27 +88,3 @@ export function mutationsSearchToApiParams(search: MutationsSearch) {
 		maxAmount: search.max,
 	};
 }
-
-export function dayStartIso(d: Date): string {
-	return new Date(
-		d.getFullYear(),
-		d.getMonth(),
-		d.getDate(),
-		0,
-		0,
-		0,
-		0,
-	).toISOString();
-}
-
-export function dayEndIso(d: Date): string {
-	return new Date(
-		d.getFullYear(),
-		d.getMonth(),
-		d.getDate(),
-		23,
-		59,
-		59,
-		999,
-	).toISOString();
-}

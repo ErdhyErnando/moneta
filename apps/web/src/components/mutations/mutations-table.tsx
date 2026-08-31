@@ -131,7 +131,7 @@ export function MutationsPagination({
 	onPageChange,
 }: PaginationProps) {
 	return (
-		<div className="flex flex-col gap-4 px-2 sm:flex-row sm:items-center sm:justify-between">
+		<div className="flex flex-col gap-4 px-2 pt-3 sm:flex-row sm:items-center sm:justify-between">
 			<div className="text-muted-foreground text-sm">
 				{total} mutation{total === 1 ? "" : "s"} total
 			</div>

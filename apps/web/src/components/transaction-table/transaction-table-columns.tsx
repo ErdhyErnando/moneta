@@ -11,6 +11,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { asUtcDay } from "@/lib/date";
 import { cn } from "@/lib/utils";
 import type { Transaction } from "./transaction-table";
 
@@ -51,7 +52,7 @@ export function getTransactionTableColumns(
 			accessorKey: "date",
 			header: "Date",
 			cell: ({ row }) => {
-				const date = new Date(row.getValue("date") as string);
+				const date = asUtcDay(row.getValue("date"));
 				return (
 					<div className="whitespace-nowrap font-medium">
 						{format(date, "MMM d, yyyy")}

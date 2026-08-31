@@ -134,13 +134,11 @@ export function MutationsToolbar({ search, onCommit }: Props) {
 				</div>
 				<MutationsDateField
 					label="From"
-					kind="start"
 					value={search.from}
 					onSelect={(from) => onCommit({ from })}
 				/>
 				<MutationsDateField
 					label="To"
-					kind="end"
 					value={search.to}
 					onSelect={(to) => onCommit({ to })}
 				/>

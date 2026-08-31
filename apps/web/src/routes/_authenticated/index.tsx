@@ -50,6 +50,7 @@ import {
 } from "@/components/ui/select";
 import { useCurrency } from "@/contexts/currency-context";
 import { api } from "@/lib/api";
+import { utcDayString } from "@/lib/date";
 
 export const Route = createFileRoute("/_authenticated/")({
 	component: HomeComponent,
@@ -121,8 +122,9 @@ function HomeComponent() {
 		}
 
 		return {
-			startDate: startDate?.toISOString(),
-			endDate: endDate?.toISOString(),
+			// date-only strings → server normalizes to UTC day boundaries (#22)
+			startDate: startDate ? utcDayString(startDate) : undefined,
+			endDate: endDate ? utcDayString(endDate) : undefined,
 		};
 	}, [timeRange, customStartDate, customEndDate]);
 

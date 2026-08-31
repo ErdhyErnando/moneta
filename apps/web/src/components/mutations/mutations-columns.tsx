@@ -3,6 +3,7 @@ import { format } from "date-fns";
 import { ArrowDown, ArrowUp, ChevronsUpDown } from "lucide-react";
 import { CategoryBadge } from "@/components/category-badge";
 import { Button } from "@/components/ui/button";
+import { asUtcDay } from "@/lib/date";
 import type { MutationRow } from "@/lib/mutations";
 import { cn } from "@/lib/utils";
 
@@ -72,7 +73,7 @@ export function getMutationColumns({
 			),
 			cell: ({ row }) => (
 				<div className="whitespace-nowrap font-medium">
-					{format(new Date(row.original.date), "MMM d, yyyy")}
+					{format(asUtcDay(row.original.date), "MMM d, yyyy")}
 				</div>
 			),
 		},

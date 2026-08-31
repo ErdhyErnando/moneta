@@ -33,7 +33,7 @@ export function TransactionTablePagination({
 	onLast,
 }: Props) {
 	return (
-		<div className="flex flex-col gap-4 px-2 sm:flex-row sm:items-center sm:justify-between">
+		<div className="flex flex-col gap-4 px-2 pt-3 sm:flex-row sm:items-center sm:justify-between">
 			<div className="text-muted-foreground text-sm">
 				{selectedCount} row(s) selected.
 			</div>

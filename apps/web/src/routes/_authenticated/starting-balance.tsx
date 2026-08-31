@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { api } from "@/lib/api";
+import { asUtcDay, toUtcDayIso } from "@/lib/date";
 
 type StartingBalanceFormData = {
 	amount: string;
@@ -50,7 +51,10 @@ function StartingBalancePage() {
 
 	const createMutation = useMutation({
 		mutationFn: async (data: StartingBalanceFormData) => {
-			await api.post("/api/starting-balances", data);
+			await api.post("/api/starting-balances", {
+				...data,
+				date: toUtcDayIso(data.date),
+			});
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["starting-balances"] });
@@ -79,7 +83,10 @@ function StartingBalancePage() {
 			id: number;
 			data: StartingBalanceFormData;
 		}) => {
-			await api.put(`/api/starting-balances/${id}`, data);
+			await api.put(`/api/starting-balances/${id}`, {
+				...data,
+				date: toUtcDayIso(data.date),
+			});
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["starting-balances"] });
@@ -159,7 +166,7 @@ function StartingBalancePage() {
 									? {
 											amount: editingBalance.amount,
 											description: editingBalance.description,
-											date: new Date(editingBalance.date),
+											date: asUtcDay(editingBalance.date),
 											categoryId: editingBalance.categoryId,
 										}
 									: undefined

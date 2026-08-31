@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { type AxiosError, api } from "@/lib/api";
+import { toUtcDayIso } from "@/lib/date";
 
 const transactionSchema = z.object({
 	amount: z
@@ -68,7 +69,7 @@ export function AddTransactionDialog() {
 			await api.post(endpoint, {
 				...data,
 				amount: data.amount,
-				date: data.date.toISOString(),
+				date: toUtcDayIso(data.date),
 			});
 		},
 		onSuccess: () => {

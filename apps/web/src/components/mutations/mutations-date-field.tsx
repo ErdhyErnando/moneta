@@ -7,29 +7,29 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
-import { dayEndIso, dayStartIso } from "@/lib/mutations";
+import { utcDayString } from "@/lib/date";
 import { cn } from "@/lib/utils";
 
 type Props = {
 	label: string;
+	/** date-only "YYYY-MM-DD" string ("" = unset) */
 	value: string;
-	/** "start" anchors to 00:00, "end" anchors to 23:59:59.999 of the picked day */
-	kind: "start" | "end";
 	placeholder?: string;
-	onSelect: (iso: string) => void;
+	onSelect: (dayOnly: string) => void;
 };
 
-/** ISO date value backed by a calendar popover (#33 toolbar). */
+/**
+ * Date filter emitting date-only "YYYY-MM-DD" strings — mutations.ts and
+ * dashboard.ts normalize those to UTC day boundaries, matching the canonical
+ * UTC-calendar-day storage (#33).
+ */
 export function MutationsDateField({
 	label,
 	value,
-	kind,
 	placeholder = "Pick date",
 	onSelect,
 }: Props) {
-	const selected = value ? new Date(value) : undefined;
-	const invalid = selected !== undefined && Number.isNaN(selected.getTime());
-	const day = invalid ? undefined : selected;
+	const selected = value ? new Date(`${value}T00:00:00`) : undefined;
 
 	return (
 		<div className="flex flex-col gap-1.5">
@@ -43,21 +43,17 @@ export function MutationsDateField({
 						size="sm"
 						className={cn(
 							"h-8 w-[140px] justify-start text-left font-normal",
-							!day && "text-muted-foreground",
+							!selected && "text-muted-foreground",
 						)}
 					>
-						{day ? format(day, "MMM d, yyyy") : placeholder}
+						{selected ? format(selected, "MMM d, yyyy") : placeholder}
 					</Button>
 				</PopoverTrigger>
 				<PopoverContent className="w-auto p-0" align="start">
 					<Calendar
 						mode="single"
-						selected={day}
-						onSelect={(d) =>
-							onSelect(
-								d ? (kind === "end" ? dayEndIso(d) : dayStartIso(d)) : "",
-							)
-						}
+						selected={selected}
+						onSelect={(day) => onSelect(day ? utcDayString(day) : "")}
 						initialFocus
 					/>
 				</PopoverContent>

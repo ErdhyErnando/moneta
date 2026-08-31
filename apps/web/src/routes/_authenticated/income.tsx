@@ -21,6 +21,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import type { AxiosError } from "@/lib/api";
 import { api } from "@/lib/api";
+import { asUtcDay, toUtcDayIso } from "@/lib/date";
 
 export const Route = createFileRoute("/_authenticated/income")({
 	component: IncomePage,
@@ -51,7 +52,10 @@ function IncomePage() {
 
 	const createMutation = useMutation({
 		mutationFn: async (data: TransactionFormData) => {
-			await api.post("/api/incomes", data);
+			await api.post("/api/incomes", {
+				...data,
+				date: toUtcDayIso(data.date),
+			});
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["incomes"] });
@@ -79,7 +83,10 @@ function IncomePage() {
 			id: number;
 			data: TransactionFormData;
 		}) => {
-			await api.put(`/api/incomes/${id}`, data);
+			await api.put(`/api/incomes/${id}`, {
+				...data,
+				date: toUtcDayIso(data.date),
+			});
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["incomes"] });
@@ -188,7 +195,7 @@ function IncomePage() {
 										? {
 												amount: editingIncome.amount,
 												description: editingIncome.description,
-												date: new Date(editingIncome.date),
+												date: asUtcDay(editingIncome.date),
 												categoryId: editingIncome.categoryId,
 											}
 										: undefined

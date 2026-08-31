@@ -17,7 +17,7 @@
 Locked via `ask_user_question` + `grill-me`:
 
 - **Project Phase:** `Tech-debt + security first` — security/perf/refactor (#23, #24, #25-27, #29) before new features. Justified: reduces risk for #32-35.
-- **#22 Mismatch:** Breakdown is correct, dashboard monthly bar chart is wrong. Fix dashboard's `getMonthlyData` UTC grouping, not breakdown.
+- **#22 Mismatch (updated 08-31, phase 4):** Root cause found during #32 smoke: forms sent *local midnight*, serialized as a shifted UTC instant (Jul 1 in UTC+2 → Jun 30 22:00Z), so UTC bucketing (accordion, dashboard `DATE_TRUNC`) and local-range breakdown disagreed on month-boundary rows. **Canonical now: calendar dates stored at UTC midnight** — client sends `toUtcDayIso(pickedDate)` at all write sites, server schemas round incoming instants to the nearest UTC day (`date-utils.ts`), range filters travel as date-only `YYYY-MM-DD` strings (normalized to UTC boundaries server-side), display uses `asUtcDay()`, and migration `0005_utc_calendar_days` normalizes legacy rows (Europe/Amsterdam tz — owner's).
 - **#32 + #33:** Two pages, not one. `#32` = monthly accordion on `/expense` + `/income` (grouped by UTC month). `#33` = new `/mutations` flat combined ledger (income+expense chronologically).
 - **#35 Redesign:** Login-only (shadcn `login-03/04` split-panel + kumo-ui tokens). No full-app redesign in v1.
 - **#34 Asset Tracking:** MVP first, live later. v1 = manual holdings ledger (type/amount/date). No live prices. v2 will add CoinGecko (crypto, 10k/mo free) + Alpha Vantage/Finnhub (stocks) with caching.
