@@ -297,13 +297,14 @@ app.get("/transactions", async (c) => {
 		limit,
 	});
 
-	// Combine and transform
+	// Combine and transform — include category color per #19 shared palette
 	const transactions = [
 		...userIncomes.map((income) => ({
 			id: income.id,
 			date: income.date.toISOString(),
 			description: income.description || "",
 			category: income.category.name,
+			categoryColor: income.category.color,
 			amount: Number(income.amount),
 			type: "income" as const,
 		})),
@@ -312,6 +313,7 @@ app.get("/transactions", async (c) => {
 			date: expense.date.toISOString(),
 			description: expense.description || "",
 			category: expense.category.name,
+			categoryColor: expense.category.color,
 			amount: Number(expense.amount),
 			type: "expense" as const,
 		})),

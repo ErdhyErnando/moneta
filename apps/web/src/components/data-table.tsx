@@ -57,6 +57,7 @@ export const schema = z.object({
 	date: z.string(),
 	description: z.string(),
 	category: z.string(),
+	categoryColor: z.string().optional(),
 	amount: z.number(),
 	type: z.enum(["income", "expense"]),
 });
@@ -112,7 +113,8 @@ const columns: ColumnDef<Transaction>[] = [
 		header: "Category",
 		cell: ({ row }) => {
 			const category = row.getValue("category") as string;
-			return <CategoryBadge name={category} />;
+			const color = (row.original as { categoryColor?: string }).categoryColor;
+			return <CategoryBadge name={category} color={color} />;
 		},
 	},
 	{

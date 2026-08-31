@@ -33,16 +33,19 @@ type Category = {
 	id: number;
 	name: string;
 	type: CategoryType;
+	color: string;
 	isArchived: boolean;
 };
 
 type CategoryFormData = {
 	name: string;
 	type: CategoryType;
+	color?: string;
 };
 
 type CategoryUpdateData = {
 	name: string;
+	color?: string;
 };
 
 type CategoryError = AxiosError<{ error?: { message?: string } | string }>;
@@ -64,6 +67,17 @@ function getErrorMessage(error: CategoryError, fallback: string) {
 	}
 
 	return errorPayload?.message || fallback;
+}
+
+function CategoryBadgePreview({ color, name }: { color: string; name: string }) {
+	return (
+		<span
+			className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-2.5 py-0.5 font-medium text-xs text-white"
+			style={{ backgroundColor: color }}
+		>
+			{name}
+		</span>
+	);
 }
 
 function CategoryTable({
@@ -105,7 +119,15 @@ function CategoryTable({
 					) : (
 						filteredCategories.map((category) => (
 							<TableRow key={category.id}>
-								<TableCell className="font-medium">{category.name}</TableCell>
+								<TableCell className="font-medium">
+									<div className="flex items-center gap-2">
+										<span
+											className="inline-block h-3 w-3 rounded-full border"
+											style={{ backgroundColor: category.color }}
+										/>
+										<CategoryBadgePreview color={category.color} name={category.name} />
+									</div>
+								</TableCell>
 								<TableCell className="text-muted-foreground">
 									{category.isArchived ? "Archived" : "Active"}
 								</TableCell>
@@ -161,6 +183,7 @@ export function CategorySettings() {
 	);
 	const [activeTab, setActiveTab] = useState<CategoryType>("income");
 	const [name, setName] = useState("");
+	const [color, setColor] = useState("#0ea5e9");
 
 	const { data: categories = [], isLoading } = useQuery({
 		queryKey: ["categories", "includeArchived"],
@@ -276,16 +299,17 @@ export function CategorySettings() {
 		if (editingCategory) {
 			updateMutation.mutate({
 				id: editingCategory.id,
-				data: { name: trimmedName },
+				data: { name: trimmedName, color },
 			});
 		} else {
-			createMutation.mutate({ name: trimmedName, type: activeTab });
+			createMutation.mutate({ name: trimmedName, type: activeTab, color });
 		}
 	};
 
 	const handleEdit = (category: Category) => {
 		setEditingCategory(category);
 		setName(category.name);
+		setColor(category.color || "#0ea5e9");
 		setIsOpen(true);
 	};
 
@@ -297,6 +321,7 @@ export function CategorySettings() {
 	const openCreateDialog = () => {
 		setEditingCategory(null);
 		setName("");
+		setColor("#0ea5e9");
 		setIsOpen(true);
 	};
 
@@ -361,6 +386,7 @@ export function CategorySettings() {
 					if (!open) {
 						setEditingCategory(null);
 						setName("");
+						setColor("#0ea5e9");
 					}
 				}}
 			>
@@ -380,6 +406,32 @@ export function CategorySettings() {
 								onChange={(e) => setName(e.target.value)}
 								required
 							/>
+						</div>
+						<div className="space-y-2">
+							<Label htmlFor="color">Color</Label>
+							<div className="flex items-center gap-2">
+								<Input
+									id="color"
+									type="color"
+									value={color}
+									onChange={(e) => setColor(e.target.value)}
+									className="h-9 w-14 p-1"
+								/>
+								<Input
+									type="text"
+									value={color}
+									onChange={(e) => setColor(e.target.value)}
+									placeholder="#0ea5e9"
+									className="flex-1"
+									pattern="^#[0-9a-fA-F]{6}$"
+								/>
+								<span
+									className="inline-flex h-6 w-6 rounded-full border"
+									style={{ backgroundColor: color }}
+									aria-hidden
+								/>
+							</div>
+							<p className="text-muted-foreground text-xs">Hex color used for pie + pill (solid badge, white text) — same for dashboard and income/expense tables</p>
 						</div>
 						<DialogFooter>
 							<Button

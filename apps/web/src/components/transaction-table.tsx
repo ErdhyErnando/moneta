@@ -99,6 +99,7 @@ export type Transaction = {
 		id: number;
 		name: string;
 		type: "income" | "expense";
+		color: string;
 	};
 };
 
@@ -106,6 +107,7 @@ type Category = {
 	id: number;
 	name: string;
 	type: "income" | "expense";
+	color: string;
 };
 
 type TransactionTableProps = {
@@ -252,7 +254,7 @@ export function TransactionTable({
 				header: "Category",
 				cell: ({ row }) => {
 					const category = row.original.category;
-					return <CategoryBadge name={category.name} />;
+					return <CategoryBadge name={category.name} color={category.color} />;
 				},
 			},
 			{
