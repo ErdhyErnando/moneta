@@ -89,12 +89,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 		? {
 				name: session.user.name || "User",
 				email: session.user.email,
-				avatar: "/avatars/shadcn.jpg",
+				avatar: (session.user as { image?: string | null }).image || "",
 			}
 		: {
 				name: "Guest",
 				email: "guest@example.com",
-				avatar: "/avatars/shadcn.jpg",
+				avatar: "",
 			};
 
 	return (

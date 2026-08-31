@@ -8,8 +8,8 @@ export async function ensureUserDefaultCategories(
 	userId: string,
 ): Promise<void> {
 	await db.execute(sql`
-		insert into ${categories} (name, type, user_id, is_archived)
-		select template.name, template.type, ${userId}, false
+		insert into ${categories} (name, type, user_id, is_archived, color)
+		select template.name, template.type, ${userId}, false, template.color
 		from ${categories} template
 		where template.user_id is null
 			and template.is_archived = false

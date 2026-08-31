@@ -109,12 +109,13 @@ async function getCategoryBreakdown(
 		.select({
 			categoryId: table.categoryId,
 			categoryName: sql<string>`${categories.name}`,
+			categoryColor: sql<string>`${categories.color}`,
 			total: sql<number>`COALESCE(SUM(CAST(${table.amount} AS DECIMAL)), 0)`,
 		})
 		.from(table)
 		.innerJoin(categories, eq(table.categoryId, categories.id))
 		.where(and(...conditions))
-		.groupBy(table.categoryId, categories.name);
+		.groupBy(table.categoryId, categories.name, categories.color);
 
 	// Calculate total
 	const total = dataByCategory.reduce((sum, cat) => sum + Number(cat.total), 0);
@@ -124,6 +125,7 @@ async function getCategoryBreakdown(
 		name: cat.categoryName,
 		amount: cat.total.toString(),
 		percentage: total > 0 ? (Number(cat.total) / total) * 100 : 0,
+		color: cat.categoryColor || "#71717a",
 	}));
 
 	return categoriesWithPercentage;

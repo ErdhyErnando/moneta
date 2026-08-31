@@ -79,8 +79,9 @@ export function ChartBarMonthlyExpenses({
 	onToggle,
 }: ChartBarMonthlyExpensesProps) {
 	const { formatCurrency } = useCurrency();
-	const currentYear = new Date().getFullYear();
-	const [selectedYear, setSelectedYear] = useState(currentYear.toString());
+	// Use UTC year to match server DATE_TRUNC UTC per #22
+	const currentYear = new Date().getUTCFullYear();
+	const [selectedYear, setSelectedYear] = useState(() => currentYear.toString());
 
 	// Generate year options (current year + 4 previous years)
 	const yearOptions = Array.from({ length: 5 }, (_, i) => currentYear - i);

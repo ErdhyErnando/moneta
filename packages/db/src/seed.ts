@@ -9,24 +9,24 @@ const { db } = await import(".");
 const { categories } = await import("./schema/moneta");
 
 const DEFAULT_CATEGORIES: (typeof categories.$inferInsert)[] = [
-	{ name: "Salary", type: "income" },
-	{ name: "Freelance", type: "income" },
-	{ name: "Investments", type: "income" },
-	{ name: "Gift", type: "income" },
-	{ name: "Other Income", type: "income" },
-	{ name: "Rent", type: "expense" },
-	{ name: "Groceries", type: "expense" },
-	{ name: "Utilities", type: "expense" },
-	{ name: "Transportation", type: "expense" },
-	{ name: "Entertainment", type: "expense" },
-	{ name: "Healthcare", type: "expense" },
-	{ name: "Shopping", type: "expense" },
-	{ name: "Dining Out", type: "expense" },
-	{ name: "Travel", type: "expense" },
-	{ name: "Education", type: "expense" },
-	{ name: "Other Expense", type: "expense" },
-	{ name: "Savings", type: "starting_balance" },
-	{ name: "Cash on Hand", type: "starting_balance" },
+	{ name: "Salary", type: "income", color: "#10b981" },
+	{ name: "Freelance", type: "income", color: "#0ea5e9" },
+	{ name: "Investments", type: "income", color: "#8b5cf6" },
+	{ name: "Gift", type: "income", color: "#f59e0b" },
+	{ name: "Other Income", type: "income", color: "#06b6d4" },
+	{ name: "Rent", type: "expense", color: "#ef4444" },
+	{ name: "Groceries", type: "expense", color: "#22c55e" },
+	{ name: "Utilities", type: "expense", color: "#3b82f6" },
+	{ name: "Transportation", type: "expense", color: "#f97316" },
+	{ name: "Entertainment", type: "expense", color: "#ec4899" },
+	{ name: "Healthcare", type: "expense", color: "#14b8a6" },
+	{ name: "Shopping", type: "expense", color: "#a855f7" },
+	{ name: "Dining Out", type: "expense", color: "#facc15" },
+	{ name: "Travel", type: "expense", color: "#6366f1" },
+	{ name: "Education", type: "expense", color: "#84cc16" },
+	{ name: "Other Expense", type: "expense", color: "#71717a" },
+	{ name: "Savings", type: "starting_balance", color: "#0ea5e9" },
+	{ name: "Cash on Hand", type: "starting_balance", color: "#22c55e" },
 ];
 
 async function main() {
@@ -39,8 +39,8 @@ async function main() {
 	try {
 		for (const category of DEFAULT_CATEGORIES) {
 			await db.execute(sql`
-				insert into ${categories} (name, type, user_id, is_archived)
-				values (${category.name}, ${category.type}, null, false)
+				insert into ${categories} (name, type, user_id, is_archived, color)
+				values (${category.name}, ${category.type}, null, false, ${category.color})
 				on conflict (type, lower(name))
 				where user_id is null and is_archived = false
 				do nothing

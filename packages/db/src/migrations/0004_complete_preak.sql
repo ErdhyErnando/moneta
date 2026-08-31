@@ -1,0 +1,1 @@
+ALTER TABLE "categories" ADD COLUMN "color" text DEFAULT '#71717a' NOT NULL;

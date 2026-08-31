@@ -14,6 +14,7 @@ import { ChartBarMonthlyExpenses } from "@/components/chart-bar-monthly-expenses
 import { ChartBarMonthlyIncome } from "@/components/chart-bar-monthly-income";
 import { ChartPieCategories } from "@/components/chart-pie-categories";
 import { CurrencySelector } from "@/components/currency-selector";
+import { AddTransactionDialog } from "@/components/dashboard/add-transaction-dialog";
 import { DataTable, type Transaction } from "@/components/data-table";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -139,6 +140,7 @@ function HomeComponent() {
 			<div className="flex items-center justify-between">
 				<h1 className="font-bold text-3xl">Dashboard</h1>
 				<div className="flex items-center gap-2">
+					<AddTransactionDialog />
 					<CurrencySelector />
 					<Select
 						value={timeRange}
