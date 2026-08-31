@@ -29,7 +29,9 @@ Locked via `ask_user_question` + `grill-me`:
 
 | # | Title | Labels | Body Status | Type |
 |---|-------|--------|-------------|------|
-| — | (none — work backlog lives in TODO issues below; #34 v2 / visual rollout to be filed post-grill) | | | |
+| 43 | assets v2: live prices (crypto+stocks), P&L, allocation pie | enhancement | **grilled 08-31** (v2 follow-up of #34) | Feature — Assets v2 |
+| 44 | apply login visual language to all pages (kumo) | enhancement | **grilled 08-31** (follow-up of #35) | Feature — Design rollout |
+| 45 | dashboard net worth: SUM(assets) in /summary | enhancement | **grilled 08-31** (#34 triage follow-up) | Feature — Dashboard |
 
 > Closed for reference: #35 login redesign [CLOSED PR #42], #34 assets MVP [CLOSED PR #42], #33 mutations ledger [CLOSED PR #40], #32 monthly groups [CLOSED PR #40], #27 giant split [CLOSED PR #39], #26 dead code [CLOSED PR #39], #31 quick-add [CLOSED 08-31], #19 palette [CLOSED 08-31], #20 avatar [CLOSED 08-31], #29 a11y [CLOSED], #25 perf render [CLOSED], #24 validation [CLOSED], #23 CVEs [CLOSED], #22 monthly mismatch [CLOSED — root cause re-fixed at UTC-calendar-day canonicalization, PR #40], #18 categories global [CLOSED], #28 /test route [CLOSED]
 
@@ -76,8 +78,9 @@ Locked via `ask_user_question` + `grill-me`:
 
 - [x] **#34** Assets MVP — `assets` table (migration `0006_groovy_kulan_gath`) + Hono CRUD (`assets.ts`, Zod-validated, UTC `DATE_TRUNC` monthly aggregation) + `/assets` route grouped by type with per-type totals + cards + lazy recharts area chart, sidebar entry `IconStack2`. API smoke-tested against dev Postgres (CRUD/validation/monthly all green; smoke user removed)
 - [x] **#35** Login redesign — shadcn login-block split panel (desktop brand panel + form, mobile stacked), kumo accent `#f6821f` tokens added to `index.css` (login-scoped only; primary/surfaces/radius untouched to avoid bleed), `--brand-accent-strong` variants for WCAG-AA text contrast, autocomplete attrs on forms, initial view flipped to sign-in. Better-Auth flow unchanged
-- [x] **#34 v2** follow-up (separate issue) — ticker + CoinGecko/Alpha Vantage with daily cache, allocation pie — **to be filed post-grill** (owner scoping pending)
-- [ ] **Visual rollout** — login design direction to other pages — **to be filed post-grill** (owner scoping pending)
+- [x] **#34 v2** filed as **#43** — ticker + provider columns (migration 0007), CoinGecko (keyless) + Alpha Vantage (env key, 25/day), in-memory TTL cache (no cache table — owner decision), P&L per holding, lazy allocation pie
+- [x] **Visual rollout** filed as **#44** — all authenticated pages, tokens+typography+surfaces only (no layout/arch changes), `--brand-accent` usage, #19 palette rule + #29 contrast must survive
+- [x] **Net worth** filed as **#45** — `totalAssets` in `/api/dashboard/summary` (unfiltered SUM), Net Worth card on dashboard; field name stable so #43 can swap to market value later
 
 ## Dependency Graph
 
@@ -96,7 +99,7 @@ Locked via `ask_user_question` + `grill-me`:
 ## For the Next Agent — Checklist
 
 - [x] Read this doc + run `gh issue list` to confirm no new issues created since 08-31 (confirmed — only #34/#35 open)
-- [x] Phases 1–5 complete (PRs #36–#42 merged, #34/#35 closed). Beyond: **#34 v2 (tickers/prices)** + **visual rollout** — owner scoping in progress (grill/ask pending), then file issues. ⚠️ Deploying: see “Deploying (DB migrations)” below — `0006` migration included in #42.
+- [x] Phases 1–5 complete (PRs #36–#42 merged, #34/#35 closed). Beyond: **#43 (assets v2 prices/P&L/pie)** + **#44 (visual rollout)** + **#45 (dashboard net worth)** — owner-grilled 08-31, bodies detailed. ⚠️ Deploying: see “Deploying (DB migrations)” below — `0006` migration included in #42.
 - [ ] Before coding, read issue body: `gh issue view <n> --json body | jq -r .body > /tmp/body.md && cat /tmp/body.md`
 - [ ] Follow issue's Proposed implementation + Acceptance exactly — bodies are now detailed with code snippets
 - [ ] Run `pnpm run check` + `pnpm run check-types` before PR (per `AGENTS.md`)
