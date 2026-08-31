@@ -1,5 +1,3 @@
-import { format } from "date-fns";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
 	Bar,
 	BarChart,
@@ -8,7 +6,6 @@ import {
 	XAxis,
 	YAxis,
 } from "recharts";
-import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -22,32 +19,10 @@ import {
 	ChartTooltip,
 	ChartTooltipContent,
 } from "@/components/ui/chart";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCurrency } from "@/contexts/currency-context";
+import { BreakdownPeriodNav } from "./breakdown-period-nav";
 import { useCategoryBreakdownData } from "./use-category-breakdown-data";
-
-// Module-scope per #25
-const MONTHS = [
-	"January",
-	"February",
-	"March",
-	"April",
-	"May",
-	"June",
-	"July",
-	"August",
-	"September",
-	"October",
-	"November",
-	"December",
-] as const;
 
 interface Props {
 	type: "income" | "expense";
@@ -58,7 +33,6 @@ export function CategoryBreakdownChart({ type }: Props) {
 	const {
 		period,
 		setPeriod,
-		currentDate,
 		setCurrentDate,
 		start,
 		end,
@@ -80,12 +54,6 @@ export function CategoryBreakdownChart({ type }: Props) {
 		{ amount: { label: "Amount" } } as ChartConfig,
 	);
 
-	const START_YEAR = 2020;
-	const END_YEAR = new Date().getUTCFullYear();
-	const yearOptions = Array.from(
-		{ length: END_YEAR - START_YEAR + 1 },
-		(_, i) => START_YEAR + i,
-	);
 	const chartHeight = Math.max(300, chartData.length * 56);
 
 	return (
@@ -116,63 +84,16 @@ export function CategoryBreakdownChart({ type }: Props) {
 				</div>
 			</CardHeader>
 			<CardContent>
-				<div className="mb-6 flex items-center justify-center gap-2">
-					<Button
-						variant="outline"
-						size="icon"
-						className="shrink-0"
-						onClick={() => navigatePeriod("prev")}
-					>
-						<ChevronLeft className="h-4 w-4" />
-					</Button>
-					<div className="flex items-center gap-2">
-						{period !== "yearly" && (
-							<Select
-								value={String(currentMonth)}
-								onValueChange={handleMonthChange}
-							>
-								<SelectTrigger className="w-[130px]">
-									<SelectValue />
-								</SelectTrigger>
-								<SelectContent>
-									{MONTHS.map((month, index) => (
-										<SelectItem key={month} value={String(index)}>
-											{month}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-						)}
-						<Select
-							value={String(currentYear)}
-							onValueChange={handleYearChange}
-						>
-							<SelectTrigger className="w-[90px]">
-								<SelectValue />
-							</SelectTrigger>
-							<SelectContent>
-								{yearOptions.map((year) => (
-									<SelectItem key={year} value={String(year)}>
-										{year}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-						{period === "weekly" && (
-							<span className="text-muted-foreground text-sm">
-								{format(start, "MMM d")} - {format(end, "MMM d")}
-							</span>
-						)}
-					</div>
-					<Button
-						variant="outline"
-						size="icon"
-						className="shrink-0"
-						onClick={() => navigatePeriod("next")}
-					>
-						<ChevronRight className="h-4 w-4" />
-					</Button>
-				</div>
+				<BreakdownPeriodNav
+					period={period}
+					currentMonth={currentMonth}
+					currentYear={currentYear}
+					start={start}
+					end={end}
+					onNavigate={navigatePeriod}
+					onMonthChange={handleMonthChange}
+					onYearChange={handleYearChange}
+				/>
 				{isLoading ? (
 					<div className="flex h-[300px] items-center justify-center">
 						<div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />

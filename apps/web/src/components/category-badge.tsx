@@ -111,7 +111,8 @@ function hashString(str: string): number {
 	return Math.abs(hash);
 }
 
-export function getCategoryColor(categoryName: string) {
+// Not exported per #26 (only-export-components) — internal hash fallback only
+function getCategoryColor(categoryName: string) {
 	const hash = hashString(categoryName);
 	return categoryColors[hash % categoryColors.length];
 }

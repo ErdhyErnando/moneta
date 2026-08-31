@@ -2,7 +2,7 @@
 
 > **Purpose:** Local tracking mirror for agent handoff across chat sessions.  
 > **Source of Truth:** GitHub Issues (`gh issue list --state open`). This doc is a **cache + phase plan**, not the spec. If in doubt, read the issue body on GitHub (rewritten 2026-08-31 via grill-me).  
-> **Last Updated:** 2026-08-31 by grill-me session (Tech Lead + EM)  
+> **Last Updated:** 2026-08-31 by phase-3-followup session (Phases 1–3 complete; #19/#20/#31 closed on owner acceptance)  
 > **Stack:** React 19 + TanStack Router + Hono + Drizzle + PostgreSQL + Better-Auth
 
 ## How to Use (for any new agent)
@@ -33,49 +33,43 @@ Locked via `ask_user_question` + `grill-me`:
 | 34 | add page for asset tracking and progress | enhancement | **rewritten 08-31** (4.2k) | Feature — Assets MVP |
 | 33 | create new mutation page to see combination of expense and income in a list | enhancement | **rewritten 08-31** (3.5k) | Feature — Ledger |
 | 32 | Expense and Income should be formatted as monthly list | enhancement, tech-debt | **rewritten 08-31** (3.7k) | Enhancement — Monthly grouping |
-| 31 | Add Transaction Feature in dashboard isn't implemented yet | enhancement, tech-debt | **rewritten 08-31** (3.5k) | Feature — Quick-add dialog |
-| 29 | [Accessibility] breadcrumb role="link" → real <a>, banned TS type in __root.tsx | good first issue, accessibility, react-doctor, web | detailed (3.7k) — ready | Tech-debt — a11y |
-| 27 | [Refactor] Split giant TransactionTable (709 LoC) and CategoryBreakdownChart — adopt useReducer | maintainability, react-doctor, tech-debt, web | detailed (3.6k) — ready | Refactor — Giant components |
-| 26 | [Maintainability] Remove 7 unused deps, 12 dead files, 3 unused exports, 7 mixed-export files | good first issue, maintainability, react-doctor, tech-debt, web | detailed (4.9k) — ready | Tech-debt — Cleanup |
-| 25 | [Performance] Lazy-load recharts, memoize context values, hoist statics — 21 render findings | performance, react-doctor, tech-debt, web | detailed (9.2k) — ready | Perf — Render |
-| 24 | [Security] Tighten backend input validation in expense/income/category routes | bug, security, server | detailed (4.8k) — ready | Security — Validation |
-| 23 | [Security] Upgrade better-auth/axios/hono/drizzle-orm — fix critical & high CVEs | security, dependencies | detailed (6.8k) — ready | Security — CVEs |
-| 22 | monthly expenses in dashboard and in expense breakdown are still mismatch | bug | **rewritten 08-31** (4.6k) | Bug — P0 |
-| 20 | user profile image should be unique | enhancement | **rewritten 08-31** (3.3k) | Enhancement — Avatar fallback |
-| 19 | breakdown by category in dashboard | enhancement | **rewritten 08-31** (3.8k) | Bug — Palette |
+| 27 | [Refactor] Split giant TransactionTable (709 LoC) and CategoryBreakdownChart — adopt useReducer | maintainability, react-doctor, tech-debt, web | detailed (3.6k) — ready | Refactor — **done in phase-3-followup, closes on merge** |
+| 26 | [Maintainability] Remove 7 unused deps, 12 dead files, 3 unused exports, 7 mixed-export files | good first issue, maintainability, react-doctor, tech-debt, web | detailed (4.9k) — ready | Tech-debt — **done in phase-3-followup, closes on merge** |
 
-> Closed for reference: #18 categories are still global [CLOSED], #28 Remove /test debug route [CLOSED]
+> Closed for reference: #31 quick-add [CLOSED 08-31], #19 palette [CLOSED 08-31], #20 avatar [CLOSED 08-31], #29 a11y [CLOSED], #25 perf render [CLOSED], #24 validation [CLOSED], #23 CVEs [CLOSED], #22 monthly mismatch [CLOSED], #18 categories global [CLOSED], #28 /test route [CLOSED]
 
 **Rewritten bodies:** Use `gh issue view 35 --json body` to verify. All vague issues (empty/one-line) now have Summary/Goals/Proposed implementation/Acceptance/Triage notes.
 
 ## Phase Plan (Recommended Order)
 
-### Phase 1 — Security Foundation (W1) — P0, blocks all
+### Phase 1 — Security Foundation (W1) — P0, blocks all ✅ DONE (PR #36)
 
-- [ ] **#23** Upgrade better-auth/axios/hono/drizzle-orm — `pnpm audit` zero high/critical, replace axios with `fetch` wrapper in `apps/web/src/lib/api.ts`
-- [ ] **#24** Tighten backend input validation — Zod regex for `amount`, `date` valid ISO, `categoryId int.positive`, `parseId` helper, try/catch `c.req.json()`
+- [x] **#23** Upgrade better-auth/axios/hono/drizzle-orm — `pnpm audit` zero high/critical, replace axios with `fetch` wrapper in `apps/web/src/lib/api.ts`
+- [x] **#24** Tighten backend input validation — Zod regex for `amount`, `date` valid ISO, `categoryId int.positive`, `parseId` helper, try/catch `c.req.json()`
 
 > **Exit criteria:** Security track green, validation pattern reusable for #34/#33/#31.
 
-### Phase 2 — P0 Bugs + Small Features (W2) — after security
+### Phase 2 — P0 Bugs + Small Features (W2) — after security ✅ DONE (PRs #37/#38; #19/#20/#31 closed on owner acceptance 08-31)
 
-- [ ] **#22** Monthly mismatch — time-box 1d investigation, unify UTC `DATE_TRUNC` in `dashboard.ts`, assert `SUM(monthly)==SUM(categories)` (±1c)
-- [ ] **#19** Shared palette — extend `getCategoryBreakdown` to return `color`, `chart-pie-categories.tsx` uses `fill={entry.color}`, remove hard-coded `COLORS`
-- [ ] **#20** Avatar fallback — `nav-user.tsx` + `app-sidebar.tsx` show "M", unique upload path `avatars/{userId}/{uuid}`
-- [ ] **#31** Dashboard quick-add dialog — `add-transaction-dialog.tsx` dialog with type toggle, invalidates `["transactions"]` + `["summary"]`
-- [ ] **#25** Perf quick-wins (parallel) — lazy recharts (`React.lazy` + `<Suspense>`), memoize `currency-context` + `ChartContext`, hoist `MONTHS`, lazy `useState`, fix `js-hoist-intl`
+- [x] **#22** Monthly mismatch — time-box 1d investigation, unify UTC `DATE_TRUNC` in `dashboard.ts`, assert `SUM(monthly)==SUM(categories)` (±1c)
+- [x] **#19** Shared palette — extend `getCategoryBreakdown` to return `color`, `chart-pie-categories.tsx` uses `fill={entry.color}`, remove hard-coded `COLORS` — *closed on owner visual acceptance*
+- [x] **#20** Avatar fallback — `nav-user.tsx` shows "M"; no upload endpoint exists yet so `avatars/{userId}/{uuid}` path is N/A — *closed on owner acceptance*
+- [x] **#31** Dashboard quick-add dialog — `add-transaction-dialog.tsx` dialog with type toggle, invalidates `["transactions"]` + `["summary"]` — *closed on owner manual acceptance*
+- [x] **#25** Perf quick-wins (parallel) — lazy recharts (`React.lazy` + `<Suspense>`), memoize `currency-context` + `ChartContext`, hoist `MONTHS`, lazy `useState`, fix `js-hoist-intl`
+
+> **Exit criteria:** Dashboard numbers trusted ✅, colors consistent ✅, dashboard entry unblocked ✅.
 
 > **Exit criteria:** Dashboard numbers trusted, colors consistent, dashboard entry unblocked.
 
-### Phase 3 — Refactors (W3) — must land before new pages
+### Phase 3 — Refactors (W3) — must land before new pages ✅ DONE (PR #38 + phase-3-followup)
 
-- [ ] **#29** Breadcrumb a11y — `BreadcrumbLink` as `<a>` + `BreadcrumbPage` with `aria-current="page"`, fix `__root.tsx` banned type
-- [ ] **#26** Dead code — remove 7+1 unused deps, verify 12 unused files via `rg`, move non-component exports to `*-variants.ts`
-- [ ] **#27** Split giants — `transaction-table/` (orchestrator + `use-transaction-table-state.ts` + columns/toolbar/pagination) and `category-breakdown-chart/` (hook + chart), `useReducer` for 5 `useState`s, no file >200 LoC
+- [x] **#29** Breadcrumb a11y — fixed in PR #38; `ui/breadcrumb.tsx` later became unreachable dead code → deleted in phase-3-followup (shadcn block can be re-added when a breadcrumb UI is actually built)
+- [x] **#26** Dead code — removed 7+1 unused deps (PR #38) + 3 deps orphaned by the deletions (`@radix-ui/react-toggle`, `@radix-ui/react-toggle-group`, `vaul`); deleted 10 + 3 dead files (`badge.tsx`, `badge-variants.ts`, `breadcrumb.tsx`); mixed exports moved/`getCategoryColor` un-exported → **0 dead-code findings**
+- [x] **#27** Split giants — `transaction-table/` + `category-breakdown-chart/` per issue spec; followup: `BreakdownPeriodNav` extracted (all files ≤200 LoC), `getStartOfDay`/`getEndOfDay` hoisted to module scope, unused `currentDate` destructure removed, columns dropdown single-pass `flatMap`
 
-> **Exit criteria:** No `no-giant-component`/`prefer-useReducer` findings, clean base for #32/#33.
+> **Exit criteria:** No `no-giant-component`/`prefer-useReducer` findings on split targets ✅, `pnpm run check` + `check-types` + build green ✅. Remaining `no-giant-component` on `category-settings.tsx` (495 LoC) was **not** in #27 scope — file a follow-up issue if desired.
 
-### Phase 4 — Ledger UX (W4) — after #27 + #22
+### Phase 4 — Ledger UX (W4) — after #27 + #22 — **READY TO START**
 
 - [ ] **#32** Monthly groups — accordion by UTC month on `/expense` + `/income`, header totals via `formatCurrency`, 6 months/page
 - [ ] **#33** `/mutations` ledger — UNION `incomes`+`expenses` at DB level, filters via Zod, paginated, type badge, URL query params
@@ -105,7 +99,7 @@ Locked via `ask_user_question` + `grill-me`:
 ## For the Next Agent — Checklist
 
 - [ ] Read this doc + run `gh issue list` to confirm no new issues created since 08-31
-- [ ] Pick next issue from Phase 1 (currently #23) — do not jump to #34/#35 before Phases 1-3
+- [ ] Phases 1–3 are merged (PRs #36, #37, #38 + phase-3-followup). Pick next issue from **Phase 4** (#32, #33) — do not jump to #34/#35 before Phase 4
 - [ ] Before coding, read issue body: `gh issue view <n> --json body | jq -r .body > /tmp/body.md && cat /tmp/body.md`
 - [ ] Follow issue's Proposed implementation + Acceptance exactly — bodies are now detailed with code snippets
 - [ ] Run `pnpm run check` + `pnpm run check-types` before PR (per `AGENTS.md`)

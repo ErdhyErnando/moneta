@@ -78,6 +78,7 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
 
 	return (
 		<style
+			// biome-ignore lint/security/noDangerouslySetInnerHtml: vendored shadcn/ui ChartStyle injects statically-generated CSS theme vars (no user input)
 			dangerouslySetInnerHTML={{
 				__html: Object.entries(THEMES)
 					.map(

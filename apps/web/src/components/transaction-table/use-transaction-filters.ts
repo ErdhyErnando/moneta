@@ -9,6 +9,29 @@ type Category = {
 	color: string;
 };
 
+// Module-scope helpers per #27 (prefer-module-scope-pure-function)
+const getStartOfDay = (date: Date): number =>
+	new Date(
+		date.getFullYear(),
+		date.getMonth(),
+		date.getDate(),
+		0,
+		0,
+		0,
+		0,
+	).getTime();
+
+const getEndOfDay = (date: Date): number =>
+	new Date(
+		date.getFullYear(),
+		date.getMonth(),
+		date.getDate(),
+		23,
+		59,
+		59,
+		999,
+	).getTime();
+
 export function useTransactionFilters<
 	T extends { date: string; categoryId: number; amount: string },
 >(data: T[], type: "income" | "expense") {
@@ -26,27 +49,6 @@ export function useTransactionFilters<
 			return res.data.categories.filter((c) => c.type === type);
 		},
 	});
-
-	const getStartOfDay = (date: Date): number =>
-		new Date(
-			date.getFullYear(),
-			date.getMonth(),
-			date.getDate(),
-			0,
-			0,
-			0,
-			0,
-		).getTime();
-	const getEndOfDay = (date: Date): number =>
-		new Date(
-			date.getFullYear(),
-			date.getMonth(),
-			date.getDate(),
-			23,
-			59,
-			59,
-			999,
-		).getTime();
 
 	const filteredData = React.useMemo(() => {
 		return data.filter((transaction) => {
