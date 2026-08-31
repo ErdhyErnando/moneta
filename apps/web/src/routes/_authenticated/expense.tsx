@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import type { AxiosError } from "axios";
 import { BarChart3, Plus } from "lucide-react";
 import { useState } from "react";
 import { CurrencySelector } from "@/components/currency-selector";
@@ -20,6 +19,7 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import type { AxiosError } from "@/lib/api";
 import { api } from "@/lib/api";
 
 export const Route = createFileRoute("/_authenticated/expense")({

@@ -56,7 +56,7 @@ async function fetchDashboardSummary(
 	if (startDate) params.append("startDate", startDate);
 	if (endDate) params.append("endDate", endDate);
 
-	const response = await api.get(`/api/dashboard/summary?${params.toString()}`);
+	const response = await api.get<{ summary: DashboardSummary }>(`/api/dashboard/summary?${params.toString()}`);
 	return response.data.summary;
 }
 
@@ -70,7 +70,7 @@ async function fetchRecentTransactions(
 	if (startDate) params.append("startDate", startDate);
 	if (endDate) params.append("endDate", endDate);
 
-	const response = await api.get(
+	const response = await api.get<{ transactions: Transaction[] }>(
 		`/api/dashboard/transactions?${params.toString()}`,
 	);
 	return response.data.transactions;
@@ -126,7 +126,7 @@ function HomeComponent() {
 			if (startDate) params.append("startDate", startDate);
 			if (endDate) params.append("endDate", endDate);
 
-			const response = await api.get(
+			const response = await api.get<{ chartData: Array<{ date: string; income: number; expense: number }> }>(
 				`/api/dashboard/chart?${params.toString()}`,
 			);
 			return response.data.chartData;

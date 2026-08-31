@@ -13,13 +13,31 @@ const app = new Hono<{ Variables: { user: { id: string } } }>();
 const categoryTypeSchema = z.enum(["income", "expense", "starting_balance"]);
 
 const createCategorySchema = z.object({
-	name: z.string().trim().min(1),
+	name: z.string().trim().min(1).max(100),
 	type: categoryTypeSchema,
 });
 
 const updateCategorySchema = z.object({
-	name: z.string().trim().min(1),
+	name: z.string().trim().min(1).max(100),
 });
+
+function parseId(c: {
+	req: { param: (name: string) => string };
+}): number | null {
+	const n = Number(c.req.param("id"));
+	if (!Number.isInteger(n) || n <= 0) return null;
+	return n;
+}
+
+async function readJson<T>(c: {
+	req: { json: () => Promise<T> };
+}): Promise<T | null> {
+	try {
+		return (await c.req.json()) as T;
+	} catch {
+		return null;
+	}
+}
 
 const legacyUpdateCategorySchema = updateCategorySchema.extend({
 	type: categoryTypeSchema.optional(),
@@ -55,7 +73,10 @@ app.get("/", async (c) => {
 
 app.post("/", async (c) => {
 	const user = c.get("user");
-	const body = await c.req.json();
+	const body = await readJson(c);
+	if (!body) {
+		return c.json({ error: { message: "Invalid JSON body" } }, 400);
+	}
 	const result = createCategorySchema.safeParse(body);
 
 	if (!result.success) {
@@ -89,8 +110,14 @@ app.post("/", async (c) => {
 
 app.put("/:id", async (c) => {
 	const user = c.get("user");
-	const id = Number(c.req.param("id"));
-	const body = await c.req.json();
+	const id = parseId(c);
+	if (id === null) {
+		return c.json({ error: { message: "Invalid id parameter" } }, 400);
+	}
+	const body = await readJson(c);
+	if (!body) {
+		return c.json({ error: { message: "Invalid JSON body" } }, 400);
+	}
 	const result = legacyUpdateCategorySchema.safeParse(body);
 
 	if (!result.success) {
@@ -138,7 +165,10 @@ app.put("/:id", async (c) => {
 
 app.delete("/:id", async (c) => {
 	const user = c.get("user");
-	const id = Number(c.req.param("id"));
+	const id = parseId(c);
+	if (id === null) {
+		return c.json({ error: { message: "Invalid id parameter" } }, 400);
+	}
 	const [archivedCategory] = await db
 		.update(categories)
 		.set({ isArchived: true })
@@ -154,7 +184,10 @@ app.delete("/:id", async (c) => {
 
 app.post("/:id/restore", async (c) => {
 	const user = c.get("user");
-	const id = Number(c.req.param("id"));
+	const id = parseId(c);
+	if (id === null) {
+		return c.json({ error: { message: "Invalid id parameter" } }, 400);
+	}
 	const category = await db.query.categories.findFirst({
 		where: and(eq(categories.id, id), eq(categories.userId, user.id)),
 	});
