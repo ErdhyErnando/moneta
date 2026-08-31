@@ -2,7 +2,7 @@
 
 > **Purpose:** Local tracking mirror for agent handoff across chat sessions.  
 > **Source of Truth:** GitHub Issues (`gh issue list --state open`). This doc is a **cache + phase plan**, not the spec. If in doubt, read the issue body on GitHub (rewritten 2026-08-31 via grill-me).  
-> **Last Updated:** 2026-08-31 by phase-3-followup session (verified against `gh issue list` + fresh `react-doctor` scan)  
+> **Last Updated:** 2026-08-31 by phase-3-followup session (Phases 1–3 complete; #19/#20/#31 closed on owner acceptance)  
 > **Stack:** React 19 + TanStack Router + Hono + Drizzle + PostgreSQL + Better-Auth
 
 ## How to Use (for any new agent)
@@ -33,15 +33,10 @@ Locked via `ask_user_question` + `grill-me`:
 | 34 | add page for asset tracking and progress | enhancement | **rewritten 08-31** (4.2k) | Feature — Assets MVP |
 | 33 | create new mutation page to see combination of expense and income in a list | enhancement | **rewritten 08-31** (3.5k) | Feature — Ledger |
 | 32 | Expense and Income should be formatted as monthly list | enhancement, tech-debt | **rewritten 08-31** (3.7k) | Enhancement — Monthly grouping |
-| 31 | Add Transaction Feature in dashboard isn't implemented yet | enhancement, tech-debt | **rewritten 08-31** (3.5k) | Feature — Quick-add dialog — **code merged PR #37/#38, issue open pending manual acceptance** |
 | 27 | [Refactor] Split giant TransactionTable (709 LoC) and CategoryBreakdownChart — adopt useReducer | maintainability, react-doctor, tech-debt, web | detailed (3.6k) — ready | Refactor — **done in phase-3-followup, closes on merge** |
 | 26 | [Maintainability] Remove 7 unused deps, 12 dead files, 3 unused exports, 7 mixed-export files | good first issue, maintainability, react-doctor, tech-debt, web | detailed (4.9k) — ready | Tech-debt — **done in phase-3-followup, closes on merge** |
-| 20 | user profile image should be unique | enhancement | **rewritten 08-31** (3.3k) | Enhancement — Avatar fallback — **"M" fallback merged; no upload endpoint exists yet, so uniqueness clause is moot; issue open pending manual acceptance** |
-| 19 | breakdown by category in dashboard | enhancement | **rewritten 08-31** (3.8k) | Bug — Palette — **shared palette merged (categoryColor through dashboard.ts + getCategoryFill); issue open pending visual/curl acceptance** |
 
-> Closed for reference: #29 a11y [CLOSED], #25 perf render [CLOSED], #24 validation [CLOSED], #23 CVEs [CLOSED], #22 monthly mismatch [CLOSED], #18 categories global [CLOSED], #28 /test route [CLOSED]
-
-> Closed for reference: #18 categories are still global [CLOSED], #28 Remove /test debug route [CLOSED]
+> Closed for reference: #31 quick-add [CLOSED 08-31], #19 palette [CLOSED 08-31], #20 avatar [CLOSED 08-31], #29 a11y [CLOSED], #25 perf render [CLOSED], #24 validation [CLOSED], #23 CVEs [CLOSED], #22 monthly mismatch [CLOSED], #18 categories global [CLOSED], #28 /test route [CLOSED]
 
 **Rewritten bodies:** Use `gh issue view 35 --json body` to verify. All vague issues (empty/one-line) now have Summary/Goals/Proposed implementation/Acceptance/Triage notes.
 
@@ -54,13 +49,15 @@ Locked via `ask_user_question` + `grill-me`:
 
 > **Exit criteria:** Security track green, validation pattern reusable for #34/#33/#31.
 
-### Phase 2 — P0 Bugs + Small Features (W2) — after security — code merged, 3 issues pending manual acceptance
+### Phase 2 — P0 Bugs + Small Features (W2) — after security ✅ DONE (PRs #37/#38; #19/#20/#31 closed on owner acceptance 08-31)
 
 - [x] **#22** Monthly mismatch — time-box 1d investigation, unify UTC `DATE_TRUNC` in `dashboard.ts`, assert `SUM(monthly)==SUM(categories)` (±1c)
-- [ ] **#19** Shared palette — extend `getCategoryBreakdown` to return `color`, `chart-pie-categories.tsx` uses `fill={entry.color}`, remove hard-coded `COLORS` — *code merged PR #37; issue open pending visual/curl acceptance*
-- [ ] **#20** Avatar fallback — `nav-user.tsx` shows "M"; no upload endpoint exists yet so `avatars/{userId}/{uuid}` path is N/A — *code merged PR #37; issue open pending acceptance*
-- [ ] **#31** Dashboard quick-add dialog — `add-transaction-dialog.tsx` dialog with type toggle, invalidates `["transactions"]` + `["summary"]` — *code merged PR #37/#38; issue open pending manual acceptance*
+- [x] **#19** Shared palette — extend `getCategoryBreakdown` to return `color`, `chart-pie-categories.tsx` uses `fill={entry.color}`, remove hard-coded `COLORS` — *closed on owner visual acceptance*
+- [x] **#20** Avatar fallback — `nav-user.tsx` shows "M"; no upload endpoint exists yet so `avatars/{userId}/{uuid}` path is N/A — *closed on owner acceptance*
+- [x] **#31** Dashboard quick-add dialog — `add-transaction-dialog.tsx` dialog with type toggle, invalidates `["transactions"]` + `["summary"]` — *closed on owner manual acceptance*
 - [x] **#25** Perf quick-wins (parallel) — lazy recharts (`React.lazy` + `<Suspense>`), memoize `currency-context` + `ChartContext`, hoist `MONTHS`, lazy `useState`, fix `js-hoist-intl`
+
+> **Exit criteria:** Dashboard numbers trusted ✅, colors consistent ✅, dashboard entry unblocked ✅.
 
 > **Exit criteria:** Dashboard numbers trusted, colors consistent, dashboard entry unblocked.
 
