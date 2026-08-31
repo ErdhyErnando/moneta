@@ -2,7 +2,7 @@
 
 > **Purpose:** Local tracking mirror for agent handoff across chat sessions.  
 > **Source of Truth:** GitHub Issues (`gh issue list --state open`). This doc is a **cache + phase plan**, not the spec. If in doubt, read the issue body on GitHub (rewritten 2026-08-31 via grill-me).  
-> **Last Updated:** 2026-08-31 by phase-4 session (#32/#33 implemented on `feat/phase-4-ledger-ux`, PR pending smoke test)  
+> **Last Updated:** 2026-08-31 by phase-5 session (PR #42: #34 assets MVP + #35 login redesign — open, pending owner smoke test)  
 > **Stack:** React 19 + TanStack Router + Hono + Drizzle + PostgreSQL + Better-Auth
 
 ## How to Use (for any new agent)
@@ -33,6 +33,8 @@ Locked via `ask_user_question` + `grill-me`:
 | 34 | add page for asset tracking and progress | enhancement | **rewritten 08-31** (4.2k) | Feature — Assets MVP — Phase 5 |
 
 > Closed for reference: #33 mutations ledger [CLOSED PR #40], #32 monthly groups [CLOSED PR #40], #27 giant split [CLOSED PR #39], #26 dead code [CLOSED PR #39], #31 quick-add [CLOSED 08-31], #19 palette [CLOSED 08-31], #20 avatar [CLOSED 08-31], #29 a11y [CLOSED], #25 perf render [CLOSED], #24 validation [CLOSED], #23 CVEs [CLOSED], #22 monthly mismatch [CLOSED — root cause re-fixed at UTC-calendar-day canonicalization, PR #40], #18 categories global [CLOSED], #28 /test route [CLOSED]
+
+**In phase-5 PR #42 (open):** #34 assets MVP (closed on owner smoke), #35 login redesign (closed on owner visual acceptance). Issues stay open until owner accepts.
 
 **Rewritten bodies:** Use `gh issue view 35 --json body` to verify. All vague issues (empty/one-line) now have Summary/Goals/Proposed implementation/Acceptance/Triage notes.
 
@@ -73,10 +75,10 @@ Locked via `ask_user_question` + `grill-me`:
 
 > **Exit criteria:** Monthly scan + full ledger both usable ✅ (pending owner smoke test), share table logic from #27 ✅ (`useTransactionFilters`, columns pattern reused).
 
-### Phase 5 — Growth (W5+) — after refactors
+### Phase 5 — Growth (W5+) — after refactors ✅ DONE (PR #42, pending owner smoke test)
 
-- [ ] **#34** Assets MVP — DB `assets` table + Hono CRUD (`assets.ts`) + `/assets` route with holdings grouped by type + monthly progress chart (lazy recharts)
-- [ ] **#35** Login redesign — shadcn block variant + kumo-ui tokens in `index.css`, responsive + dark mode, `better-auth` flow unchanged
+- [x] **#34** Assets MVP — `assets` table (migration `0006_groovy_kulan_gath`) + Hono CRUD (`assets.ts`, Zod-validated, UTC `DATE_TRUNC` monthly aggregation) + `/assets` route grouped by type with per-type totals + cards + lazy recharts area chart, sidebar entry `IconStack2`. API smoke-tested against dev Postgres (CRUD/validation/monthly all green; smoke user removed)
+- [x] **#35** Login redesign — shadcn login-block split panel (desktop brand panel + form, mobile stacked), kumo accent `#f6821f` tokens added to `index.css` (login-scoped only; primary/surfaces/radius untouched to avoid bleed), `--brand-accent-strong` variants for WCAG-AA text contrast, autocomplete attrs on forms, initial view flipped to sign-in. Better-Auth flow unchanged
 - [ ] **#34 v2** follow-up (separate issue) — ticker + CoinGecko/Alpha Vantage with daily cache, allocation pie (not in this phase)
 
 ## Dependency Graph
@@ -95,8 +97,8 @@ Locked via `ask_user_question` + `grill-me`:
 
 ## For the Next Agent — Checklist
 
-- [ ] Read this doc + run `gh issue list` to confirm no new issues created since 08-31
-- [ ] Phases 1–4 merged (PRs #36–#40). Next up: **Phase 5** — #34 assets MVP, then #35 login redesign. ⚠️ Before deploying: see “Deploying (DB migrations)” below.
+- [x] Read this doc + run `gh issue list` to confirm no new issues created since 08-31 (confirmed — only #34/#35 open)
+- [x] Phases 1–5 merged/pending (PRs #36–#41 merged; **PR #42 open** — #34 assets MVP + #35 login redesign, awaiting owner smoke test). Beyond: #34 v2 (tickers/prices) as a new issue. ⚠️ Before deploying: see “Deploying (DB migrations)” below — `0006` migration included in #42.
 - [ ] Before coding, read issue body: `gh issue view <n> --json body | jq -r .body > /tmp/body.md && cat /tmp/body.md`
 - [ ] Follow issue's Proposed implementation + Acceptance exactly — bodies are now detailed with code snippets
 - [ ] Run `pnpm run check` + `pnpm run check-types` before PR (per `AGENTS.md`)

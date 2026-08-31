@@ -58,11 +58,13 @@ export default function SignUpForm({
 	}
 
 	return (
-		<div className="mx-auto mt-10 w-full max-w-md p-6">
-			<p className="text-center text-muted-foreground text-sm">
-				Welcome to Moneta
-			</p>
-			<h1 className="mb-6 text-center font-bold text-3xl">Create Account</h1>
+		<div className="space-y-6">
+			<div className="space-y-2">
+				<h1 className="font-bold text-2xl tracking-tight">Create account</h1>
+				<p className="text-muted-foreground text-sm">
+					Start tracking your finances in minutes
+				</p>
+			</div>
 
 			<form
 				onSubmit={(e) => {
@@ -80,12 +82,13 @@ export default function SignUpForm({
 								<Input
 									id={field.name}
 									name={field.name}
+									autoComplete="name"
 									value={field.state.value}
 									onBlur={field.handleBlur}
 									onChange={(e) => field.handleChange(e.target.value)}
 								/>
 								{field.state.meta.errors.map((error) => (
-									<p key={error?.message} className="text-red-500">
+									<p key={error?.message} className="text-red-500 text-sm">
 										{error?.message}
 									</p>
 								))}
@@ -103,12 +106,13 @@ export default function SignUpForm({
 									id={field.name}
 									name={field.name}
 									type="email"
+									autoComplete="email"
 									value={field.state.value}
 									onBlur={field.handleBlur}
 									onChange={(e) => field.handleChange(e.target.value)}
 								/>
 								{field.state.meta.errors.map((error) => (
-									<p key={error?.message} className="text-red-500">
+									<p key={error?.message} className="text-red-500 text-sm">
 										{error?.message}
 									</p>
 								))}
@@ -126,12 +130,13 @@ export default function SignUpForm({
 									id={field.name}
 									name={field.name}
 									type="password"
+									autoComplete="new-password"
 									value={field.state.value}
 									onBlur={field.handleBlur}
 									onChange={(e) => field.handleChange(e.target.value)}
 								/>
 								{field.state.meta.errors.map((error) => (
-									<p key={error?.message} className="text-red-500">
+									<p key={error?.message} className="text-red-500 text-sm">
 										{error?.message}
 									</p>
 								))}
@@ -153,13 +158,13 @@ export default function SignUpForm({
 				</form.Subscribe>
 			</form>
 
-			<div className="mt-4 text-center">
+			<div className="text-center">
 				<Button
 					variant="link"
 					onClick={onSwitchToSignIn}
-					className="text-indigo-600 hover:text-indigo-800"
+					className="text-primary hover:text-primary/80"
 				>
-					Already have an account? Sign In
+					Already have an account? Sign in
 				</Button>
 			</div>
 		</div>

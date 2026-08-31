@@ -1,6 +1,7 @@
 import { relations, sql } from "drizzle-orm";
 import {
 	boolean,
+	index,
 	integer,
 	numeric,
 	pgEnum,
@@ -79,6 +80,40 @@ export const expenses = pgTable("expenses", {
 		.notNull(),
 });
 
+export const assetTypeEnum = pgEnum("asset_type", [
+	"stock",
+	"bond",
+	"cash",
+	"crypto",
+	"other",
+]);
+
+export const assets = pgTable(
+	"assets",
+	{
+		id: serial("id").primaryKey(),
+		userId: text("user_id")
+			.notNull()
+			.references(() => user.id, { onDelete: "cascade" }),
+		type: assetTypeEnum("type").notNull(),
+		name: text("name").notNull(),
+		symbol: text("symbol"),
+		quantity: numeric("quantity", { precision: 18, scale: 8 }),
+		amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+		date: timestamp("date").notNull(),
+		notes: text("notes"),
+		createdAt: timestamp("created_at").defaultNow().notNull(),
+		updatedAt: timestamp("updated_at")
+			.defaultNow()
+			.$onUpdate(() => new Date())
+			.notNull(),
+	},
+	(table) => [
+		index("assets_user_type_idx").on(table.userId, table.type),
+		index("assets_user_date_idx").on(table.userId, table.date),
+	],
+);
+
 export const startingBalances = pgTable("starting_balances", {
 	id: serial("id").primaryKey(),
 	amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
@@ -142,3 +177,10 @@ export const startingBalancesRelations = relations(
 		}),
 	}),
 );
+
+export const assetsRelations = relations(assets, ({ one }) => ({
+	user: one(user, {
+		fields: [assets.userId],
+		references: [user.id],
+	}),
+}));

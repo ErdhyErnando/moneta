@@ -21,6 +21,7 @@ app.use(
 );
 
 import { authMiddleware } from "./middleware";
+import assets from "./routes/assets";
 import categories from "./routes/categories";
 import dashboard from "./routes/dashboard";
 import expenses from "./routes/expenses";
@@ -34,6 +35,7 @@ app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 app.use("/api/*", authMiddleware);
 
 // Register protected routes
+app.route("/api/assets", assets);
 app.route("/api/categories", categories);
 app.route("/api/incomes", incomes);
 app.route("/api/expenses", expenses);
