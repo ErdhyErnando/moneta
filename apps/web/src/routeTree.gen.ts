@@ -18,6 +18,7 @@ import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedMutationsRouteImport } from './routes/_authenticated/mutations'
 import { Route as AuthenticatedIncomeRouteImport } from './routes/_authenticated/income'
 import { Route as AuthenticatedExpenseRouteImport } from './routes/_authenticated/expense'
+import { Route as AuthenticatedAssetsRouteImport } from './routes/_authenticated/assets'
 import { Route as AuthenticatedIncomeBreakdownRouteImport } from './routes/_authenticated/income_.breakdown'
 import { Route as AuthenticatedExpenseBreakdownRouteImport } from './routes/_authenticated/expense_.breakdown'
 
@@ -66,6 +67,11 @@ const AuthenticatedExpenseRoute = AuthenticatedExpenseRouteImport.update({
   path: '/expense',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedAssetsRoute = AuthenticatedAssetsRouteImport.update({
+  id: '/assets',
+  path: '/assets',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedIncomeBreakdownRoute =
   AuthenticatedIncomeBreakdownRouteImport.update({
     id: '/income_/breakdown',
@@ -82,6 +88,7 @@ const AuthenticatedExpenseBreakdownRoute =
 export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
+  '/assets': typeof AuthenticatedAssetsRoute
   '/expense': typeof AuthenticatedExpenseRoute
   '/income': typeof AuthenticatedIncomeRoute
   '/mutations': typeof AuthenticatedMutationsRoute
@@ -94,6 +101,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
+  '/assets': typeof AuthenticatedAssetsRoute
   '/expense': typeof AuthenticatedExpenseRoute
   '/income': typeof AuthenticatedIncomeRoute
   '/mutations': typeof AuthenticatedMutationsRoute
@@ -108,6 +116,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
+  '/_authenticated/assets': typeof AuthenticatedAssetsRoute
   '/_authenticated/expense': typeof AuthenticatedExpenseRoute
   '/_authenticated/income': typeof AuthenticatedIncomeRoute
   '/_authenticated/mutations': typeof AuthenticatedMutationsRoute
@@ -122,6 +131,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/dashboard'
     | '/login'
+    | '/assets'
     | '/expense'
     | '/income'
     | '/mutations'
@@ -134,6 +144,7 @@ export interface FileRouteTypes {
   to:
     | '/dashboard'
     | '/login'
+    | '/assets'
     | '/expense'
     | '/income'
     | '/mutations'
@@ -147,6 +158,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/dashboard'
     | '/login'
+    | '/_authenticated/assets'
     | '/_authenticated/expense'
     | '/_authenticated/income'
     | '/_authenticated/mutations'
@@ -228,6 +240,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedExpenseRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/assets': {
+      id: '/_authenticated/assets'
+      path: '/assets'
+      fullPath: '/assets'
+      preLoaderRoute: typeof AuthenticatedAssetsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/income_/breakdown': {
       id: '/_authenticated/income_/breakdown'
       path: '/income/breakdown'
@@ -246,6 +265,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedAssetsRoute: typeof AuthenticatedAssetsRoute
   AuthenticatedExpenseRoute: typeof AuthenticatedExpenseRoute
   AuthenticatedIncomeRoute: typeof AuthenticatedIncomeRoute
   AuthenticatedMutationsRoute: typeof AuthenticatedMutationsRoute
@@ -257,6 +277,7 @@ interface AuthenticatedRouteChildren {
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedAssetsRoute: AuthenticatedAssetsRoute,
   AuthenticatedExpenseRoute: AuthenticatedExpenseRoute,
   AuthenticatedIncomeRoute: AuthenticatedIncomeRoute,
   AuthenticatedMutationsRoute: AuthenticatedMutationsRoute,

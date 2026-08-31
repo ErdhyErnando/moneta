@@ -5,6 +5,7 @@ import {
 	IconLogout,
 	IconMoon,
 	IconSettings,
+	IconStack2,
 	IconSun,
 	IconTrendingDown,
 	IconTrendingUp,
@@ -55,6 +56,11 @@ const navMainItems = [
 		title: "Mutations",
 		url: "/mutations",
 		icon: IconArrowsExchange,
+	},
+	{
+		title: "Assets",
+		url: "/assets",
+		icon: IconStack2,
 	},
 	{
 		title: "Starting Balance",
