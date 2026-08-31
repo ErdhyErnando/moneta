@@ -129,6 +129,23 @@ NOTE: `0005_utc_calendar_days` interprets *legacy* rows (entered before PR #40)
 as Europe/Amsterdam. It only ever truncates to calendar days, is idempotent,
 and does not affect how NEW data is stored (canonical UTC midnight, any TZ).
 
+⚠️ 2026-08-31 prod incident (relation "assets" does not exist after deploy):
+backfill-journal is COUNT-based and writes journal rows WITHOUT executing DDL.
+If the journal row count was already >= journal entry count, `db:migrate`
+reports success while applying ZERO SQL — the newest migration's DDL never
+runs. ALWAYS verify after the pair:
+
+```bash
+psql "$DATABASE_URL" -c "select count(*) from drizzle.__drizzle_migrations;"  # must equal nodes in meta/_journal.json
+psql "$DATABASE_URL" -c "select to_regclass('public.assets');"                # spot-check newest table exists
+```
+
+If the newest journal row was backfilled but its table is missing: delete the
+phantom row (highest id), then `db:migrate` — it will execute that migration
+for real (prod had 8 rows vs 7 files; deleting the phantom 0006 row fixed it).
+Cosmetic prod journal quirks (stale `0001` hash after migration regen, a
+missing id-3 row) are harmless — the migrator only counts rows.
+
 ## Verification Commands
 
 ```bash
