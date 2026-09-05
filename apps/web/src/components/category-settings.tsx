@@ -148,6 +148,7 @@ function CategoryTable({
 												size="icon"
 												onClick={() => onRestore(category.id)}
 												disabled={isRestoring}
+												aria-label={`Restore ${category.name}`}
 											>
 												<ArchiveRestore className="h-4 w-4" />
 											</Button>
@@ -157,6 +158,7 @@ function CategoryTable({
 													variant="ghost"
 													size="icon"
 													onClick={() => onEdit(category)}
+													aria-label={`Edit ${category.name}`}
 												>
 													<Pencil className="h-4 w-4" />
 												</Button>
@@ -165,6 +167,7 @@ function CategoryTable({
 													size="icon"
 													onClick={() => onArchive(category)}
 													className="text-destructive hover:text-destructive"
+													aria-label={`Archive ${category.name}`}
 												>
 													<Trash2 className="h-4 w-4" />
 												</Button>
