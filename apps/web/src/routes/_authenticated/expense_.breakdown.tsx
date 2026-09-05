@@ -1,7 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ChevronLeft } from "lucide-react";
-import { CategoryBreakdownChart } from "@/components/category-breakdown-chart";
+import { lazy, Suspense } from "react";
 import { Button } from "@/components/ui/button";
+
+// recharts-heavy chart loads on demand per #48 (route-level code split)
+const CategoryBreakdownChart = lazy(() =>
+	import(
+		"@/components/category-breakdown-chart/category-breakdown-chart"
+	).then((m) => ({ default: m.CategoryBreakdownChart })),
+);
 
 export const Route = createFileRoute("/_authenticated/expense_/breakdown")({
 	component: ExpenseBreakdownPage,
@@ -20,7 +27,11 @@ function ExpenseBreakdownPage() {
 				<h1 className="font-bold text-2xl sm:text-3xl">Expense Breakdown</h1>
 			</div>
 
-			<CategoryBreakdownChart type="expense" />
+			<Suspense
+				fallback={<div className="h-[300px] animate-pulse rounded bg-muted" />}
+			>
+				<CategoryBreakdownChart type="expense" />
+			</Suspense>
 		</div>
 	);
 }

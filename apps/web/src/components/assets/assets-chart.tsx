@@ -1,5 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+// recharts ships in an async chunk: this module loads only via React.lazy
+// in routes/_authenticated/assets.tsx, never in the initial bundle (#48).
+// react-doctor-disable-next-line react-doctor/prefer-dynamic-import
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 import {
 	Card,

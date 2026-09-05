@@ -1,3 +1,6 @@
+// recharts ships in an async chunk: this module loads only via React.lazy
+// in routes/_authenticated/expense_.breakdown.tsx + income_.breakdown.tsx, never in the initial bundle (#48).
+// react-doctor-disable-next-line react-doctor/prefer-dynamic-import
 import {
 	Bar,
 	BarChart,
