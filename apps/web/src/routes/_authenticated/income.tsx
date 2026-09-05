@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { BarChart3, Plus } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { CurrencySelector } from "@/components/currency-selector";
 import TransactionForm from "@/components/transaction-form";
 import {
@@ -38,7 +38,7 @@ function IncomePage() {
 	const { toast } = useToast();
 	const [isOpen, setIsOpen] = useState(false);
 	const [editingId, setEditingId] = useState<number | null>(null);
-	const [deleteId, setDeleteId] = useState<number | null>(null);
+	const deleteIdRef = useRef<number | null>(null);
 	const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 	const queryClient = useQueryClient();
 
@@ -118,7 +118,7 @@ function IncomePage() {
 				description: "Income deleted successfully",
 			});
 			setIsDeleteOpen(false);
-			setDeleteId(null);
+			deleteIdRef.current = null;
 		},
 		onError: (error: AxiosError<{ error: { message: string } }>) => {
 			toast({
@@ -144,13 +144,14 @@ function IncomePage() {
 	};
 
 	const handleDelete = (transaction: Transaction) => {
-		setDeleteId(transaction.id);
+		deleteIdRef.current = transaction.id;
 		setIsDeleteOpen(true);
 	};
 
 	const confirmDelete = async () => {
-		if (deleteId) {
-			await deleteMutation.mutateAsync(deleteId);
+		const id = deleteIdRef.current;
+		if (id) {
+			await deleteMutation.mutateAsync(id);
 		}
 	};
 

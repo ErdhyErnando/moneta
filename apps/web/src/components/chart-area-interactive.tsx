@@ -1,3 +1,6 @@
+// recharts ships in an async chunk: this module loads only via React.lazy
+// in routes/_authenticated/index.tsx, never in the initial bundle (#48).
+// react-doctor-disable-next-line react-doctor/prefer-dynamic-import
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 import {
 	Card,
@@ -32,13 +35,15 @@ interface ChartData {
 	expense: number;
 }
 
+const EMPTY_CHART_DATA: ChartData[] = [];
+
 interface ChartAreaInteractiveProps {
 	data?: ChartData[];
 	isLoading?: boolean;
 }
 
 export function ChartAreaInteractive({
-	data = [],
+	data = EMPTY_CHART_DATA,
 	isLoading = false,
 }: ChartAreaInteractiveProps) {
 	return (

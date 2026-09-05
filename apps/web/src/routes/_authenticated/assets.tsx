@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
-import { lazy, Suspense, useMemo, useState } from "react";
+import { lazy, Suspense, useMemo, useRef, useState } from "react";
 import {
 	AssetForm,
 	type AssetFormValues,
@@ -57,7 +57,7 @@ function AssetsPage() {
 	const { formatCurrency } = useCurrency();
 	const [isOpen, setIsOpen] = useState(false);
 	const [editingId, setEditingId] = useState<number | null>(null);
-	const [deleteId, setDeleteId] = useState<number | null>(null);
+	const deleteIdRef = useRef<number | null>(null);
 	const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 	const queryClient = useQueryClient();
 
@@ -124,7 +124,7 @@ function AssetsPage() {
 		onSuccess: () => {
 			invalidate();
 			setIsDeleteOpen(false);
-			setDeleteId(null);
+			deleteIdRef.current = null;
 			toast({ title: "Success", description: "Asset deleted successfully" });
 		},
 		onError: (error: AxiosError<{ error: { message: string } }>) => {
@@ -151,13 +151,14 @@ function AssetsPage() {
 	};
 
 	const handleDelete = (asset: Asset) => {
-		setDeleteId(asset.id);
+		deleteIdRef.current = asset.id;
 		setIsDeleteOpen(true);
 	};
 
 	const confirmDelete = async () => {
-		if (deleteId) {
-			await deleteMutation.mutateAsync(deleteId);
+		const id = deleteIdRef.current;
+		if (id) {
+			await deleteMutation.mutateAsync(id);
 		}
 	};
 
@@ -168,14 +169,19 @@ function AssetsPage() {
 			list.push(asset);
 			byType.set(asset.type, list);
 		}
-		return ASSET_TYPES.map((type) => {
+		return ASSET_TYPES.flatMap((type) => {
 			const list = byType.get(type) ?? [];
-			return {
-				type,
-				assets: list,
-				total: list.reduce((sum, a) => sum + Number(a.amount), 0),
-			};
-		}).filter((group) => group.assets.length > 0);
+			if (list.length === 0) {
+				return [];
+			}
+			return [
+				{
+					type,
+					assets: list,
+					total: list.reduce((sum, a) => sum + Number(a.amount), 0),
+				},
+			];
+		});
 	}, [assets]);
 
 	const totalValue = useMemo(
