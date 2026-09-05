@@ -60,6 +60,7 @@ export function BreakdownPeriodNav({
 				size="icon"
 				className="shrink-0"
 				onClick={() => onNavigate("prev")}
+				aria-label="Previous period"
 			>
 				<ChevronLeft className="h-4 w-4" />
 			</Button>
@@ -101,6 +102,7 @@ export function BreakdownPeriodNav({
 				size="icon"
 				className="shrink-0"
 				onClick={() => onNavigate("next")}
+				aria-label="Next period"
 			>
 				<ChevronRight className="h-4 w-4" />
 			</Button>
