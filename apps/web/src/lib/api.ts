@@ -51,23 +51,33 @@ async function request<T>(
 
 	const contentType = res.headers.get("content-type") || "";
 	const isJson = contentType.includes("application/json");
+
+	// Check status before treating the body as success: fetch() resolves
+	// on HTTP 4xx/5xx, so an unchecked read can mistake an error payload
+	// for a successful response.
+	if (!res.ok) {
+		let errorData: unknown = null;
+		try {
+			errorData = isJson ? await res.json() : await res.text();
+		} catch {
+			errorData = null;
+		}
+		const message =
+			(errorData as { error?: { message?: string } })?.error?.message ||
+			(errorData as { message?: string })?.message ||
+			res.statusText ||
+			"Request failed";
+		throw new AxiosError(message, {
+			data: errorData as T,
+			status: res.status,
+		});
+	}
+
 	let data: unknown = null;
 	try {
 		data = isJson ? await res.json() : await res.text();
 	} catch {
 		data = null;
-	}
-
-	if (!res.ok) {
-		const message =
-			(data as { error?: { message?: string } })?.error?.message ||
-			(data as { message?: string })?.message ||
-			res.statusText ||
-			"Request failed";
-		throw new AxiosError(message, {
-			data: data as T,
-			status: res.status,
-		});
 	}
 
 	return { data: data as T, status: res.status };

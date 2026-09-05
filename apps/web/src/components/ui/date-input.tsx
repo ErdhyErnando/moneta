@@ -23,15 +23,16 @@ function DateInput({ value, onChange, label, id, disabled }: DateInputProps) {
 	const [open, setOpen] = React.useState(false);
 	const [hasError, setHasError] = React.useState(false);
 
-	// Keep text in sync when value changes externally (e.g. calendar pick)
-	const lastExternalValue = React.useRef<Date | undefined>(value);
-	React.useEffect(() => {
-		if (value && value !== lastExternalValue.current) {
-			setTextValue(format(value, "dd/MM/yyyy"));
-			setHasError(false);
-			lastExternalValue.current = value;
-		}
-	}, [value]);
+	// Keep text in sync when value changes externally (e.g. calendar pick).
+	// Adjusted during render — not in an effect — so users never briefly
+	// see the stale value.
+	// See https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+	const [prevValue, setPrevValue] = React.useState(value);
+	if (value && value !== prevValue) {
+		setPrevValue(value);
+		setTextValue(format(value, "dd/MM/yyyy"));
+		setHasError(false);
+	}
 
 	const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		let raw = e.target.value;
@@ -61,7 +62,6 @@ function DateInput({ value, onChange, label, id, disabled }: DateInputProps) {
 				const isDisabled = disabled?.(parsed) ?? false;
 				if (!isDisabled) {
 					setHasError(false);
-					lastExternalValue.current = parsed;
 					onChange(parsed);
 				} else {
 					setHasError(true);
@@ -94,7 +94,6 @@ function DateInput({ value, onChange, label, id, disabled }: DateInputProps) {
 
 	const handleCalendarSelect = (date: Date | undefined) => {
 		if (date) {
-			lastExternalValue.current = date;
 			onChange(date);
 			setTextValue(format(date, "dd/MM/yyyy"));
 			setHasError(false);
