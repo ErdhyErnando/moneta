@@ -6,15 +6,9 @@ Built for tech-savvy folks who want a simple, self-hosted money tracker they act
 
 ## 📸 Screenshots
 
-> Screenshots live in [`docs/screenshots/`](docs/screenshots/) — drop PNGs in there and they show up below.
+> Screenshots live in [`docs/screenshots/`](docs/screenshots/) — drop a PNG in there and it shows up below.
 
-| Dashboard | Breakdown |
-| --- | --- |
-| ![Dashboard](docs/screenshots/dashboard.png) | ![Breakdown](docs/screenshots/breakdown.png) |
-
-| Assets | Categories |
-| --- | --- |
-| ![Assets](docs/screenshots/assets.png) | ![Categories](docs/screenshots/categories.png) |
+![Dashboard](docs/screenshots/dashboard.png)
 
 ## ✨ Core Features
 
