@@ -1,12 +1,5 @@
-import {
-	IconArrowDownRight,
-	IconArrowUpRight,
-	IconCalendar,
-	IconWallet,
-} from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { format } from "date-fns";
 import { lazy, Suspense, useMemo, useState } from "react";
 
 const ChartAreaInteractive = lazy(() =>
@@ -30,24 +23,16 @@ const ChartPieCategories = lazy(() =>
 	})),
 );
 
-import { CurrencySelector } from "@/components/currency-selector";
-import { AddTransactionDialog } from "@/components/dashboard/add-transaction-dialog";
-import { DataTable, type Transaction } from "@/components/data-table";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from "@/components/ui/popover";
+	DashboardHeader,
+	type TimeRange,
+} from "@/components/dashboard/dashboard-header";
+import { RecentTransactions } from "@/components/dashboard/recent-transactions";
 import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
+	type DashboardSummary,
+	SummaryCards,
+} from "@/components/dashboard/summary-cards";
+import { type Transaction } from "@/components/data-table";
 import { useCurrency } from "@/contexts/currency-context";
 import { api } from "@/lib/api";
 import { utcDayString } from "@/lib/date";
@@ -55,16 +40,6 @@ import { utcDayString } from "@/lib/date";
 export const Route = createFileRoute("/_authenticated/")({
 	component: HomeComponent,
 });
-
-type TimeRange = "7d" | "30d" | "90d" | "custom";
-
-interface DashboardSummary {
-	totalIncome: number;
-	totalExpenses: number;
-	netBalance: number;
-	totalStartingBalance: number;
-	currentBalance: number;
-}
 
 // API functions
 async function fetchDashboardSummary(
@@ -157,155 +132,22 @@ function HomeComponent() {
 
 	return (
 		<div className="flex flex-col gap-6 p-6">
-			{/* Time Range Selector */}
-			<div className="flex items-center justify-between">
-				<h1 className="font-bold text-3xl">Dashboard</h1>
-				<div className="flex items-center gap-2">
-					<AddTransactionDialog />
-					<CurrencySelector />
-					<Select
-						value={timeRange}
-						onValueChange={(value) => setTimeRange(value as TimeRange)}
-					>
-						<SelectTrigger className="w-[180px]">
-							<SelectValue placeholder="Select time range" />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="7d">Last 7 days</SelectItem>
-							<SelectItem value="30d">Last 30 days</SelectItem>
-							<SelectItem value="90d">Last 90 days</SelectItem>
-							<SelectItem value="custom">Custom range</SelectItem>
-						</SelectContent>
-					</Select>
+			<DashboardHeader
+			timeRange={timeRange}
+			onTimeRangeChange={setTimeRange}
+			customStartDate={customStartDate}
+			customEndDate={customEndDate}
+			onCustomStartChange={setCustomStartDate}
+			onCustomEndChange={setCustomEndDate}
+		/>
 
-					{timeRange === "custom" && (
-						<>
-							<Popover>
-								<PopoverTrigger asChild>
-									<Button variant="outline" className="w-[140px] justify-start">
-										<IconCalendar className="mr-2 size-4" />
-										{customStartDate
-											? format(customStartDate, "MMM dd, yyyy")
-											: "Start date"}
-									</Button>
-								</PopoverTrigger>
-								<PopoverContent className="w-auto p-0">
-									<Calendar
-										mode="single"
-										selected={customStartDate}
-										onSelect={setCustomStartDate}
-										initialFocus
-									/>
-								</PopoverContent>
-							</Popover>
+		<SummaryCards
+			summary={summary}
+			isLoading={summaryLoading}
+			formatCurrency={formatCurrency}
+		/>
 
-							<Popover>
-								<PopoverTrigger asChild>
-									<Button variant="outline" className="w-[140px] justify-start">
-										<IconCalendar className="mr-2 size-4" />
-										{customEndDate
-											? format(customEndDate, "MMM dd, yyyy")
-											: "End date"}
-									</Button>
-								</PopoverTrigger>
-								<PopoverContent className="w-auto p-0">
-									<Calendar
-										mode="single"
-										selected={customEndDate}
-										onSelect={setCustomEndDate}
-										initialFocus
-									/>
-								</PopoverContent>
-							</Popover>
-						</>
-					)}
-				</div>
-			</div>
-
-			{/* Summary Cards */}
-			<div className="grid gap-4 md:grid-cols-4">
-				<Card>
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="font-medium text-sm">Total Income</CardTitle>
-						<IconArrowUpRight className="size-4 text-emerald-500" />
-					</CardHeader>
-					<CardContent>
-						{summaryLoading ? (
-							<div className="h-8 w-32 animate-pulse rounded bg-muted" />
-						) : (
-							<div className="font-bold text-2xl text-emerald-600">
-								+{formatCurrency(summary?.totalIncome || 0)}
-							</div>
-						)}
-					</CardContent>
-				</Card>
-
-				<Card>
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="font-medium text-sm">
-							Total Expenses
-						</CardTitle>
-						<IconArrowDownRight className="size-4 text-rose-500" />
-					</CardHeader>
-					<CardContent>
-						{summaryLoading ? (
-							<div className="h-8 w-32 animate-pulse rounded bg-muted" />
-						) : (
-							<div className="font-bold text-2xl text-rose-600">
-								-{formatCurrency(summary?.totalExpenses || 0)}
-							</div>
-						)}
-					</CardContent>
-				</Card>
-
-				<Card>
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="font-medium text-sm">Net Balance</CardTitle>
-						<IconWallet className="size-4 text-muted-foreground" />
-					</CardHeader>
-					<CardContent>
-						{summaryLoading ? (
-							<div className="h-8 w-32 animate-pulse rounded bg-muted" />
-						) : (
-							<div
-								className={`font-bold text-2xl ${
-									(summary?.netBalance || 0) >= 0
-										? "text-emerald-600"
-										: "text-rose-600"
-								}`}
-							>
-								{formatCurrency(summary?.netBalance || 0)}
-							</div>
-						)}
-					</CardContent>
-				</Card>
-
-				<Card>
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="font-medium text-sm">
-							Current Balance
-						</CardTitle>
-						<IconWallet className="size-4 text-blue-500" />
-					</CardHeader>
-					<CardContent>
-						{summaryLoading ? (
-							<div className="h-8 w-32 animate-pulse rounded bg-muted" />
-						) : (
-							<div
-								className={`font-bold text-2xl ${
-									(summary?.currentBalance || 0) >= 0
-										? "text-blue-600"
-										: "text-rose-600"
-								}`}
-							>
-								{formatCurrency(summary?.currentBalance || 0)}
-							</div>
-						)}
-					</CardContent>
-				</Card>
-			</div>
-
-			{/* Chart and Category Pie */}
+		{/* Chart and Category Pie */}
 			<div className="grid gap-6 md:grid-cols-7">
 				<div className="md:col-span-4">
 					<Suspense
@@ -345,32 +187,7 @@ function HomeComponent() {
 				)}
 			</Suspense>
 
-			{/* Recent Transactions */}
-			<Card>
-				<CardHeader>
-					<CardTitle>Recent Transactions</CardTitle>
-				</CardHeader>
-				<CardContent>
-					{transactionsLoading ? (
-						<div className="space-y-2">
-							{[
-								"skeleton-1",
-								"skeleton-2",
-								"skeleton-3",
-								"skeleton-4",
-								"skeleton-5",
-							].map((key) => (
-								<div
-									key={key}
-									className="h-12 w-full animate-pulse rounded bg-muted"
-								/>
-							))}
-						</div>
-					) : (
-						<DataTable data={transactions} />
-					)}
-				</CardContent>
-			</Card>
+			<RecentTransactions transactions={transactions} isLoading={transactionsLoading} />
 		</div>
 	);
 }

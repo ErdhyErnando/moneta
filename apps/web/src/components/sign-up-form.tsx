@@ -3,10 +3,9 @@ import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import z from "zod";
 import { authClient } from "@/lib/auth-client";
+import { AuthField } from "./auth-field";
 import Loader from "./loader";
 import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
 
 export default function SignUpForm({
 	onSwitchToSignIn,
@@ -77,22 +76,7 @@ export default function SignUpForm({
 				<div>
 					<form.Field name="name">
 						{(field) => (
-							<div className="space-y-2">
-								<Label htmlFor={field.name}>Name</Label>
-								<Input
-									id={field.name}
-									name={field.name}
-									autoComplete="name"
-									value={field.state.value}
-									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.value)}
-								/>
-								{field.state.meta.errors.map((error) => (
-									<p key={error?.message} className="text-red-500 text-sm">
-										{error?.message}
-									</p>
-								))}
-							</div>
+							<AuthField field={field} label="Name" autoComplete="name" />
 						)}
 					</form.Field>
 				</div>
@@ -100,23 +84,7 @@ export default function SignUpForm({
 				<div>
 					<form.Field name="email">
 						{(field) => (
-							<div className="space-y-2">
-								<Label htmlFor={field.name}>Email</Label>
-								<Input
-									id={field.name}
-									name={field.name}
-									type="email"
-									autoComplete="email"
-									value={field.state.value}
-									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.value)}
-								/>
-								{field.state.meta.errors.map((error) => (
-									<p key={error?.message} className="text-red-500 text-sm">
-										{error?.message}
-									</p>
-								))}
-							</div>
+							<AuthField field={field} label="Email" type="email" autoComplete="email" />
 						)}
 					</form.Field>
 				</div>
@@ -124,23 +92,7 @@ export default function SignUpForm({
 				<div>
 					<form.Field name="password">
 						{(field) => (
-							<div className="space-y-2">
-								<Label htmlFor={field.name}>Password</Label>
-								<Input
-									id={field.name}
-									name={field.name}
-									type="password"
-									autoComplete="new-password"
-									value={field.state.value}
-									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.value)}
-								/>
-								{field.state.meta.errors.map((error) => (
-									<p key={error?.message} className="text-red-500 text-sm">
-										{error?.message}
-									</p>
-								))}
-							</div>
+							<AuthField field={field} label="Password" type="password" autoComplete="new-password" />
 						)}
 					</form.Field>
 				</div>

@@ -2,45 +2,54 @@
 
 Moneta is a personal finance management web application designed designed and develop with the plan of testing google's Antigravity. The primary objective is to provide a fast, efficient, and user-friendly tool for tracking income and expenses, visualizing financial health, and gaining insights into spending habits. (not really i just want to see the capabilities of gemini 3 pro 😝)
 
-This project is built for tech-savvy individuals who prefer a simple, self-hosted solution for privacy and control over their financial data.(non tech-savy could use it too)
+Built for tech-savvy folks who want a simple, self-hosted money tracker they actually control — your data lives in your own Postgres, not in someone else's cloud. (non tech-savvy could use it too)
+
+## 📸 Screenshots
+
+> Screenshots live in [`docs/screenshots/`](docs/screenshots/) — drop a PNG in there and it shows up below.
+
+![Dashboard](docs/screenshots/dashboard.png)
 
 ## ✨ Core Features
 
-- **User Authentication:** Secure user authentication and authorization using email and password.
-- **Dashboard:** A comprehensive dashboard with financial summaries and data visualizations (bar charts, line charts).
-- **Filtering:** Filter dashboard data by weekly, monthly, and yearly views.
-- **Income Management:** A dedicated page to add and view income entries with categories.
-- **Expense Management:** A dedicated page to add and view expense entries with categories.
-- **Predefined Categories:** A set of predefined categories for income and expenses.
+- **User Authentication:** Email + password sign-up/sign-in with sessions (Better-Auth), protected routes included.
+- **Dashboard:** Summary cards (income, expenses, net + current balance), cash-flow area chart, category pie, monthly income/expense bars with year picker, and recent transactions.
+- **Time Ranges:** Slice the dashboard by last 7 / 30 / 90 days or a custom date range.
+- **Income & Expense Management:** Filterable, sortable, paginated tables with a column chooser, add/edit/delete dialogs, and per-type breakdown pages with charts.
+- **Assets Ledger:** Track holdings (stocks, bonds, cash, crypto, …) grouped by type with totals, a chart, and full CRUD.
+- **Starting Balances:** Set opening balances so the numbers actually add up from day one.
+- **Categories:** Custom categories with colors, per-type tabs, plus archive/restore instead of scary hard deletes.
+- **Multi-currency Display:** Currency selector for viewing amounts your way.
+- **Dark Mode:** Light / dark / system theme with a sidebar toggle.
+- **PWA:** Installable, works like a native-ish app on desktop and mobile.
 
 ## 🚀 Technology Stack
 
 - **TypeScript** - For type safety and improved developer experience
-- **React** - For building the user interface
-- **TanStack Router** - File-based routing with full type safety
+- **React 19 + Vite** - UI + dev server / build (port 3001)
+- **TanStack Router / Query / Table / Form** - File-based routing, server state, tables, forms
 - **TailwindCSS** - Utility-first CSS for rapid UI development
 - **shadcn/ui** - Reusable UI components
-- **Recharts** - For data visualization
-- **Hono** - Lightweight, performant server framework for the backend API
-- **Node.js** - Runtime environment
-- **Drizzle** - TypeScript-first ORM
-- **PostgreSQL** - Database engine
-- **Authentication** - Better-Auth
+- **Recharts** - Charts, lazy-loaded so the first paint stays snappy
+- **Hono (Node.js)** - Lightweight backend API (port 3000)
+- **Drizzle + PostgreSQL** - TypeScript-first ORM + database engine
+- **Better-Auth** - Authentication
 - **Biome** - Linting and formatting
-- **PWA** - Progressive Web App support
-- **Turborepo** - Optimized monorepo build system
+- **Turborepo + pnpm** - Monorepo build system + package manager
 
 ## 📦 Project Structure
 
 ```
 moneta/
 ├── apps/
-│   ├── web/         # Frontend application (React + TanStack Router)
-│   └── server/      # Backend API (Hono)
+│   ├── web/         # Frontend (React 19 + Vite + TanStack Router)
+│   └── server/      # Backend API (Hono, Dockerfile included)
 ├── packages/
-│   ├── api/         # tRPC API layer / business logic
-│   ├── auth/        # Authentication configuration & logic
-│   └── db/          # Database schema & queries
+│   ├── auth/        # Better-Auth configuration & logic
+│   ├── config/      # Shared TypeScript config
+│   └── db/          # Drizzle schema, migrations & queries
+└── docs/
+    └── screenshots/ # README screenshots live here
 ```
 
 ## 🏁 Getting Started
@@ -48,19 +57,36 @@ moneta/
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/en/) (v18 or higher)
-- [pnpm](https://pnpm.io/installation)
+- [pnpm](https://pnpm.io/installation) (v9)
 - [PostgreSQL](https://www.postgresql.org/download/)
 
 ### Installation
 
 1.  Clone the repository:
     ```bash
-    git clone https://github.com/your-username/moneta.git
+    git clone https://github.com/ErdhyErnando/moneta.git
     cd moneta
     ```
 2.  Install the dependencies:
     ```bash
     pnpm install
+    ```
+3.  Configure the backend — copy the example env and fill it in:
+    ```bash
+    cp apps/server/.env.example apps/server/.env
+    ```
+    ```env
+    DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"
+    BETTER_AUTH_SECRET="something-long-and-random"
+    BETTER_AUTH_URL="http://localhost:3000"
+    CORS_ORIGIN="http://localhost:3001"
+    ```
+4.  Point the web app at the API (optional for local dev, defaults to `http://localhost:3000`):
+    ```bash
+    cp apps/web/.env.example apps/web/.env
+    ```
+    ```env
+    VITE_SERVER_URL="http://localhost:3000"
     ```
 
 ## 🗄️ Database Setup
@@ -69,22 +95,15 @@ This project uses PostgreSQL with Drizzle ORM.
 
 1.  Make sure you have a PostgreSQL database server running.
 2.  Create a new database for the project.
-3.  Copy the `.env.example` file in `apps/server` to a new file named `.env`.
-    ```bash
-    cp apps/server/.env.example apps/server/.env
-    ```
-4.  Update your `apps/server/.env` file with your PostgreSQL connection details.
-    ```env
-    DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"
-    ```
-5.  Apply the schema to your database:
+3.  Push the schema to your database:
     ```bash
     pnpm run db:push
     ```
+    (Migrations workflow: `pnpm run db:generate` then `pnpm run db:migrate`. Peek at the data anytime with `pnpm run db:studio`, or load demo data with `pnpm run db:seed`.)
 
 ## 🚀 Running the Application
 
-Run the development server:
+Run everything in development mode:
 
 ```bash
 pnpm run dev
@@ -93,43 +112,34 @@ pnpm run dev
 - The web application will be available at [http://localhost:3001](http://localhost:3001).
 - The API server will be running at [http://localhost:3000](http://localhost:3000).
 
+Run only what you need: `pnpm run dev:web` (frontend) or `pnpm run dev:server` (backend).
+
 ## 📜 Available Scripts
 
 - `pnpm run dev`: Start all applications in development mode
-- `pnpm run build`: Build all applications
 - `pnpm run dev:web`: Start only the web application
-- `pnpm run dev:server`: Start only the server
-- `pnpm run check-types`: Check TypeScript types across all apps
+- `pnpm run dev:server`: Start only the API server
+- `pnpm run build`: Build all applications
+- `pnpm run check`: Biome check with auto-fix (run this before committing, pretty please)
+- `pnpm run check-types`: TypeScript check across all apps
 - `pnpm run db:push`: Push schema changes to the database
+- `pnpm run db:generate`: Generate a migration from schema changes
+- `pnpm run db:migrate`: Run pending migrations
 - `pnpm run db:studio`: Open Drizzle Studio to view and manage your data
-- `pnpm run format`: Format the code using Biome
-- `pnpm run lint`: Lint the code using Biome
-- `pnpm run check`: Run both formatting and linting
-- `cd apps/web && pnpm run generate-pwa-assets`: Generate PWA assets
+- `pnpm run db:seed`: Seed the database with demo data
+- `cd apps/web && pnpm run generate-pwa-assets`: Regenerate PWA icons/splash assets
 
 ## 🌐 API Endpoints
 
-A brief overview of the available API endpoints.
+Brief overview — everything under `/api` needs an authenticated session (cookie-based).
 
-### Authentication
-
-- `POST /auth/sign-in`: User login.
-- `POST /auth/sign-out`: User logout.
-
-### Income Management
-
-- `GET /api/incomes`: Get all income records for the authenticated user.
-- `POST /api/incomes`: Add a new income record.
-
-### Expense Management
-
-- `GET /api/expenses`: Get all expense records for the authenticated user.
-- `POST /api/expenses`: Add a new expense record.
-
-### Category Management
-
-- `GET /api/categories`: Get all predefined categories.
+- **Auth:** handled by Better-Auth (sign-up / sign-in / sign-out / session).
+- **Incomes / Expenses:** `GET /api/incomes`, `POST /api/incomes`, `PUT /api/incomes/:id`, `DELETE /api/incomes/:id` (same shape for `/api/expenses`).
+- **Assets:** `GET /api/assets`, `POST /api/assets`, `PUT /api/assets/:id`, `DELETE /api/assets/:id`.
+- **Starting balances:** `GET /api/starting-balances`, `POST /api/starting-balances`, `PUT /api/starting-balances/:id`, `DELETE /api/starting-balances/:id`.
+- **Categories:** `GET /api/categories`, `POST /api/categories`, `PUT /api/categories/:id`, `DELETE /api/categories/:id` (archive), `POST /api/categories/:id/restore`.
+- **Dashboard:** `GET /api/dashboard/summary`, `/transactions`, `/chart`, `/expense-categories`, `/income-categories`, `/monthly-expenses`, `/monthly-income` (all accept `startDate`/`endDate`, monthly ones take `year`).
 
 ## 🚀 Deployment
 
-The application is designed to be deployed to a personal VPS using [Dokploy](https://dokploy.com/).
+The application is designed to be deployed to a personal VPS using [Dokploy](https://dokploy.com/). The server ships with a `Dockerfile`, and pushes to `main` touching `apps/server/**` (or shared packages) automatically build + push an image to GHCR via [`.github/workflows/deploy-server.yml`](.github/workflows/deploy-server.yml). The web app is a static Vite build (`pnpm --filter web build`) — serve `apps/web/dist` behind anything you like.
