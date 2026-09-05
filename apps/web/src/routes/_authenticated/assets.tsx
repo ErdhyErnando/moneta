@@ -9,6 +9,7 @@ import {
 import { AssetsGroup } from "@/components/assets/assets-group";
 import { CurrencySelector } from "@/components/currency-selector";
 import { Button } from "@/components/ui/button";
+import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 import {
 	Card,
 	CardContent,
@@ -316,29 +317,14 @@ function AssetsPage() {
 				</div>
 			)}
 
-			<Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-				<DialogContent>
-					<DialogHeader>
-						<DialogTitle>Delete Asset</DialogTitle>
-						<DialogDescription>
-							Are you sure you want to delete this asset? This action cannot be
-							undone.
-						</DialogDescription>
-					</DialogHeader>
-					<DialogFooter>
-						<Button variant="outline" onClick={() => setIsDeleteOpen(false)}>
-							Cancel
-						</Button>
-						<Button
-							variant="destructive"
-							onClick={confirmDelete}
-							disabled={deleteMutation.isPending}
-						>
-							{deleteMutation.isPending ? "Deleting..." : "Delete"}
-						</Button>
-					</DialogFooter>
-				</DialogContent>
-			</Dialog>
+			<DeleteConfirmDialog
+				open={isDeleteOpen}
+				onOpenChange={setIsDeleteOpen}
+				title="Delete Asset"
+				description="Are you sure you want to delete this asset? This action cannot be undone."
+				onConfirm={confirmDelete}
+				pending={deleteMutation.isPending}
+			/>
 		</div>
 	);
 }
