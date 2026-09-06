@@ -9,22 +9,21 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
-import { Route as AuthenticatedStartingBalanceRouteImport } from './routes/_authenticated/starting-balance'
-import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
-import { Route as AuthenticatedMutationsRouteImport } from './routes/_authenticated/mutations'
-import { Route as AuthenticatedIncomeRouteImport } from './routes/_authenticated/income'
-import { Route as AuthenticatedExpenseRouteImport } from './routes/_authenticated/expense'
 import { Route as AuthenticatedAssetsRouteImport } from './routes/_authenticated/assets'
-import { Route as AuthenticatedIncomeBreakdownRouteImport } from './routes/_authenticated/income_.breakdown'
+import { Route as AuthenticatedExpenseRouteImport } from './routes/_authenticated/expense'
+import { Route as AuthenticatedIncomeRouteImport } from './routes/_authenticated/income'
+import { Route as AuthenticatedMutationsRouteImport } from './routes/_authenticated/mutations'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedStartingBalanceRouteImport } from './routes/_authenticated/starting-balance'
 import { Route as AuthenticatedExpenseBreakdownRouteImport } from './routes/_authenticated/expense_.breakdown'
+import { Route as AuthenticatedIncomeBreakdownRouteImport } from './routes/_authenticated/income_.breakdown'
 
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -32,13 +31,39 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRoute = AuthenticatedRouteImport.update({
-  id: '/_authenticated',
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedAssetsRoute = AuthenticatedAssetsRouteImport.update({
+  id: '/assets',
+  path: '/assets',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedExpenseRoute = AuthenticatedExpenseRouteImport.update({
+  id: '/expense',
+  path: '/expense',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedIncomeRoute = AuthenticatedIncomeRouteImport.update({
+  id: '/income',
+  path: '/income',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedMutationsRoute = AuthenticatedMutationsRouteImport.update({
+  id: '/mutations',
+  path: '/mutations',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedStartingBalanceRoute =
@@ -47,45 +72,21 @@ const AuthenticatedStartingBalanceRoute =
     path: '/starting-balance',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
-const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedMutationsRoute = AuthenticatedMutationsRouteImport.update({
-  id: '/mutations',
-  path: '/mutations',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedIncomeRoute = AuthenticatedIncomeRouteImport.update({
-  id: '/income',
-  path: '/income',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedExpenseRoute = AuthenticatedExpenseRouteImport.update({
-  id: '/expense',
-  path: '/expense',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedAssetsRoute = AuthenticatedAssetsRouteImport.update({
-  id: '/assets',
-  path: '/assets',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedIncomeBreakdownRoute =
-  AuthenticatedIncomeBreakdownRouteImport.update({
-    id: '/income_/breakdown',
-    path: '/income/breakdown',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
 const AuthenticatedExpenseBreakdownRoute =
   AuthenticatedExpenseBreakdownRouteImport.update({
     id: '/expense_/breakdown',
     path: '/expense/breakdown',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedIncomeBreakdownRoute =
+  AuthenticatedIncomeBreakdownRouteImport.update({
+    id: '/income_/breakdown',
+    path: '/income/breakdown',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof AuthenticatedIndexRoute
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/assets': typeof AuthenticatedAssetsRoute
@@ -94,7 +95,6 @@ export interface FileRoutesByFullPath {
   '/mutations': typeof AuthenticatedMutationsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/starting-balance': typeof AuthenticatedStartingBalanceRoute
-  '/': typeof AuthenticatedIndexRoute
   '/expense/breakdown': typeof AuthenticatedExpenseBreakdownRoute
   '/income/breakdown': typeof AuthenticatedIncomeBreakdownRoute
 }
@@ -129,6 +129,7 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/'
     | '/dashboard'
     | '/login'
     | '/assets'
@@ -137,7 +138,6 @@ export interface FileRouteTypes {
     | '/mutations'
     | '/settings'
     | '/starting-balance'
-    | '/'
     | '/expense/breakdown'
     | '/income/breakdown'
   fileRoutesByTo: FileRoutesByTo
@@ -177,11 +177,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -191,11 +191,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated': {
-      id: '/_authenticated'
-      path: ''
-      fullPath: ''
-      preLoaderRoute: typeof AuthenticatedRouteImport
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/': {
@@ -205,32 +205,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/starting-balance': {
-      id: '/_authenticated/starting-balance'
-      path: '/starting-balance'
-      fullPath: '/starting-balance'
-      preLoaderRoute: typeof AuthenticatedStartingBalanceRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/settings': {
-      id: '/_authenticated/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/mutations': {
-      id: '/_authenticated/mutations'
-      path: '/mutations'
-      fullPath: '/mutations'
-      preLoaderRoute: typeof AuthenticatedMutationsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/income': {
-      id: '/_authenticated/income'
-      path: '/income'
-      fullPath: '/income'
-      preLoaderRoute: typeof AuthenticatedIncomeRouteImport
+    '/_authenticated/assets': {
+      id: '/_authenticated/assets'
+      path: '/assets'
+      fullPath: '/assets'
+      preLoaderRoute: typeof AuthenticatedAssetsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/expense': {
@@ -240,18 +219,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedExpenseRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/assets': {
-      id: '/_authenticated/assets'
-      path: '/assets'
-      fullPath: '/assets'
-      preLoaderRoute: typeof AuthenticatedAssetsRouteImport
+    '/_authenticated/income': {
+      id: '/_authenticated/income'
+      path: '/income'
+      fullPath: '/income'
+      preLoaderRoute: typeof AuthenticatedIncomeRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/income_/breakdown': {
-      id: '/_authenticated/income_/breakdown'
-      path: '/income/breakdown'
-      fullPath: '/income/breakdown'
-      preLoaderRoute: typeof AuthenticatedIncomeBreakdownRouteImport
+    '/_authenticated/mutations': {
+      id: '/_authenticated/mutations'
+      path: '/mutations'
+      fullPath: '/mutations'
+      preLoaderRoute: typeof AuthenticatedMutationsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/starting-balance': {
+      id: '/_authenticated/starting-balance'
+      path: '/starting-balance'
+      fullPath: '/starting-balance'
+      preLoaderRoute: typeof AuthenticatedStartingBalanceRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/expense_/breakdown': {
@@ -259,6 +252,13 @@ declare module '@tanstack/react-router' {
       path: '/expense/breakdown'
       fullPath: '/expense/breakdown'
       preLoaderRoute: typeof AuthenticatedExpenseBreakdownRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/income_/breakdown': {
+      id: '/_authenticated/income_/breakdown'
+      path: '/income/breakdown'
+      fullPath: '/income/breakdown'
+      preLoaderRoute: typeof AuthenticatedIncomeBreakdownRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
   }

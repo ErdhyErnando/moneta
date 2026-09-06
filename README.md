@@ -56,8 +56,8 @@ moneta/
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/en/) (v18 or higher)
-- [pnpm](https://pnpm.io/installation) (v9)
+- [Node.js](https://nodejs.org/en/) (v22.13 or higher)
+- [pnpm](https://pnpm.io/installation) (v11)
 - [PostgreSQL](https://www.postgresql.org/download/)
 
 ### Installation

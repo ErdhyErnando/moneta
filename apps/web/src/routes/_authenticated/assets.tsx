@@ -8,8 +8,8 @@ import {
 } from "@/components/assets/asset-form";
 import { AssetsGroup } from "@/components/assets/assets-group";
 import { CurrencySelector } from "@/components/currency-selector";
-import { Button } from "@/components/ui/button";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
+import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,

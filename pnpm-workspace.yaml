@@ -6,3 +6,7 @@ catalog:
   dotenv: ^17.2.2
 overrides:
   seroval: ^1.5.3
+allowBuilds:
+  # pnpm 10+ gates install scripts; these two are legit and needed by dev tooling
+  esbuild: true # pulled by drizzle-kit (db:generate / db:push)
+  sharp: true # pulled by @vite-pwa/assets-generator (generate-pwa-assets)

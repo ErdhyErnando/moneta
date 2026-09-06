@@ -1,21 +1,19 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { useState } from "react";
+import { CategoryFormDialog } from "@/components/category-form-dialog";
 import { CategoryTable } from "@/components/category-table";
 import {
 	type Category,
 	type CategoryType,
 	categoryTypes,
 } from "@/components/category-types";
-import { CategoryFormDialog } from "@/components/category-form-dialog";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import type { AxiosError } from "@/lib/api";
 import { api } from "@/lib/api";
-
-
 
 type CategoryFormData = {
 	name: string;
@@ -29,7 +27,6 @@ type CategoryUpdateData = {
 };
 
 type CategoryError = AxiosError<{ error?: { message?: string } | string }>;
-
 
 function getErrorMessage(error: CategoryError, fallback: string) {
 	const errorPayload = error.response?.data?.error;
@@ -213,18 +210,18 @@ export function CategorySettings() {
 					<TabsTrigger value="starting_balance">Starting Balance</TabsTrigger>
 				</TabsList>
 				{categoryTypes.map((type) => (
-				<TabsContent key={type} value={type} className="mt-4">
-					<CategoryTable
-						categories={categories}
-						isLoading={isLoading}
-						type={type}
-						isRestoring={restoreMutation.isPending}
-						onEdit={handleEdit}
-						onArchive={handleArchive}
-						onRestore={restoreMutation.mutate}
-					/>
-				</TabsContent>
-			))}
+					<TabsContent key={type} value={type} className="mt-4">
+						<CategoryTable
+							categories={categories}
+							isLoading={isLoading}
+							type={type}
+							isRestoring={restoreMutation.isPending}
+							onEdit={handleEdit}
+							onArchive={handleArchive}
+							onRestore={restoreMutation.mutate}
+						/>
+					</TabsContent>
+				))}
 			</Tabs>
 
 			<CategoryFormDialog

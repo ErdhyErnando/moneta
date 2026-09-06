@@ -25,14 +25,9 @@
 		"zod": "^4.1.11"
 	},
 	"devDependencies": {
-		"turbo": "^2.5.4",
+		"turbo": "^2.10.12",
 		"@biomejs/biome": "^2.2.0",
 		"@types/node": "^22.13.11"
 	},
-	"pnpm": {
-		"overrides": {
-			"seroval": "^1.5.3"
-		}
-	},
-	"packageManager": "pnpm@9.15.3"
+	"packageManager": "pnpm@11.25.0"
 }

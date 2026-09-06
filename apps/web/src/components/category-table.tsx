@@ -1,8 +1,5 @@
 import { ArchiveRestore, Pencil, Trash2 } from "lucide-react";
-import type {
-	Category,
-	CategoryType,
-} from "@/components/category-types";
+import type { Category, CategoryType } from "@/components/category-types";
 import { Button } from "@/components/ui/button";
 import {
 	Table,
@@ -137,4 +134,3 @@ export function CategoryTable({
 		</div>
 	);
 }
-
