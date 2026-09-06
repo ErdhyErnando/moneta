@@ -78,8 +78,8 @@ export function CategoryFormDialog({
 							/>
 						</div>
 						<p className="text-muted-foreground text-xs">
-							Hex color used for pie + pill (solid badge, white text) — same
-							for dashboard and income/expense tables
+							Hex color used for pie + pill (solid badge, white text) — same for
+							dashboard and income/expense tables
 						</p>
 					</div>
 					<DialogFooter>

@@ -6,10 +6,7 @@ import {
 	IconChevronsRight,
 	IconLayoutColumns,
 } from "@tabler/icons-react";
-import {
-	flexRender,
-	type Table as TanStackTable,
-} from "@tanstack/react-table";
+import { flexRender, type Table as TanStackTable } from "@tanstack/react-table";
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -72,25 +69,22 @@ export function DataTableShell<TData>({
 							</Button>
 						</DropdownMenuTrigger>
 						<DropdownMenuContent align="end" className="w-56">
-							{table
-								.getAllColumns()
-								.flatMap((column) =>
-									typeof column.accessorFn !== "undefined" &&
-									column.getCanHide()
-										? [
-												<DropdownMenuCheckboxItem
-													key={column.id}
-													className="capitalize"
-													checked={column.getIsVisible()}
-													onCheckedChange={(value) =>
-														column.toggleVisibility(!!value)
-													}
-												>
-													{column.id}
-												</DropdownMenuCheckboxItem>,
-											]
-										: [],
-								)}
+							{table.getAllColumns().flatMap((column) =>
+								typeof column.accessorFn !== "undefined" && column.getCanHide()
+									? [
+											<DropdownMenuCheckboxItem
+												key={column.id}
+												className="capitalize"
+												checked={column.getIsVisible()}
+												onCheckedChange={(value) =>
+													column.toggleVisibility(!!value)
+												}
+											>
+												{column.id}
+											</DropdownMenuCheckboxItem>,
+										]
+									: [],
+							)}
 						</DropdownMenuContent>
 					</DropdownMenu>
 					{addControl}
@@ -135,10 +129,7 @@ export function DataTableShell<TData>({
 							))
 						) : (
 							<TableRow>
-								<TableCell
-									colSpan={colCount}
-									className="h-24 text-center"
-								>
+								<TableCell colSpan={colCount} className="h-24 text-center">
 									No results.
 								</TableCell>
 							</TableRow>

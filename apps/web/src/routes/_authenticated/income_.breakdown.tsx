@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 
 // recharts-heavy chart loads on demand per #48 (route-level code split)
 const CategoryBreakdownChart = lazy(() =>
-	import(
-		"@/components/category-breakdown-chart/category-breakdown-chart"
-	).then((m) => ({ default: m.CategoryBreakdownChart })),
+	import("@/components/category-breakdown-chart/category-breakdown-chart").then(
+		(m) => ({ default: m.CategoryBreakdownChart }),
+	),
 );
 
 export const Route = createFileRoute("/_authenticated/income_/breakdown")({

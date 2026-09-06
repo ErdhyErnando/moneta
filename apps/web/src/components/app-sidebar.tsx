@@ -136,8 +136,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
 							<Button variant="outline" size="icon" className="size-9">
-								<IconSun className="size-4 rotate-0 scale-100 opacity-100 transition-transform transition-opacity dark:-rotate-90 dark:scale-50 dark:opacity-0" />
-								<IconMoon className="absolute size-4 rotate-90 scale-50 opacity-0 transition-transform transition-opacity dark:rotate-0 dark:scale-100 dark:opacity-100" />
+								<IconSun className="dark:-rotate-90 size-4 rotate-0 scale-100 opacity-100 transition-opacity transition-transform dark:scale-50 dark:opacity-0" />
+								<IconMoon className="absolute size-4 rotate-90 scale-50 opacity-0 transition-opacity transition-transform dark:rotate-0 dark:scale-100 dark:opacity-100" />
 								<span className="sr-only">Toggle theme</span>
 							</Button>
 						</DropdownMenuTrigger>

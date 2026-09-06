@@ -84,7 +84,12 @@ export default function SignUpForm({
 				<div>
 					<form.Field name="email">
 						{(field) => (
-							<AuthField field={field} label="Email" type="email" autoComplete="email" />
+							<AuthField
+								field={field}
+								label="Email"
+								type="email"
+								autoComplete="email"
+							/>
 						)}
 					</form.Field>
 				</div>
@@ -92,7 +97,12 @@ export default function SignUpForm({
 				<div>
 					<form.Field name="password">
 						{(field) => (
-							<AuthField field={field} label="Password" type="password" autoComplete="new-password" />
+							<AuthField
+								field={field}
+								label="Password"
+								type="password"
+								autoComplete="new-password"
+							/>
 						)}
 					</form.Field>
 				</div>

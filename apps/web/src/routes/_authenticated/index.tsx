@@ -32,7 +32,7 @@ import {
 	type DashboardSummary,
 	SummaryCards,
 } from "@/components/dashboard/summary-cards";
-import { type Transaction } from "@/components/data-table";
+import type { Transaction } from "@/components/data-table";
 import { useCurrency } from "@/contexts/currency-context";
 import { api } from "@/lib/api";
 import { utcDayString } from "@/lib/date";
@@ -133,21 +133,21 @@ function HomeComponent() {
 	return (
 		<div className="flex flex-col gap-6 p-6">
 			<DashboardHeader
-			timeRange={timeRange}
-			onTimeRangeChange={setTimeRange}
-			customStartDate={customStartDate}
-			customEndDate={customEndDate}
-			onCustomStartChange={setCustomStartDate}
-			onCustomEndChange={setCustomEndDate}
-		/>
+				timeRange={timeRange}
+				onTimeRangeChange={setTimeRange}
+				customStartDate={customStartDate}
+				customEndDate={customEndDate}
+				onCustomStartChange={setCustomStartDate}
+				onCustomEndChange={setCustomEndDate}
+			/>
 
-		<SummaryCards
-			summary={summary}
-			isLoading={summaryLoading}
-			formatCurrency={formatCurrency}
-		/>
+			<SummaryCards
+				summary={summary}
+				isLoading={summaryLoading}
+				formatCurrency={formatCurrency}
+			/>
 
-		{/* Chart and Category Pie */}
+			{/* Chart and Category Pie */}
 			<div className="grid gap-6 md:grid-cols-7">
 				<div className="md:col-span-4">
 					<Suspense
@@ -187,7 +187,10 @@ function HomeComponent() {
 				)}
 			</Suspense>
 
-			<RecentTransactions transactions={transactions} isLoading={transactionsLoading} />
+			<RecentTransactions
+				transactions={transactions}
+				isLoading={transactionsLoading}
+			/>
 		</div>
 	);
 }

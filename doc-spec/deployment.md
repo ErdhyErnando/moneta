@@ -48,7 +48,7 @@ Create a file at `apps/server/Dockerfile`. This uses `turbo prune` to optimize t
 The Dockerfile includes several security and efficiency improvements:
 
 1. **`.dockerignore` file**: Excludes sensitive files (`.env`, `.git`) and unnecessary files from the build context
-2. **Pinned pnpm version**: Uses `corepack prepare pnpm@9.15.3 --activate` to ensure consistent builds
+2. **Pinned pnpm version**: Installs `pnpm@11.25.0` globally (corepack bundled with Node images predates pnpm 11's new bin entry path, so pnpm is installed directly) to ensure consistent builds
 3. **Production dependencies only**: Installs only production dependencies with `--prod --frozen-lockfile`
 4. **Minimal runtime image**: The runner stage copies only necessary files:
    - `apps/server/dist/` (built application)

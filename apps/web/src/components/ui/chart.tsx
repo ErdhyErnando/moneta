@@ -108,7 +108,9 @@ ${colorConfig
 
 const ChartTooltip = RechartsPrimitive.Tooltip;
 
-type ChartTooltipContentProps = React.ComponentProps<typeof RechartsPrimitive.Tooltip> &
+type ChartTooltipContentProps = React.ComponentProps<
+	typeof RechartsPrimitive.Tooltip
+> &
 	React.ComponentProps<"div"> & {
 		hideLabel?: boolean;
 		hideIndicator?: boolean;
@@ -203,7 +205,7 @@ function ChartTooltipContentBody({
 					const itemConfig = getPayloadConfigFromPayload(config, item, key);
 					const indicatorColor = color || item.payload.fill || item.color;
 
-					return [(
+					return [
 						<div
 							key={item.dataKey}
 							className={cn(
@@ -259,8 +261,8 @@ function ChartTooltipContentBody({
 									</div>
 								</>
 							)}
-						</div>
-					)];
+						</div>,
+					];
 				})}
 			</div>
 		</div>
@@ -302,7 +304,7 @@ function ChartLegendContent({
 				const key = `${nameKey || item.dataKey || "value"}`;
 				const itemConfig = getPayloadConfigFromPayload(config, item, key);
 
-				return [(
+				return [
 					<div
 						key={item.value}
 						className={cn(
@@ -320,8 +322,8 @@ function ChartLegendContent({
 							/>
 						)}
 						{itemConfig?.label}
-					</div>
-				)];
+					</div>,
+				];
 			})}
 		</div>
 	);

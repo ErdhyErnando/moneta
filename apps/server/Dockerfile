@@ -1,4 +1,4 @@
-FROM node:20-alpine AS base
+FROM node:22-alpine AS base
 
 FROM base AS builder
 # Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
@@ -21,9 +21,9 @@ WORKDIR /app
 COPY --from=builder /app/out/json/ .
 COPY --from=builder /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
 
-# Enable corepack and pin pnpm version to match package.json
-RUN corepack enable
-RUN corepack prepare pnpm@9.15.3 --activate
+# Install the pnpm version pinned in package.json
+# (corepack bundled with Node images predates pnpm 11's new bin entry path, so install pnpm directly)
+RUN npm install -g pnpm@11.25.0
 
 # Install all dependencies (including devDependencies needed for build)
 RUN pnpm install --frozen-lockfile

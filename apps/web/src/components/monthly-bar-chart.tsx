@@ -95,7 +95,8 @@ export function MonthlyBarChart({
 	const yearOptions = Array.from({ length: 5 }, (_, i) => currentYear - i);
 
 	const chartConfig = useMemo(
-		() => ({ amount: { label: barLabel, color: barColor } }) satisfies ChartConfig,
+		() =>
+			({ amount: { label: barLabel, color: barColor } }) satisfies ChartConfig,
 		[barLabel, barColor],
 	);
 
