@@ -52,7 +52,7 @@
 		"@moneta/config": "workspace:*",
 		"@tanstack/react-router-devtools": "^1.167.1",
 		"@tanstack/router-plugin": "^1.168.35",
-		"@types/node": "^22.13.13",
+		"@types/node": "^24.19.2",
 		"@types/react": "~19.1.10",
 		"@types/react-dom": "~19.1.11",
 		"@vite-pwa/assets-generator": "^1.0.0",

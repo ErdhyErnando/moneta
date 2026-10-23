@@ -16,12 +16,12 @@
 		"better-auth": "catalog:",
 		"dotenv": "catalog:",
 		"drizzle-orm": "^0.45.2",
-		"hono": "^4.13.5",
+		"hono": "^4.13.11",
 		"zod": "^4.1.11"
 	},
 	"devDependencies": {
 		"@moneta/config": "workspace:*",
-		"@types/node": "^22.13.11",
+		"@types/node": "^24.19.2",
 		"tsdown": "^0.16.5",
 		"tsx": "^4.19.2",
 		"typescript": "^5.8.2"
