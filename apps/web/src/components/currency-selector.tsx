@@ -39,7 +39,7 @@ export function CurrencySelector() {
 							{curr.symbol} {curr.name}
 						</span>
 						{currency.code === curr.code && (
-							<span className="text-primary">✓</span>
+							<span className="text-brand-accent-strong">✓</span>
 						)}
 					</DropdownMenuItem>
 				))}

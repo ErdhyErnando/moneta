@@ -124,7 +124,7 @@ export default function SignUpForm({
 				<Button
 					variant="link"
 					onClick={onSwitchToSignIn}
-					className="text-primary hover:text-primary/80"
+					className="text-brand-accent-strong hover:text-brand-accent-strong/80"
 				>
 					Already have an account? Sign in
 				</Button>
