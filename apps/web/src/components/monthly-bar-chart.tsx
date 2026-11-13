@@ -1,4 +1,4 @@
-import { Button, LayerCard, Select } from "@cloudflare/kumo";
+import { Button, Select } from "@cloudflare/kumo";
 import { ArrowRightIcon } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
@@ -13,6 +13,8 @@ import {
 	XAxis,
 	YAxis,
 } from "recharts";
+import { ChartCard } from "@/components/dashboard/chart-card";
+import { SignedAmount } from "@/components/dashboard/signed-amount";
 import {
 	type ChartConfig,
 	ChartContainer,
@@ -55,7 +57,8 @@ export type MonthlyBarChartProps = {
 	queryKeyBase: string;
 	endpoint: (year: string) => string;
 	barLabel: string;
-	barColor: string;
+	/** Which P&L token the bars and the total carry (§2.4, §2.5). */
+	direction: "positive" | "negative";
 	toggleTitle: string;
 	onToggle?: () => void;
 };
@@ -66,7 +69,7 @@ export function MonthlyBarChart({
 	queryKeyBase,
 	endpoint,
 	barLabel,
-	barColor,
+	direction,
 	toggleTitle,
 	onToggle,
 }: MonthlyBarChartProps) {
@@ -82,11 +85,19 @@ export function MonthlyBarChart({
 
 	const chartConfig = useMemo(
 		() =>
-			({ amount: { label: barLabel, color: barColor } }) satisfies ChartConfig,
-		[barLabel, barColor],
+			({
+				amount: {
+					label: barLabel,
+					color:
+						direction === "positive"
+							? "var(--color-positive)"
+							: "var(--color-negative)",
+				},
+			}) satisfies ChartConfig,
+		[barLabel, direction],
 	);
 
-	const { data, isLoading } = useQuery({
+	const { data, isLoading, isError, refetch } = useQuery({
 		queryKey: [queryKeyBase, selectedYear],
 		queryFn: async () => {
 			const response = await api.get<MonthlyBarResponse>(
@@ -112,118 +123,119 @@ export function MonthlyBarChart({
 	});
 
 	const total = chartData.reduce((sum, item) => sum + item.amount, 0);
+	const hasData = (data?.monthlyData.length ?? 0) > 0;
 
 	return (
-		<LayerCard className="gap-0 rounded-xl p-0 shadow-none">
-			<div className="flex items-center justify-between px-6 pt-6 pb-4">
-				<div className="flex items-center gap-2">
-					<div>
-						<div className="font-semibold text-base">{title}</div>
-						<div className="text-kumo-subtle text-sm">
-							{descriptionPrefix} for {selectedYear}
-						</div>
-					</div>
+		<ChartCard
+			title={title}
+			description={`${descriptionPrefix} for ${selectedYear}`}
+			height="xl"
+			isLoading={isLoading}
+			isError={isError}
+			onRetry={() => {
+				void refetch();
+			}}
+			isEmpty={!hasData}
+			emptyTitle={`No ${barLabel.toLowerCase()} recorded in ${selectedYear}`}
+			emptyDescription="Pick another year to compare."
+			bodyClassName="flex flex-col gap-2"
+			actions={
+				<>
 					{onToggle && (
 						<Button
 							variant="ghost"
-							size="sm"
 							shape="square"
 							onClick={onToggle}
-							className="ml-2"
+							className="max-md:size-11"
 							aria-label={toggleTitle}
 							title={toggleTitle}
 							icon={<ArrowRightIcon size={16} />}
 						/>
 					)}
-				</div>
-				<Select
-					size="sm"
-					className="w-[120px]"
-					aria-label="Year"
-					placeholder="Select year"
-					value={selectedYear}
-					onValueChange={(value) => {
-						if (value) setSelectedYear(value);
-					}}
-					items={yearOptions.map((year) => ({
-						label: String(year),
-						value: year.toString(),
-					}))}
+					<Select
+						className="w-28 max-md:h-11"
+						aria-label="Year"
+						placeholder="Select year"
+						value={selectedYear}
+						onValueChange={(value) => {
+							if (value) setSelectedYear(value);
+						}}
+						items={yearOptions.map((year) => ({
+							label: String(year),
+							value: year.toString(),
+						}))}
+					/>
+				</>
+			}
+		>
+			<div className="min-h-0 flex-1">
+				<ChartContainer config={chartConfig} className="h-full w-full">
+					<BarChart
+						accessibilityLayer
+						data={chartData}
+						layout="vertical"
+						margin={{
+							right: 16,
+							left: 8,
+							top: 8,
+							bottom: 8,
+						}}
+					>
+						<CartesianGrid horizontal={false} />
+						<YAxis
+							dataKey="month"
+							type="category"
+							tickLine={false}
+							tickMargin={10}
+							axisLine={false}
+							hide
+						/>
+						<XAxis dataKey="amount" type="number" hide />
+						<ChartTooltip
+							cursor={false}
+							content={
+								<ChartTooltipContent
+									indicator="line"
+									formatter={(value) => formatCurrency(Number(value))}
+								/>
+							}
+						/>
+						<Bar
+							dataKey="amount"
+							layout="vertical"
+							fill="var(--color-amount)"
+							radius={3}
+						>
+							<LabelList
+								dataKey="month"
+								position="insideLeft"
+								offset={8}
+								className="fill-background"
+								fontSize={10}
+							/>
+							<LabelList
+								dataKey="amount"
+								position="right"
+								offset={8}
+								className="fill-foreground"
+								fontSize={10}
+								formatter={(value: number) =>
+									value > 0 ? formatCurrency(value) : ""
+								}
+							/>
+						</Bar>
+					</BarChart>
+				</ChartContainer>
+			</div>
+			<div className="flex flex-wrap items-center justify-center gap-2 text-kumo-subtle text-sm">
+				<span>Total for {selectedYear}</span>
+				<SignedAmount
+					amount={total}
+					formatCurrency={formatCurrency}
+					direction={direction}
+					size="inline"
 				/>
 			</div>
-			<div className="px-6 pb-6">
-				{isLoading ? (
-					<div className="h-[200px] animate-pulse rounded-lg bg-kumo-fill" />
-				) : (
-					<>
-						<ChartContainer
-							config={chartConfig}
-							className="max-h-[300px] w-full"
-						>
-							<BarChart
-								accessibilityLayer
-								data={chartData}
-								layout="vertical"
-								margin={{
-									right: 16,
-									left: 8,
-									top: 8,
-									bottom: 8,
-								}}
-							>
-								<CartesianGrid horizontal={false} />
-								<YAxis
-									dataKey="month"
-									type="category"
-									tickLine={false}
-									tickMargin={10}
-									axisLine={false}
-									hide
-								/>
-								<XAxis dataKey="amount" type="number" hide />
-								<ChartTooltip
-									cursor={false}
-									content={
-										<ChartTooltipContent
-											indicator="line"
-											formatter={(value) => formatCurrency(Number(value))}
-										/>
-									}
-								/>
-								<Bar
-									dataKey="amount"
-									layout="vertical"
-									fill="var(--color-amount)"
-									radius={3}
-								>
-									<LabelList
-										dataKey="month"
-										position="insideLeft"
-										offset={8}
-										className="fill-background"
-										fontSize={10}
-									/>
-									<LabelList
-										dataKey="amount"
-										position="right"
-										offset={8}
-										className="fill-foreground"
-										fontSize={10}
-										formatter={(value: number) =>
-											value > 0 ? formatCurrency(value) : ""
-										}
-									/>
-								</Bar>
-							</BarChart>
-						</ChartContainer>
-						<div className="mt-4 text-center">
-							<p className="text-kumo-subtle text-sm tabular-nums">
-								Total for {selectedYear}: {formatCurrency(total)}
-							</p>
-						</div>
-					</>
-				)}
-			</div>
-		</LayerCard>
+		</ChartCard>
 	);
 }

@@ -14,7 +14,7 @@ export function ChartBarMonthlyExpenses({
 			queryKeyBase="monthly-expenses"
 			endpoint={(year) => `/api/dashboard/monthly-expenses?year=${year}`}
 			barLabel="Expenses"
-			barColor="var(--destructive)"
+			direction="negative"
 			toggleTitle="Switch to Income"
 			onToggle={onToggle}
 		/>

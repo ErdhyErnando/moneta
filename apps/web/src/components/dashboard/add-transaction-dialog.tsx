@@ -4,11 +4,20 @@ import { useState } from "react";
 import { AddTransactionForm } from "@/components/add-transaction-form";
 import { ResponsiveDialog } from "@/components/responsive-dialog";
 
+type AddTransactionDialogProps = {
+	/** Layout-only override on the trigger (e.g. `max-md:hidden`). */
+	className?: string;
+};
+
 /**
- * Dashboard "Add Transaction" entry point. The form itself lives in
- * `AddTransactionForm` so the mobile bottom-nav sheet can share it.
+ * Dashboard "Add Transaction" entry point — the view's single primary CTA.
+ * The form itself lives in `AddTransactionForm` so the mobile bottom-nav sheet
+ * can share it. Opens as a centered dialog at `>=md` and a bottom sheet below
+ * it (ResponsiveDialog, decision D11).
  */
-export function AddTransactionDialog(): React.JSX.Element {
+export function AddTransactionDialog({
+	className,
+}: AddTransactionDialogProps): React.JSX.Element {
 	const [open, setOpen] = useState(false);
 	const [type, setType] = useState<"expense" | "income">("expense");
 
@@ -18,6 +27,7 @@ export function AddTransactionDialog(): React.JSX.Element {
 				variant="primary"
 				icon={<PlusIcon size={16} />}
 				onClick={() => setOpen(true)}
+				className={className}
 			>
 				Add Transaction
 			</Button>

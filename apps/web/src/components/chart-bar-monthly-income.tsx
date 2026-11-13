@@ -14,7 +14,7 @@ export function ChartBarMonthlyIncome({
 			queryKeyBase="monthly-income"
 			endpoint={(year) => `/api/dashboard/monthly-income?year=${year}`}
 			barLabel="Income"
-			barColor="var(--color-positive)"
+			direction="positive"
 			toggleTitle="Switch to Expenses"
 			onToggle={onToggle}
 		/>
