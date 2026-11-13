@@ -1,6 +1,16 @@
 @import url("https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,1..1000&display=swap");
+@import "@cloudflare/kumo/styles/tailwind";
 @import "tailwindcss";
 @import "tw-animate-css";
+
+/* kumo ships its utility classes inside dist/chunks/*.js, and Tailwind v4 does
+   not scan node_modules by default. IMPORTANT (pnpm): the oxide scanner does
+   NOT follow symlinks, so the usual `node_modules/@cloudflare/kumo/dist` path
+   finds 0 files. It also rejects globs *inside* a path segment
+   (`@cloudflare+kumo@*`). The only working form is the real `.pnpm` store path,
+   with the exact peer-hash directory  ->  bump it on every kumo upgrade.
+   Verified: 371 files / 15,012 candidates scanned. */
+@source "../../../node_modules/.pnpm/@cloudflare+kumo@2.18.0_@date-fns+tz@1.4.1_@phosphor-icons+react@2.1.10_react-dom@19.1._baa480b20dc40c3307635f6d55b0dc5a/node_modules/@cloudflare/kumo/dist/**/*.js";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -220,5 +230,70 @@ body {
 
 	body {
 		@apply bg-background text-foreground;
+	}
+}
+
+/* -------------------------------------------------------------------------- */
+/* SPIKE #44 — kumo brand override (green, hue 156) + dark-mode bridge         */
+/*                                                                            */
+/* Deliberately UNLAYERED: kumo declares its tokens inside `@layer theme`      */
+/* (from `@theme`) and `@layer base` (per-mode flattening). Unlayered normal    */
+/* declarations beat every layered normal declaration, so these win without    */
+/* `!important` and without depending on stylesheet order.                     */
+/* -------------------------------------------------------------------------- */
+
+:root,
+:root[data-mode="light"],
+:root.light {
+	/* brand as fill (primary CTA, active nav, focus ring, 1px indicators) */
+	--color-kumo-brand: oklch(0.52 0.1 156);
+	--color-kumo-brand-hover: oklch(0.48 0.095 156);
+	/* brand as text / link / keyword (AA on card) */
+	--text-color-kumo-brand: oklch(0.42 0.085 156);
+	/* focus ring */
+	--color-kumo-focus: oklch(0.52 0.1 156);
+}
+
+/* kumo's own `@theme` redefines Tailwind's type scale (--text-sm 14→13px,
+   --text-base 16→14px, --text-lg 18→16px) for EVERY consumer of the stylesheet —
+   it silently shrinks the existing app (measured: 13k–17k pixels differ per page).
+   These 6 lines opt out and restore Tailwind's scale. Delete them if the
+   redesign wants kumo's compact scale everywhere (matches D3's "compact"). */
+:root {
+	--text-sm: 0.875rem;
+	--text-sm--line-height: calc(1.25 / 0.875);
+	--text-base: 1rem;
+	--text-base--line-height: calc(1.5 / 1);
+	--text-lg: 1.125rem;
+	--text-lg--line-height: calc(1.75 / 1.125);
+}
+
+/* dark: later in source order than the light block, same-ish specificity,
+   so both `.dark` (next-themes) and `[data-mode="dark"]` (kumo) resolve. */
+:root[data-mode="dark"],
+:root.dark {
+	--color-kumo-brand: oklch(0.72 0.11 156);
+	--color-kumo-brand-hover: oklch(0.76 0.11 156);
+	--text-color-kumo-brand: oklch(0.8 0.1 156);
+	--color-kumo-focus: oklch(0.72 0.11 156);
+}
+
+/* kumo hardcodes `!text-white` on primary + destructive buttons. In dark mode
+   the brand fill is light (#66b987 → 2.4:1 against white), so the primary
+   label must flip to near-black. The selector pins the *primary* variant only:
+   its inline style declares `--kumo-button-emphasis-bg: … var(--color-kumo-brand) …`,
+   whereas destructive points at `--color-kumo-danger`.
+
+   NOTE: `!important` is required, and it must live INSIDE a cascade layer.
+   In the important origin the layer order is reversed, so an unlayered
+   `!important` LOSES to Tailwind's `!text-white` utility (which is important
+   and inside `@layer utilities`). Declaring it in a layer that is registered
+   EARLIER than `utilities` (`base` does it) makes it win. Verified in
+   Chrome: unlayered → still rgb(255,255,255); @layer base → #0f1912. */
+@layer base {
+	:root[data-mode="dark"]
+		[data-kumo-component="Button"][style*="--color-kumo-brand"],
+	:root.dark [data-kumo-component="Button"][style*="--color-kumo-brand"] {
+		color: #0f1912 !important;
 	}
 }

@@ -36,12 +36,15 @@ function RootComponent() {
 		<>
 			<HeadContent />
 			<ThemeProvider
-				attribute="class"
+				attribute={["class", "data-mode"]}
 				defaultTheme="dark"
 				disableTransitionOnChange
 				storageKey="vite-ui-theme"
+				value={{ light: "light", dark: "dark" }}
 			>
-				<div className="h-svh">
+				{/* kumo: isolating the app root keeps portalled popups above our
+				    own sticky headers, which use positive z-index. */}
+				<div className="isolate h-svh">
 					<Outlet />
 				</div>
 				<Toaster />

@@ -12,7 +12,9 @@
 		"generate-pwa-assets": "pwa-assets-generator"
 	},
 	"dependencies": {
+		"@cloudflare/kumo": "^2.18.0",
 		"@moneta/auth": "workspace:*",
+		"@phosphor-icons/react": "^2.1.10",
 		"@radix-ui/react-accordion": "^1.2.20",
 		"@radix-ui/react-avatar": "^1.1.11",
 		"@radix-ui/react-checkbox": "^1.3.3",
@@ -36,6 +38,7 @@
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
 		"date-fns": "^4.1.0",
+		"echarts": "^6.1.0",
 		"lucide-react": "^0.473.0",
 		"next-themes": "^0.4.6",
 		"react": "19.1.0",

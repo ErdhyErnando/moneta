@@ -18,6 +18,7 @@ import { Route as AuthenticatedExpenseRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedIncomeRouteImport } from './routes/_authenticated/income'
 import { Route as AuthenticatedMutationsRouteImport } from './routes/_authenticated/mutations'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedSpikeRouteImport } from './routes/_authenticated/spike'
 import { Route as AuthenticatedStartingBalanceRouteImport } from './routes/_authenticated/starting-balance'
 import { Route as AuthenticatedExpenseBreakdownRouteImport } from './routes/_authenticated/expense_.breakdown'
 import { Route as AuthenticatedIncomeBreakdownRouteImport } from './routes/_authenticated/income_.breakdown'
@@ -66,6 +67,11 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedSpikeRoute = AuthenticatedSpikeRouteImport.update({
+  id: '/spike',
+  path: '/spike',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedStartingBalanceRoute =
   AuthenticatedStartingBalanceRouteImport.update({
     id: '/starting-balance',
@@ -94,6 +100,7 @@ export interface FileRoutesByFullPath {
   '/income': typeof AuthenticatedIncomeRoute
   '/mutations': typeof AuthenticatedMutationsRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/spike': typeof AuthenticatedSpikeRoute
   '/starting-balance': typeof AuthenticatedStartingBalanceRoute
   '/expense/breakdown': typeof AuthenticatedExpenseBreakdownRoute
   '/income/breakdown': typeof AuthenticatedIncomeBreakdownRoute
@@ -106,6 +113,7 @@ export interface FileRoutesByTo {
   '/income': typeof AuthenticatedIncomeRoute
   '/mutations': typeof AuthenticatedMutationsRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/spike': typeof AuthenticatedSpikeRoute
   '/starting-balance': typeof AuthenticatedStartingBalanceRoute
   '/': typeof AuthenticatedIndexRoute
   '/expense/breakdown': typeof AuthenticatedExpenseBreakdownRoute
@@ -121,6 +129,7 @@ export interface FileRoutesById {
   '/_authenticated/income': typeof AuthenticatedIncomeRoute
   '/_authenticated/mutations': typeof AuthenticatedMutationsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/spike': typeof AuthenticatedSpikeRoute
   '/_authenticated/starting-balance': typeof AuthenticatedStartingBalanceRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/expense_/breakdown': typeof AuthenticatedExpenseBreakdownRoute
@@ -137,6 +146,7 @@ export interface FileRouteTypes {
     | '/income'
     | '/mutations'
     | '/settings'
+    | '/spike'
     | '/starting-balance'
     | '/expense/breakdown'
     | '/income/breakdown'
@@ -149,6 +159,7 @@ export interface FileRouteTypes {
     | '/income'
     | '/mutations'
     | '/settings'
+    | '/spike'
     | '/starting-balance'
     | '/'
     | '/expense/breakdown'
@@ -163,6 +174,7 @@ export interface FileRouteTypes {
     | '/_authenticated/income'
     | '/_authenticated/mutations'
     | '/_authenticated/settings'
+    | '/_authenticated/spike'
     | '/_authenticated/starting-balance'
     | '/_authenticated/'
     | '/_authenticated/expense_/breakdown'
@@ -240,6 +252,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/spike': {
+      id: '/_authenticated/spike'
+      path: '/spike'
+      fullPath: '/spike'
+      preLoaderRoute: typeof AuthenticatedSpikeRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/starting-balance': {
       id: '/_authenticated/starting-balance'
       path: '/starting-balance'
@@ -270,6 +289,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedIncomeRoute: typeof AuthenticatedIncomeRoute
   AuthenticatedMutationsRoute: typeof AuthenticatedMutationsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedSpikeRoute: typeof AuthenticatedSpikeRoute
   AuthenticatedStartingBalanceRoute: typeof AuthenticatedStartingBalanceRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedExpenseBreakdownRoute: typeof AuthenticatedExpenseBreakdownRoute
@@ -282,6 +302,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedIncomeRoute: AuthenticatedIncomeRoute,
   AuthenticatedMutationsRoute: AuthenticatedMutationsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedSpikeRoute: AuthenticatedSpikeRoute,
   AuthenticatedStartingBalanceRoute: AuthenticatedStartingBalanceRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedExpenseBreakdownRoute: AuthenticatedExpenseBreakdownRoute,
