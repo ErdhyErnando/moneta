@@ -8,7 +8,9 @@ import { VitePWA } from "vite-plugin-pwa";
 export default defineConfig({
 	plugins: [
 		tailwindcss(),
-		tanstackRouter({}),
+		// D12: split every route into its own chunk. Main's entry was >1 MB because
+		// every route shipped up front; kumo then adds ~+400 kB on top of it.
+		tanstackRouter({ autoCodeSplitting: true }),
 		react(),
 		VitePWA({
 			registerType: "autoUpdate",
