@@ -113,7 +113,7 @@ export default function SignInForm({
 				<Button
 					variant="link"
 					onClick={onSwitchToSignUp}
-					className="text-primary hover:text-primary/80"
+					className="text-brand-accent-strong hover:text-brand-accent-strong/80"
 				>
 					Need an account? Sign up
 				</Button>
