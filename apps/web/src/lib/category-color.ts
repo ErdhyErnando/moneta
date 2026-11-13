@@ -18,10 +18,10 @@ import { useSyncExternalStore } from "react";
 
 export type CategoryColorMode = "light" | "dark";
 
-const MARK_LIGHTNESS_SHIFT: Record<CategoryColorMode, number> = {
-	light: -0.16,
-	dark: 0.12,
-};
+/** Light marks sit `-0.16` OKLCH lightness from the stored anchor, dark `+0.12`. */
+function lightnessShift(mode: CategoryColorMode): number {
+	return mode === "dark" ? 0.12 : -0.16;
+}
 
 const HEX = /^#[0-9a-f]{6}$/i;
 
@@ -150,7 +150,7 @@ export function categoryMark(
 	}
 
 	return oklchToHex(
-		clamp01(anchor.lightness + MARK_LIGHTNESS_SHIFT[mode]),
+		clamp01(anchor.lightness + lightnessShift(mode)),
 		anchor.chroma,
 		anchor.hue,
 	);

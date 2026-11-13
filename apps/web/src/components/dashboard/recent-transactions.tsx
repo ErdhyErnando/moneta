@@ -1,17 +1,15 @@
 import { Banner, LayerCard } from "@cloudflare/kumo";
 import {
 	ArrowClockwiseIcon,
-	ArrowDownRightIcon,
-	ArrowUpRightIcon,
 	ReceiptIcon,
 	WarningCircleIcon,
 } from "@phosphor-icons/react";
 import { CategoryBadge } from "@/components/category-badge";
+import { SignedAmount } from "@/components/dashboard/signed-amount";
 import type { Transaction } from "@/components/data-table";
 import { EmptyState } from "@/components/layout";
 import { useCurrency } from "@/contexts/currency-context";
 import { asUtcDay } from "@/lib/date";
-import { cn } from "@/lib/utils";
 
 type RecentTransactionsProps = {
 	transactions: Transaction[];
@@ -27,8 +25,6 @@ const ROW_SKELETONS = [
 	"skeleton-4",
 	"skeleton-5",
 ];
-
-const ICON = { size: 16, weight: "regular" } as const;
 
 /**
  * The dashboard's last ten transactions.
@@ -48,12 +44,10 @@ export function RecentTransactions({
 
 	return (
 		<LayerCard className="flex flex-col gap-0 rounded-xl p-0 shadow-none">
-			<div className="flex items-center justify-between gap-2 border-kumo-hairline border-b px-6 py-4">
-				<div className="min-w-0">
-					<h3 className="font-semibold text-base text-kumo-strong">
-						Recent Transactions
-					</h3>
-				</div>
+			<div className="border-kumo-hairline border-b px-6 py-4">
+				<h3 className="font-semibold text-base text-kumo-strong">
+					Recent Transactions
+				</h3>
 			</div>
 
 			<div className="px-6 py-2">
@@ -97,7 +91,9 @@ export function RecentTransactions({
 
 							return (
 								<li
-									key={transaction.id}
+									/* income and expense ids come from different tables (#22), so
+									   the type is part of the identity. */
+									key={`${transaction.type}-${transaction.id}`}
 									className="flex items-center gap-3 py-2"
 								>
 									<div className="min-w-0 flex-1 space-y-1">
@@ -126,30 +122,13 @@ export function RecentTransactions({
 										{date.toLocaleDateString()}
 									</div>
 
-									<div
-										className={cn(
-											"flex w-28 shrink-0 items-center justify-end gap-1 font-medium tabular-nums",
-											isIncome ? "text-positive" : "text-negative",
-										)}
-									>
-										{isIncome ? (
-											<ArrowUpRightIcon
-												{...ICON}
-												aria-hidden="true"
-												className="shrink-0"
-											/>
-										) : (
-											<ArrowDownRightIcon
-												{...ICON}
-												aria-hidden="true"
-												className="shrink-0"
-											/>
-										)}
-										<span aria-hidden="true">{isIncome ? "+" : "-"}</span>
-										<span className="sr-only">
-											{isIncome ? "income" : "expense"}
-										</span>
-										<span>{formatCurrency(transaction.amount)}</span>
+									<div className="flex w-28 shrink-0 justify-end">
+										<SignedAmount
+											amount={transaction.amount}
+											formatCurrency={formatCurrency}
+											direction={isIncome ? "positive" : "negative"}
+											size="inline"
+										/>
 									</div>
 								</li>
 							);
