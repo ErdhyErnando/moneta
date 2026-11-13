@@ -1,17 +1,8 @@
+import { Button, Input, Select } from "@cloudflare/kumo";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { z } from "zod";
-import { Button } from "@/components/ui/button";
 import { DateInput } from "@/components/ui/date-input";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { type AxiosError, api } from "@/lib/api";
 import { toUtcDayIso } from "@/lib/date";
@@ -132,7 +123,7 @@ export function AddTransactionForm({
 			<div className="flex gap-2">
 				<Button
 					type="button"
-					variant={type === "expense" ? "destructive" : "outline"}
+					variant={type === "expense" ? "secondary" : "ghost"}
 					className="flex-1"
 					onClick={() => onTypeChange("expense")}
 				>
@@ -140,45 +131,33 @@ export function AddTransactionForm({
 				</Button>
 				<Button
 					type="button"
-					variant={type === "income" ? "default" : "outline"}
+					variant={type === "income" ? "secondary" : "ghost"}
 					className="flex-1"
 					onClick={() => onTypeChange("income")}
 				>
 					Income
 				</Button>
 			</div>
-			<div className="space-y-2">
-				<Label htmlFor="amount">Amount</Label>
-				<Input
-					id="amount"
-					type="text"
-					inputMode="decimal"
-					placeholder="0.00"
-					value={amount}
-					onChange={(e) => setAmount(e.target.value)}
-					required
-				/>
-			</div>
-			<div className="space-y-2">
-				<Label htmlFor="category">Category</Label>
-				<Select
-					value={categoryId ? String(categoryId) : undefined}
-					onValueChange={(v) => setCategoryId(Number(v))}
-				>
-					<SelectTrigger>
-						<SelectValue placeholder="Select category" />
-					</SelectTrigger>
-					<SelectContent>
-						{categories.map((c) => (
-							<SelectItem key={c.id} value={String(c.id)}>
-								{c.name}
-							</SelectItem>
-						))}
-					</SelectContent>
-				</Select>
-			</div>
-			<div className="space-y-2">
-				<Label htmlFor="date">Date</Label>
+			<Input
+				label="Amount"
+				id="amount"
+				inputMode="decimal"
+				placeholder="0.00"
+				value={amount}
+				onChange={(e) => setAmount(e.target.value)}
+				required
+			/>
+			<Select
+				label="Category"
+				id="category"
+				className="w-full"
+				placeholder="Select category"
+				value={categoryId > 0 ? categoryId : null}
+				onValueChange={(value) => setCategoryId(Number(value) || 0)}
+				items={categories.map((c) => ({ label: c.name, value: c.id }))}
+			/>
+			<div className="space-y-1.5">
+				<span className="font-medium text-sm">Date</span>
 				<DateInput
 					id="date"
 					label=""
@@ -187,17 +166,20 @@ export function AddTransactionForm({
 					disabled={(d) => d > new Date() || d < new Date("1900-01-01")}
 				/>
 			</div>
-			<div className="space-y-2">
-				<Label htmlFor="description">Description (optional)</Label>
-				<Input
-					id="description"
-					value={description}
-					onChange={(e) => setDescription(e.target.value)}
-					maxLength={280}
-					placeholder="Note"
-				/>
-			</div>
-			<Button type="submit" className="w-full" disabled={mutation.isPending}>
+			<Input
+				label="Description"
+				id="description"
+				value={description}
+				onChange={(e) => setDescription(e.target.value)}
+				maxLength={280}
+				placeholder="Optional note"
+			/>
+			<Button
+				type="submit"
+				variant="primary"
+				className="w-full"
+				disabled={mutation.isPending}
+			>
 				{mutation.isPending ? "Saving..." : "Save"}
 			</Button>
 		</form>

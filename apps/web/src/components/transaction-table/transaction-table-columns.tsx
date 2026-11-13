@@ -1,16 +1,9 @@
-import { IconDotsVertical } from "@tabler/icons-react";
+import { Button, Checkbox } from "@cloudflare/kumo";
+import { DropdownMenu } from "@cloudflare/kumo/components/dropdown";
+import { DotsThreeVerticalIcon } from "@phosphor-icons/react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { CategoryBadge } from "@/components/category-badge";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { asUtcDay } from "@/lib/date";
 import { cn } from "@/lib/utils";
 import type { Transaction } from "./transaction-table";
@@ -27,9 +20,9 @@ export function getTransactionTableColumns(
 			header: ({ table }) => (
 				<div className="flex items-center justify-center">
 					<Checkbox
-						checked={
-							table.getIsAllRowsSelected() ||
-							(table.getIsSomeRowsSelected() && "indeterminate")
+						checked={table.getIsAllRowsSelected()}
+						indeterminate={
+							table.getIsSomeRowsSelected() && !table.getIsAllRowsSelected()
 						}
 						onCheckedChange={(value) => table.toggleAllRowsSelected(!!value)}
 						aria-label="Select all"
@@ -87,7 +80,7 @@ export function getTransactionTableColumns(
 					<div
 						className={cn(
 							"whitespace-nowrap text-right font-medium",
-							type === "income" ? "text-emerald-600" : "text-rose-600",
+							type === "income" ? "text-positive" : "text-negative",
 						)}
 					>
 						{type === "income" ? "+" : "-"}
@@ -100,28 +93,27 @@ export function getTransactionTableColumns(
 			id: "actions",
 			cell: ({ row }) => (
 				<DropdownMenu>
-					<DropdownMenuTrigger asChild>
+					<DropdownMenu.Trigger>
 						<Button
 							variant="ghost"
-							className="flex size-8 text-muted-foreground data-[state=open]:bg-muted"
-							size="icon"
-						>
-							<IconDotsVertical className="size-4" />
-							<span className="sr-only">Open menu</span>
-						</Button>
-					</DropdownMenuTrigger>
-					<DropdownMenuContent align="end" className="w-32">
-						<DropdownMenuItem onClick={() => onEdit?.(row.original)}>
+							size="sm"
+							shape="square"
+							aria-label="Open menu"
+							icon={<DotsThreeVerticalIcon size={16} />}
+						/>
+					</DropdownMenu.Trigger>
+					<DropdownMenu.Content align="end" className="w-32">
+						<DropdownMenu.Item onClick={() => onEdit?.(row.original)}>
 							Edit
-						</DropdownMenuItem>
-						<DropdownMenuSeparator />
-						<DropdownMenuItem
-							variant="destructive"
+						</DropdownMenu.Item>
+						<DropdownMenu.Separator />
+						<DropdownMenu.Item
+							variant="danger"
 							onClick={() => onDelete?.(row.original)}
 						>
 							Delete
-						</DropdownMenuItem>
-					</DropdownMenuContent>
+						</DropdownMenu.Item>
+					</DropdownMenu.Content>
 				</DropdownMenu>
 			),
 		},

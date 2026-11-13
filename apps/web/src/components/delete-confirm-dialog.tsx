@@ -1,12 +1,4 @@
-import { Button } from "@/components/ui/button";
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-} from "@/components/ui/dialog";
+import { ResponsiveDialog } from "@/components/responsive-dialog";
 
 type DeleteConfirmDialogProps = {
 	open: boolean;
@@ -29,23 +21,21 @@ export function DeleteConfirmDialog({
 	pending,
 	confirmLabel = "Delete",
 	pendingLabel = "Deleting...",
-}: DeleteConfirmDialogProps) {
+}: DeleteConfirmDialogProps): React.JSX.Element {
 	return (
-		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent>
-				<DialogHeader>
-					<DialogTitle>{title}</DialogTitle>
-					<DialogDescription>{description}</DialogDescription>
-				</DialogHeader>
-				<DialogFooter>
-					<Button variant="outline" onClick={() => onOpenChange(false)}>
-						Cancel
-					</Button>
-					<Button variant="destructive" onClick={onConfirm} disabled={pending}>
-						{pending ? pendingLabel : confirmLabel}
-					</Button>
-				</DialogFooter>
-			</DialogContent>
-		</Dialog>
+		<ResponsiveDialog
+			open={open}
+			onOpenChange={onOpenChange}
+			title={title}
+			description={description}
+			size="sm"
+			dismissLabel="Cancel"
+			action={{
+				label: pending ? pendingLabel : confirmLabel,
+				onClick: onConfirm,
+				variant: "destructive",
+				loading: pending,
+			}}
+		/>
 	);
 }

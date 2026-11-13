@@ -1,6 +1,10 @@
-import { ArchiveRestore, Pencil, Trash2 } from "lucide-react";
+import { Button } from "@cloudflare/kumo";
+import {
+	ArrowCounterClockwiseIcon,
+	PencilSimpleIcon,
+	TrashIcon,
+} from "@phosphor-icons/react";
 import type { Category, CategoryType } from "@/components/category-types";
-import { Button } from "@/components/ui/button";
 import {
 	Table,
 	TableBody,
@@ -51,7 +55,7 @@ export function CategoryTable({
 	);
 
 	return (
-		<div className="rounded-md border">
+		<div className="rounded-xl border border-kumo-hairline">
 			<Table>
 				<TableHeader>
 					<TableRow>
@@ -88,7 +92,7 @@ export function CategoryTable({
 										/>
 									</div>
 								</TableCell>
-								<TableCell className="text-muted-foreground">
+								<TableCell className="text-kumo-subtle">
 									{category.isArchived ? "Archived" : "Active"}
 								</TableCell>
 								<TableCell className="text-right">
@@ -96,32 +100,31 @@ export function CategoryTable({
 										{category.isArchived ? (
 											<Button
 												variant="ghost"
-												size="icon"
+												size="sm"
+												shape="square"
 												onClick={() => onRestore(category.id)}
 												disabled={isRestoring}
 												aria-label={`Restore ${category.name}`}
-											>
-												<ArchiveRestore className="h-4 w-4" />
-											</Button>
+												icon={<ArrowCounterClockwiseIcon size={16} />}
+											/>
 										) : (
 											<>
 												<Button
 													variant="ghost"
-													size="icon"
+													size="sm"
+													shape="square"
 													onClick={() => onEdit(category)}
 													aria-label={`Edit ${category.name}`}
-												>
-													<Pencil className="h-4 w-4" />
-												</Button>
+													icon={<PencilSimpleIcon size={16} />}
+												/>
 												<Button
-													variant="ghost"
-													size="icon"
+													variant="secondary-destructive"
+													size="sm"
+													shape="square"
 													onClick={() => onArchive(category)}
-													className="text-destructive hover:text-destructive"
 													aria-label={`Archive ${category.name}`}
-												>
-													<Trash2 className="h-4 w-4" />
-												</Button>
+													icon={<TrashIcon size={16} />}
+												/>
 											</>
 										)}
 									</div>

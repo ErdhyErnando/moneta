@@ -1,6 +1,8 @@
 // recharts ships in an async chunk: this module loads only via React.lazy
 // in routes/_authenticated/expense_.breakdown.tsx + income_.breakdown.tsx, never in the initial bundle (#48).
 // react-doctor-disable-next-line react-doctor/prefer-dynamic-import
+
+import { LayerCard, Tabs } from "@cloudflare/kumo";
 import {
 	Bar,
 	BarChart,
@@ -10,19 +12,11 @@ import {
 	YAxis,
 } from "recharts";
 import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
-import {
 	type ChartConfig,
 	ChartContainer,
 	ChartTooltip,
 	ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCurrency } from "@/contexts/currency-context";
 import { BreakdownPeriodNav } from "./breakdown-period-nav";
 import { useCategoryBreakdownData } from "./use-category-breakdown-data";
@@ -60,33 +54,31 @@ export function CategoryBreakdownChart({ type }: Props) {
 	const chartHeight = Math.max(300, chartData.length * 56);
 
 	return (
-		<Card className="w-full">
-			<CardHeader>
-				<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-					<div>
-						<CardTitle className="capitalize">
-							{type} Breakdown by Category
-						</CardTitle>
-						<CardDescription>
-							Visualize your {type} across different categories
-						</CardDescription>
+		<LayerCard className="w-full gap-0 rounded-xl p-0 shadow-none">
+			<div className="flex flex-col gap-4 px-6 pt-6 pb-4 sm:flex-row sm:items-center sm:justify-between">
+				<div>
+					<div className="font-semibold text-base capitalize">
+						{type} Breakdown by Category
 					</div>
-					<Tabs
-						value={period}
-						onValueChange={(v) => {
-							setPeriod(v as never);
-							setCurrentDate(new Date());
-						}}
-					>
-						<TabsList>
-							<TabsTrigger value="weekly">Weekly</TabsTrigger>
-							<TabsTrigger value="monthly">Monthly</TabsTrigger>
-							<TabsTrigger value="yearly">Yearly</TabsTrigger>
-						</TabsList>
-					</Tabs>
+					<div className="text-kumo-subtle text-sm">
+						Visualize your {type} across different categories
+					</div>
 				</div>
-			</CardHeader>
-			<CardContent>
+				<Tabs
+					size="sm"
+					tabs={[
+						{ value: "weekly", label: "Weekly" },
+						{ value: "monthly", label: "Monthly" },
+						{ value: "yearly", label: "Yearly" },
+					]}
+					value={period}
+					onValueChange={(v) => {
+						setPeriod(v as never);
+						setCurrentDate(new Date());
+					}}
+				/>
+			</div>
+			<div className="px-6 pb-6">
 				<BreakdownPeriodNav
 					period={period}
 					currentMonth={currentMonth}
@@ -98,11 +90,9 @@ export function CategoryBreakdownChart({ type }: Props) {
 					onYearChange={handleYearChange}
 				/>
 				{isLoading ? (
-					<div className="flex h-[300px] items-center justify-center">
-						<div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-					</div>
+					<div className="h-[300px] animate-pulse rounded-lg bg-kumo-fill" />
 				) : chartData.length === 0 ? (
-					<div className="flex h-[300px] items-center justify-center text-muted-foreground">
+					<div className="flex h-[300px] items-center justify-center text-kumo-subtle">
 						No {type} data found for this period
 					</div>
 				) : (
@@ -162,16 +152,16 @@ export function CategoryBreakdownChart({ type }: Props) {
 					</ChartContainer>
 				)}
 				{!isLoading && chartData.length > 0 && (
-					<div className="mt-6 border-t pt-4 text-center">
-						<p className="text-muted-foreground text-sm">
+					<div className="mt-6 border-kumo-hairline border-t pt-4 text-center">
+						<p className="text-kumo-subtle text-sm">
 							Total {type}:{" "}
-							<span className="font-bold text-foreground">
+							<span className="font-bold text-kumo-default tabular-nums">
 								{formatCurrency(total)}
 							</span>
 						</p>
 					</div>
 				)}
-			</CardContent>
-		</Card>
+			</div>
+		</LayerCard>
 	);
 }

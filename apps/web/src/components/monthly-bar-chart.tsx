@@ -1,4 +1,5 @@
-import { IconArrowRight } from "@tabler/icons-react";
+import { Button, LayerCard, Select } from "@cloudflare/kumo";
+import { ArrowRightIcon } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 // recharts ships in an async chunk: this module loads only via React.lazy
@@ -12,27 +13,12 @@ import {
 	XAxis,
 	YAxis,
 } from "recharts";
-import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
 import {
 	type ChartConfig,
 	ChartContainer,
 	ChartTooltip,
 	ChartTooltipContent,
 } from "@/components/ui/chart";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
 import { useCurrency } from "@/contexts/currency-context";
 import { api } from "@/lib/api";
 
@@ -128,47 +114,46 @@ export function MonthlyBarChart({
 	const total = chartData.reduce((sum, item) => sum + item.amount, 0);
 
 	return (
-		<Card>
-			<CardHeader>
-				<div className="flex items-center justify-between">
-					<div className="flex items-center gap-2">
-						<div>
-							<CardTitle>{title}</CardTitle>
-							<CardDescription>
-								{descriptionPrefix} for {selectedYear}
-							</CardDescription>
+		<LayerCard className="gap-0 rounded-xl p-0 shadow-none">
+			<div className="flex items-center justify-between px-6 pt-6 pb-4">
+				<div className="flex items-center gap-2">
+					<div>
+						<div className="font-semibold text-base">{title}</div>
+						<div className="text-kumo-subtle text-sm">
+							{descriptionPrefix} for {selectedYear}
 						</div>
-						{onToggle && (
-							<Button
-								variant="ghost"
-								size="icon"
-								onClick={onToggle}
-								className="ml-2"
-								title={toggleTitle}
-							>
-								<IconArrowRight className="h-4 w-4" />
-							</Button>
-						)}
 					</div>
-					<Select value={selectedYear} onValueChange={setSelectedYear}>
-						<SelectTrigger className="w-[120px]">
-							<SelectValue placeholder="Select year" />
-						</SelectTrigger>
-						<SelectContent>
-							{yearOptions.map((year) => (
-								<SelectItem key={year} value={year.toString()}>
-									{year}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
+					{onToggle && (
+						<Button
+							variant="ghost"
+							size="sm"
+							shape="square"
+							onClick={onToggle}
+							className="ml-2"
+							aria-label={toggleTitle}
+							title={toggleTitle}
+							icon={<ArrowRightIcon size={16} />}
+						/>
+					)}
 				</div>
-			</CardHeader>
-			<CardContent>
+				<Select
+					size="sm"
+					className="w-[120px]"
+					aria-label="Year"
+					placeholder="Select year"
+					value={selectedYear}
+					onValueChange={(value) => {
+						if (value) setSelectedYear(value);
+					}}
+					items={yearOptions.map((year) => ({
+						label: String(year),
+						value: year.toString(),
+					}))}
+				/>
+			</div>
+			<div className="px-6 pb-6">
 				{isLoading ? (
-					<div className="flex h-[200px] items-center justify-center">
-						<div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-					</div>
+					<div className="h-[200px] animate-pulse rounded-lg bg-kumo-fill" />
 				) : (
 					<>
 						<ChartContainer
@@ -232,13 +217,13 @@ export function MonthlyBarChart({
 							</BarChart>
 						</ChartContainer>
 						<div className="mt-4 text-center">
-							<p className="text-muted-foreground text-sm">
+							<p className="text-kumo-subtle text-sm tabular-nums">
 								Total for {selectedYear}: {formatCurrency(total)}
 							</p>
 						</div>
 					</>
 				)}
-			</CardContent>
-		</Card>
+			</div>
+		</LayerCard>
 	);
 }

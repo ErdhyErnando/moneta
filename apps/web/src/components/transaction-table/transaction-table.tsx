@@ -5,7 +5,7 @@ import {
 	useReactTable,
 } from "@tanstack/react-table";
 import * as React from "react";
-import { Accordion } from "@/components/ui/accordion";
+import { Accordion } from "@/components/primitives/accordion";
 import { useCurrency } from "@/contexts/currency-context";
 import { getTransactionTableColumns } from "./transaction-table-columns";
 import { TransactionTableFilters } from "./transaction-table-filters";
@@ -153,22 +153,17 @@ export function TransactionTable({
 				)}
 			</div>
 			{isLoading ? (
-				<div className="rounded-md border py-12 text-center text-muted-foreground">
+				<div className="rounded-xl border border-kumo-hairline py-12 text-center text-kumo-subtle">
 					Loading...
 				</div>
 			) : groups.length === 0 ? (
-				<div className="rounded-md border py-12 text-center text-muted-foreground">
+				<div className="rounded-xl border border-kumo-hairline py-12 text-center text-kumo-subtle">
 					No {type === "income" ? "incomes" : "expenses"} found.
 				</div>
 			) : (
 				<Accordion
-					type="multiple"
 					value={expanded}
-					onValueChange={(value) =>
-						setExpandedOverride(
-							Array.isArray(value) ? value : value ? [value] : [],
-						)
-					}
+					onValueChange={(value) => setExpandedOverride(value)}
 					className="space-y-3"
 				>
 					{pageGroups.map((group) => (

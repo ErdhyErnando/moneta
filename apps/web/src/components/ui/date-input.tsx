@@ -1,12 +1,10 @@
+import { Button, Input, Label } from "@cloudflare/kumo";
+import { Popover } from "@cloudflare/kumo/components/popover";
+import { CalendarBlankIcon } from "@phosphor-icons/react";
 import { format, isValid, parse } from "date-fns";
-import { CalendarIcon } from "lucide-react";
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { Button } from "./button";
 import { Calendar } from "./calendar";
-import { Input } from "./input";
-import { Label } from "./label";
-import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 
 type DateInputProps = {
 	value: Date | undefined;
@@ -120,28 +118,33 @@ function DateInput({ value, onChange, label, id, disabled }: DateInputProps) {
 							"border-destructive ring-destructive/20 focus-visible:border-destructive focus-visible:ring-destructive/50",
 					)}
 				/>
-				<Popover open={open} onOpenChange={setOpen}>
-					<PopoverTrigger asChild>
-						<Button
-							variant="outline"
-							size="icon"
-							className="shrink-0"
-							type="button"
-						>
-							<CalendarIcon className="h-4 w-4" />
-							<span className="sr-only">Open calendar</span>
-						</Button>
-					</PopoverTrigger>
-					<PopoverContent className="w-auto p-0" align="end">
-						<Calendar
-							mode="single"
-							selected={value}
-							onSelect={handleCalendarSelect}
-							disabled={disabled}
-							initialFocus
-						/>
-					</PopoverContent>
-				</Popover>
+				<Popover.Root open={open} onOpenChange={setOpen}>
+					<Popover.Trigger
+						render={
+							<Button
+								variant="secondary"
+								shape="square"
+								className="shrink-0"
+								type="button"
+								aria-label="Open calendar"
+								icon={<CalendarBlankIcon size={16} />}
+							/>
+						}
+					/>
+					<Popover.Portal>
+						<Popover.Positioner align="end">
+							<Popover.Popup className="w-auto p-0">
+								<Calendar
+									mode="single"
+									selected={value}
+									onSelect={handleCalendarSelect}
+									disabled={disabled}
+									autoFocus
+								/>
+							</Popover.Popup>
+						</Popover.Positioner>
+					</Popover.Portal>
+				</Popover.Root>
 			</div>
 			{hasError && (
 				<p className="text-destructive text-xs">

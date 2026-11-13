@@ -1,5 +1,5 @@
+import { LayerCard } from "@cloudflare/kumo";
 import { DataTable, type Transaction } from "@/components/data-table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type RecentTransactionsProps = {
 	transactions: Transaction[];
@@ -10,32 +10,28 @@ type RecentTransactionsProps = {
 export function RecentTransactions({
 	transactions,
 	isLoading,
-}: RecentTransactionsProps) {
+}: RecentTransactionsProps): React.JSX.Element {
 	return (
-		<Card>
-			<CardHeader>
-				<CardTitle>Recent Transactions</CardTitle>
-			</CardHeader>
-			<CardContent>
-				{isLoading ? (
-					<div className="space-y-2">
-						{[
-							"skeleton-1",
-							"skeleton-2",
-							"skeleton-3",
-							"skeleton-4",
-							"skeleton-5",
-						].map((key) => (
-							<div
-								key={key}
-								className="h-12 w-full animate-pulse rounded bg-muted"
-							/>
-						))}
-					</div>
-				) : (
-					<DataTable data={transactions} />
-				)}
-			</CardContent>
-		</Card>
+		<LayerCard className="gap-4 rounded-xl p-6 shadow-none">
+			<div className="font-semibold text-base">Recent Transactions</div>
+			{isLoading ? (
+				<div className="space-y-2">
+					{[
+						"skeleton-1",
+						"skeleton-2",
+						"skeleton-3",
+						"skeleton-4",
+						"skeleton-5",
+					].map((key) => (
+						<div
+							key={key}
+							className="h-12 w-full animate-pulse rounded-lg bg-kumo-fill"
+						/>
+					))}
+				</div>
+			) : (
+				<DataTable data={transactions} />
+			)}
+		</LayerCard>
 	);
 }

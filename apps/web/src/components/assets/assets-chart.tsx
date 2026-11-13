@@ -1,3 +1,4 @@
+import { LayerCard, Select } from "@cloudflare/kumo";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 // recharts ships in an async chunk: this module loads only via React.lazy
@@ -5,25 +6,11 @@ import { useState } from "react";
 // react-doctor-disable-next-line react-doctor/prefer-dynamic-import
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
-import {
 	type ChartConfig,
 	ChartContainer,
 	ChartTooltip,
 	ChartTooltipContent,
 } from "@/components/ui/chart";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
 import { useCurrency } from "@/contexts/currency-context";
 import { api } from "@/lib/api";
 
@@ -84,34 +71,32 @@ export function AssetsChart() {
 	const totalAssets = chartData.reduce((sum, item) => sum + item.amount, 0);
 
 	return (
-		<Card>
-			<CardHeader>
-				<div className="flex items-center justify-between">
-					<div>
-						<CardTitle>Asset Value</CardTitle>
-						<CardDescription>
-							Total holdings by month for {selectedYear}
-						</CardDescription>
+		<LayerCard className="gap-0 rounded-xl p-0 shadow-none">
+			<div className="flex items-center justify-between px-6 pt-6 pb-4">
+				<div>
+					<div className="font-semibold text-base">Asset Value</div>
+					<div className="text-kumo-subtle text-sm">
+						Total holdings by month for {selectedYear}
 					</div>
-					<Select value={selectedYear} onValueChange={setSelectedYear}>
-						<SelectTrigger className="w-[120px]">
-							<SelectValue placeholder="Select year" />
-						</SelectTrigger>
-						<SelectContent>
-							{yearOptions.map((year) => (
-								<SelectItem key={year} value={year.toString()}>
-									{year}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
 				</div>
-			</CardHeader>
-			<CardContent>
+				<Select
+					size="sm"
+					className="w-[120px]"
+					aria-label="Year"
+					placeholder="Select year"
+					value={selectedYear}
+					onValueChange={(value) => {
+						if (value) setSelectedYear(value);
+					}}
+					items={yearOptions.map((year) => ({
+						label: String(year),
+						value: year.toString(),
+					}))}
+				/>
+			</div>
+			<div className="px-6 pb-6">
 				{isLoading ? (
-					<div className="flex h-[200px] items-center justify-center">
-						<div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-					</div>
+					<div className="h-[200px] animate-pulse rounded-lg bg-kumo-fill" />
 				) : (
 					<>
 						<ChartContainer config={chartConfig} className="h-[200px] w-full">
@@ -151,13 +136,13 @@ export function AssetsChart() {
 							</AreaChart>
 						</ChartContainer>
 						<div className="mt-4 text-center">
-							<p className="text-muted-foreground text-sm">
+							<p className="text-kumo-subtle text-sm tabular-nums">
 								Total for {selectedYear}: {formatCurrency(totalAssets)}
 							</p>
 						</div>
 					</>
 				)}
-			</CardContent>
-		</Card>
+			</div>
+		</LayerCard>
 	);
 }

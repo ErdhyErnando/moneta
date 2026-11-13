@@ -1,11 +1,11 @@
+import { Button } from "@cloudflare/kumo";
 import { useForm } from "@tanstack/react-form";
 import { useNavigate } from "@tanstack/react-router";
-import { toast } from "sonner";
 import z from "zod";
+import { useToast } from "@/hooks/use-toast";
 import { authClient } from "@/lib/auth-client";
 import { AuthField } from "./auth-field";
 import Loader from "./loader";
-import { Button } from "./ui/button";
 
 export default function SignInForm({
 	onSwitchToSignUp,
@@ -16,6 +16,7 @@ export default function SignInForm({
 		from: "/",
 	});
 	const { isPending } = authClient.useSession();
+	const { toast } = useToast();
 
 	const form = useForm({
 		defaultValues: {
@@ -33,10 +34,14 @@ export default function SignInForm({
 						navigate({
 							to: "/",
 						});
-						toast.success("Sign in successful");
+						toast({ title: "Sign in successful" });
 					},
 					onError: (error) => {
-						toast.error(error.error.message || error.error.statusText);
+						toast({
+							title: "Error",
+							description: error.error.message || error.error.statusText,
+							variant: "destructive",
+						});
 					},
 				},
 			);
@@ -100,6 +105,8 @@ export default function SignInForm({
 					{(state) => (
 						<Button
 							type="submit"
+							variant="primary"
+							size="lg"
 							className="w-full"
 							disabled={!state.canSubmit || state.isSubmitting}
 						>
@@ -111,9 +118,9 @@ export default function SignInForm({
 
 			<div className="text-center">
 				<Button
-					variant="link"
+					variant="ghost"
 					onClick={onSwitchToSignUp}
-					className="text-brand-accent-strong hover:text-brand-accent-strong/80"
+					className="text-brand-strong"
 				>
 					Need an account? Sign up
 				</Button>

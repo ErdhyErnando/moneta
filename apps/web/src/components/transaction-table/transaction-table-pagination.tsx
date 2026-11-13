@@ -1,10 +1,10 @@
+import { Button } from "@cloudflare/kumo";
 import {
-	IconChevronLeft,
-	IconChevronRight,
-	IconChevronsLeft,
-	IconChevronsRight,
-} from "@tabler/icons-react";
-import { Button } from "@/components/ui/button";
+	CaretLeftIcon,
+	CaretLineLeftIcon,
+	CaretLineRightIcon,
+	CaretRightIcon,
+} from "@phosphor-icons/react";
 
 type Props = {
 	selectedCount: number;
@@ -31,10 +31,13 @@ export function TransactionTablePagination({
 	onPrevious,
 	onNext,
 	onLast,
-}: Props) {
+}: Props): React.JSX.Element {
+	const atStart = pageIndex === 0;
+	const atEnd = pageIndex >= pageCount - 1;
+
 	return (
 		<div className="flex flex-col gap-4 px-2 pt-3 sm:flex-row sm:items-center sm:justify-between">
-			<div className="text-muted-foreground text-sm">
+			<div className="text-kumo-subtle text-sm">
 				{selectedCount} row(s) selected.
 			</div>
 			<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:space-x-6 lg:space-x-8">
@@ -45,41 +48,43 @@ export function TransactionTablePagination({
 					</div>
 					<div className="flex items-center space-x-2">
 						<Button
-							variant="outline"
-							className="hidden h-8 w-8 p-0 lg:flex"
+							variant="secondary"
+							size="sm"
+							shape="square"
+							aria-label="Go to first page"
+							className="hidden lg:inline-flex"
 							onClick={onFirst}
-							disabled={pageIndex === 0}
-						>
-							<span className="sr-only">Go to first page</span>
-							<IconChevronsLeft className="size-4" />
-						</Button>
+							disabled={atStart}
+							icon={<CaretLineLeftIcon size={16} />}
+						/>
 						<Button
-							variant="outline"
-							className="h-8 w-8 p-0"
+							variant="secondary"
+							size="sm"
+							shape="square"
+							aria-label="Go to previous page"
 							onClick={onPrevious}
-							disabled={pageIndex === 0}
-						>
-							<span className="sr-only">Go to previous page</span>
-							<IconChevronLeft className="size-4" />
-						</Button>
+							disabled={atStart}
+							icon={<CaretLeftIcon size={16} />}
+						/>
 						<Button
-							variant="outline"
-							className="h-8 w-8 p-0"
+							variant="secondary"
+							size="sm"
+							shape="square"
+							aria-label="Go to next page"
 							onClick={onNext}
-							disabled={pageIndex >= pageCount - 1}
-						>
-							<span className="sr-only">Go to next page</span>
-							<IconChevronRight className="size-4" />
-						</Button>
+							disabled={atEnd}
+							icon={<CaretRightIcon size={16} />}
+						/>
 						<Button
-							variant="outline"
-							className="hidden h-8 w-8 p-0 lg:flex"
+							variant="secondary"
+							size="sm"
+							shape="square"
+							aria-label="Go to last page"
+							className="hidden lg:inline-flex"
 							onClick={onLast}
-							disabled={pageIndex >= pageCount - 1}
-						>
-							<span className="sr-only">Go to last page</span>
-							<IconChevronsRight className="size-4" />
-						</Button>
+							disabled={atEnd}
+							icon={<CaretLineRightIcon size={16} />}
+						/>
 					</div>
 				</div>
 			</div>

@@ -1,19 +1,12 @@
+import { Button, Input } from "@cloudflare/kumo";
+import { DropdownMenu } from "@cloudflare/kumo/components/dropdown";
 import {
-	IconChevronDown,
-	IconFilter,
-	IconLayoutColumns,
-	IconX,
-} from "@tabler/icons-react";
+	CaretDownIcon,
+	ColumnsIcon,
+	FunnelIcon,
+	XIcon,
+} from "@phosphor-icons/react";
 import type { Table } from "@tanstack/react-table";
-import { Button } from "@/components/ui/button";
-import {
-	DropdownMenu,
-	DropdownMenuCheckboxItem,
-	DropdownMenuContent,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import type { Transaction } from "./transaction-table";
 
 type Props = {
@@ -32,11 +25,9 @@ export function TransactionTableToolbar({
 	return (
 		<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
 			<div className="flex flex-col gap-1.5">
-				<Label htmlFor="description-filter" className="sr-only">
-					Filter by description
-				</Label>
 				<Input
 					id="description-filter"
+					aria-label="Filter by description"
 					placeholder="Filter descriptions..."
 					value={
 						(table.getColumn("description")?.getFilterValue() as string) ?? ""
@@ -49,31 +40,34 @@ export function TransactionTableToolbar({
 			</div>
 			<div className="flex flex-wrap items-center gap-2">
 				<Button
-					variant={showFilters ? "secondary" : "outline"}
+					variant={showFilters ? "secondary" : "ghost"}
 					size="sm"
+					icon={<FunnelIcon size={16} />}
 					onClick={() => setShowFilters(!showFilters)}
 				>
-					<IconFilter className="mr-2 size-4" />
 					Filters
 					{hasActiveFilters && (
-						<span className="ml-1 rounded-full bg-primary px-1.5 py-0.5 text-[10px] text-primary-foreground">
+						<span className="ml-1 rounded-full bg-kumo-brand px-1.5 py-0.5 text-[10px] text-kumo-inverse">
 							{table.getState().columnFilters.length}
 						</span>
 					)}
 				</Button>
 				<DropdownMenu>
-					<DropdownMenuTrigger asChild>
-						<Button variant="outline" size="sm">
-							<IconLayoutColumns className="mr-2 size-4" />
+					<DropdownMenu.Trigger>
+						<Button
+							variant="secondary"
+							size="sm"
+							icon={<ColumnsIcon size={16} />}
+						>
 							<span className="hidden sm:inline">Columns</span>
-							<IconChevronDown className="ml-2 size-4" />
+							<CaretDownIcon className="ml-2" size={16} />
 						</Button>
-					</DropdownMenuTrigger>
-					<DropdownMenuContent align="end" className="w-56">
+					</DropdownMenu.Trigger>
+					<DropdownMenu.Content align="end" className="w-56">
 						{table.getAllColumns().flatMap((column) =>
 							typeof column.accessorFn !== "undefined" && column.getCanHide()
 								? [
-										<DropdownMenuCheckboxItem
+										<DropdownMenu.CheckboxItem
 											key={column.id}
 											className="capitalize"
 											checked={column.getIsVisible()}
@@ -82,11 +76,11 @@ export function TransactionTableToolbar({
 											}
 										>
 											{column.id}
-										</DropdownMenuCheckboxItem>,
+										</DropdownMenu.CheckboxItem>,
 									]
 								: [],
 						)}
-					</DropdownMenuContent>
+					</DropdownMenu.Content>
 				</DropdownMenu>
 			</div>
 		</div>
@@ -95,8 +89,12 @@ export function TransactionTableToolbar({
 
 export function ClearButton({ onClick }: { onClick: () => void }) {
 	return (
-		<Button variant="ghost" size="sm" onClick={onClick} className="h-8">
-			<IconX className="mr-1 size-4" />
+		<Button
+			variant="ghost"
+			size="sm"
+			icon={<XIcon size={16} />}
+			onClick={onClick}
+		>
 			Clear
 		</Button>
 	);

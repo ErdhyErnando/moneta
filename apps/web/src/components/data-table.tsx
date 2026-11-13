@@ -1,4 +1,6 @@
-import { IconDotsVertical } from "@tabler/icons-react";
+import { Button, Checkbox } from "@cloudflare/kumo";
+import { DropdownMenu } from "@cloudflare/kumo/components/dropdown";
+import { DotsThreeVerticalIcon } from "@phosphor-icons/react";
 import {
 	type ColumnDef,
 	type ColumnFiltersState,
@@ -15,15 +17,6 @@ import { z } from "zod";
 import { CategoryBadge } from "@/components/category-badge";
 import { AddTransactionDialog } from "@/components/dashboard/add-transaction-dialog";
 import { DataTableShell } from "@/components/data-table-shell";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useCurrency } from "@/contexts/currency-context";
 import { asUtcDay } from "@/lib/date";
 
@@ -45,9 +38,10 @@ const columns: ColumnDef<Transaction>[] = [
 		header: ({ table }) => (
 			<div className="flex items-center justify-center">
 				<Checkbox
-					checked={
-						table.getIsAllPageRowsSelected() ||
-						(table.getIsSomePageRowsSelected() && "indeterminate")
+					checked={table.getIsAllPageRowsSelected()}
+					indeterminate={
+						table.getIsSomePageRowsSelected() &&
+						!table.getIsAllPageRowsSelected()
 					}
 					onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
 					aria-label="Select all"
@@ -101,8 +95,8 @@ const columns: ColumnDef<Transaction>[] = [
 				<span
 					className={`inline-flex items-center justify-center whitespace-nowrap rounded-full px-2.5 py-0.5 font-medium text-xs ${
 						type === "income"
-							? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
-							: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300"
+							? "bg-kumo-success-tint text-positive"
+							: "bg-kumo-danger-tint text-negative"
 					}`}
 				>
 					{type.charAt(0).toUpperCase() + type.slice(1)}
@@ -126,8 +120,8 @@ const columns: ColumnDef<Transaction>[] = [
 
 			return (
 				<div
-					className={`text-right font-medium ${
-						type === "income" ? "text-emerald-600" : "text-rose-600"
+					className={`text-right font-medium tabular-nums ${
+						type === "income" ? "text-positive" : "text-negative"
 					}`}
 				>
 					{type === "income" ? "+" : "-"}
@@ -140,22 +134,21 @@ const columns: ColumnDef<Transaction>[] = [
 		id: "actions",
 		cell: () => (
 			<DropdownMenu>
-				<DropdownMenuTrigger asChild>
+				<DropdownMenu.Trigger>
 					<Button
 						variant="ghost"
-						className="flex size-8 text-muted-foreground data-[state=open]:bg-muted"
-						size="icon"
-					>
-						<IconDotsVertical className="size-4" />
-						<span className="sr-only">Open menu</span>
-					</Button>
-				</DropdownMenuTrigger>
-				<DropdownMenuContent align="end" className="w-32">
-					<DropdownMenuItem>Edit</DropdownMenuItem>
-					<DropdownMenuItem>Duplicate</DropdownMenuItem>
-					<DropdownMenuSeparator />
-					<DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
-				</DropdownMenuContent>
+						size="sm"
+						shape="square"
+						aria-label="Open menu"
+						icon={<DotsThreeVerticalIcon size={16} />}
+					/>
+				</DropdownMenu.Trigger>
+				<DropdownMenu.Content align="end" className="w-32">
+					<DropdownMenu.Item>Edit</DropdownMenu.Item>
+					<DropdownMenu.Item>Duplicate</DropdownMenu.Item>
+					<DropdownMenu.Separator />
+					<DropdownMenu.Item variant="danger">Delete</DropdownMenu.Item>
+				</DropdownMenu.Content>
 			</DropdownMenu>
 		),
 	},
