@@ -19,7 +19,7 @@ type ResponsiveDialogProps = {
 	title: string;
 	description?: string;
 	size?: ResponsiveDialogSize;
-	children: React.ReactNode;
+	children?: React.ReactNode;
 	/**
 	 * The right-hand action. The left-hand dismiss button is automatic
 	 * (docs/design.md §7.6: secondary left, primary right).
@@ -67,6 +67,7 @@ export function ResponsiveDialog({
 				{description ? (
 					<LayerDialog.Description>{description}</LayerDialog.Description>
 				) : null}
+				{/* kumo requires exactly one Title and one Body, so Body is always rendered. */}
 				<LayerDialog.Body>{children}</LayerDialog.Body>
 				{action ? (
 					<LayerDialog.Actions dismissLabel={dismissLabel}>

@@ -1,21 +1,14 @@
+import { DropdownMenu } from "@cloudflare/kumo/components/dropdown";
 import {
-	IconCreditCard,
-	IconDotsVertical,
-	IconLogout,
-	IconNotification,
-	IconUserCircle,
-} from "@tabler/icons-react";
+	BellIcon,
+	CreditCardIcon,
+	DotsThreeVerticalIcon,
+	SignOutIcon,
+	UserCircleIcon,
+} from "@phosphor-icons/react";
+import type * as React from "react";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuGroup,
-	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/primitives";
 import {
 	SidebarMenu,
 	SidebarMenuButton,
@@ -31,76 +24,70 @@ export function NavUser({
 		email: string;
 		avatar: string;
 	};
-}) {
+}): React.JSX.Element {
 	const { isMobile } = useSidebar();
 
 	return (
 		<SidebarMenu>
 			<SidebarMenuItem>
 				<DropdownMenu>
-					<DropdownMenuTrigger asChild>
+					<DropdownMenu.Trigger>
 						<SidebarMenuButton
 							size="lg"
 							className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
 						>
-							<Avatar className="h-8 w-8 rounded-lg grayscale">
+							<Avatar className="size-8">
 								<AvatarImage src={user.avatar} alt={user.name} />
-								<AvatarFallback className="rounded-lg bg-primary text-primary-foreground">
+								<AvatarFallback className="bg-kumo-tint font-medium text-kumo-strong">
 									M
 								</AvatarFallback>
 							</Avatar>
 							<div className="grid flex-1 text-left text-sm leading-tight">
 								<span className="truncate font-medium">{user.name}</span>
-								<span className="truncate text-muted-foreground text-xs">
+								<span className="truncate text-kumo-subtle text-xs">
 									{user.email}
 								</span>
 							</div>
-							<IconDotsVertical className="ml-auto size-4" />
+							<DotsThreeVerticalIcon className="ml-auto" size={16} />
 						</SidebarMenuButton>
-					</DropdownMenuTrigger>
-					<DropdownMenuContent
-						className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+					</DropdownMenu.Trigger>
+					<DropdownMenu.Content
+						className="min-w-56"
 						side={isMobile ? "bottom" : "right"}
 						align="end"
 						sideOffset={4}
 					>
-						<DropdownMenuLabel className="p-0 font-normal">
+						<DropdownMenu.Label className="p-0 font-normal">
 							<div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-								<Avatar className="h-8 w-8 rounded-lg">
+								<Avatar className="size-8">
 									<AvatarImage src={user.avatar} alt={user.name} />
-									<AvatarFallback className="rounded-lg bg-primary text-primary-foreground">
+									<AvatarFallback className="bg-kumo-tint font-medium text-kumo-strong">
 										M
 									</AvatarFallback>
 								</Avatar>
 								<div className="grid flex-1 text-left text-sm leading-tight">
 									<span className="truncate font-medium">{user.name}</span>
-									<span className="truncate text-muted-foreground text-xs">
+									<span className="truncate text-kumo-subtle text-xs">
 										{user.email}
 									</span>
 								</div>
 							</div>
-						</DropdownMenuLabel>
-						<DropdownMenuSeparator />
-						<DropdownMenuGroup>
-							<DropdownMenuItem>
-								<IconUserCircle />
-								Account
-							</DropdownMenuItem>
-							<DropdownMenuItem>
-								<IconCreditCard />
-								Billing
-							</DropdownMenuItem>
-							<DropdownMenuItem>
-								<IconNotification />
-								Notifications
-							</DropdownMenuItem>
-						</DropdownMenuGroup>
-						<DropdownMenuSeparator />
-						<DropdownMenuItem>
-							<IconLogout />
+						</DropdownMenu.Label>
+						<DropdownMenu.Separator />
+						<DropdownMenu.Item icon={<UserCircleIcon size={16} />}>
+							Account
+						</DropdownMenu.Item>
+						<DropdownMenu.Item icon={<CreditCardIcon size={16} />}>
+							Billing
+						</DropdownMenu.Item>
+						<DropdownMenu.Item icon={<BellIcon size={16} />}>
+							Notifications
+						</DropdownMenu.Item>
+						<DropdownMenu.Separator />
+						<DropdownMenu.Item icon={<SignOutIcon size={16} />}>
 							Log out
-						</DropdownMenuItem>
-					</DropdownMenuContent>
+						</DropdownMenu.Item>
+					</DropdownMenu.Content>
 				</DropdownMenu>
 			</SidebarMenuItem>
 		</SidebarMenu>

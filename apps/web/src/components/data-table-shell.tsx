@@ -1,28 +1,15 @@
+import { Button, Input, Select } from "@cloudflare/kumo";
+import { DropdownMenu } from "@cloudflare/kumo/components/dropdown";
 import {
-	IconChevronDown,
-	IconChevronLeft,
-	IconChevronRight,
-	IconChevronsLeft,
-	IconChevronsRight,
-	IconLayoutColumns,
-} from "@tabler/icons-react";
+	CaretDownIcon,
+	CaretLeftIcon,
+	CaretLineLeftIcon,
+	CaretLineRightIcon,
+	CaretRightIcon,
+	ColumnsIcon,
+} from "@phosphor-icons/react";
 import { flexRender, type Table as TanStackTable } from "@tanstack/react-table";
 import type { ReactNode } from "react";
-import { Button } from "@/components/ui/button";
-import {
-	DropdownMenu,
-	DropdownMenuCheckboxItem,
-	DropdownMenuContent,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
 import {
 	Table,
 	TableBody,
@@ -50,6 +37,7 @@ export function DataTableShell<TData>({
 		<div className="w-full space-y-4">
 			<div className="flex items-center justify-between">
 				<Input
+					aria-label="Filter descriptions"
 					placeholder="Filter descriptions..."
 					value={
 						(table.getColumn("description")?.getFilterValue() as string) ?? ""
@@ -61,18 +49,21 @@ export function DataTableShell<TData>({
 				/>
 				<div className="flex items-center gap-2">
 					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-							<Button variant="outline" size="sm">
-								<IconLayoutColumns className="mr-2 size-4" />
+						<DropdownMenu.Trigger>
+							<Button
+								variant="secondary"
+								size="sm"
+								icon={<ColumnsIcon size={16} />}
+							>
 								Columns
-								<IconChevronDown className="ml-2 size-4" />
+								<CaretDownIcon className="ml-2" size={16} />
 							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent align="end" className="w-56">
+						</DropdownMenu.Trigger>
+						<DropdownMenu.Content align="end" className="w-56">
 							{table.getAllColumns().flatMap((column) =>
 								typeof column.accessorFn !== "undefined" && column.getCanHide()
 									? [
-											<DropdownMenuCheckboxItem
+											<DropdownMenu.CheckboxItem
 												key={column.id}
 												className="capitalize"
 												checked={column.getIsVisible()}
@@ -81,16 +72,16 @@ export function DataTableShell<TData>({
 												}
 											>
 												{column.id}
-											</DropdownMenuCheckboxItem>,
+											</DropdownMenu.CheckboxItem>,
 										]
 									: [],
 							)}
-						</DropdownMenuContent>
+						</DropdownMenu.Content>
 					</DropdownMenu>
 					{addControl}
 				</div>
 			</div>
-			<div className="rounded-md border">
+			<div className="rounded-xl border border-kumo-hairline">
 				<Table>
 					<TableHeader>
 						{table.getHeaderGroups().map((headerGroup) => (
@@ -138,7 +129,7 @@ export function DataTableShell<TData>({
 				</Table>
 			</div>
 			<div className="flex items-center justify-between px-2">
-				<div className="flex-1 text-muted-foreground text-sm">
+				<div className="flex-1 text-kumo-subtle text-sm">
 					{table.getFilteredSelectedRowModel().rows.length} of{" "}
 					{table.getFilteredRowModel().rows.length} row(s) selected.
 				</div>
@@ -146,24 +137,18 @@ export function DataTableShell<TData>({
 					<div className="flex items-center space-x-2">
 						<p className="font-medium text-sm">Rows per page</p>
 						<Select
+							size="sm"
+							className="w-[70px]"
+							aria-label="Rows per page"
 							value={`${table.getState().pagination.pageSize}`}
 							onValueChange={(value) => {
-								table.setPageSize(Number(value));
+								if (value) table.setPageSize(Number(value));
 							}}
-						>
-							<SelectTrigger className="h-8 w-[70px]">
-								<SelectValue
-									placeholder={table.getState().pagination.pageSize}
-								/>
-							</SelectTrigger>
-							<SelectContent side="top">
-								{[10, 20, 30, 40, 50].map((pageSize) => (
-									<SelectItem key={pageSize} value={`${pageSize}`}>
-										{pageSize}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
+							items={[10, 20, 30, 40, 50].map((pageSize) => ({
+								label: String(pageSize),
+								value: String(pageSize),
+							}))}
+						/>
 					</div>
 					<div className="flex w-[100px] items-center justify-center font-medium text-sm">
 						Page {table.getState().pagination.pageIndex + 1} of{" "}
@@ -171,41 +156,43 @@ export function DataTableShell<TData>({
 					</div>
 					<div className="flex items-center space-x-2">
 						<Button
-							variant="outline"
-							className="hidden h-8 w-8 p-0 lg:flex"
+							variant="secondary"
+							size="sm"
+							shape="square"
+							aria-label="Go to first page"
+							className="hidden lg:inline-flex"
 							onClick={() => table.setPageIndex(0)}
 							disabled={!table.getCanPreviousPage()}
-						>
-							<span className="sr-only">Go to first page</span>
-							<IconChevronsLeft className="size-4" />
-						</Button>
+							icon={<CaretLineLeftIcon size={16} />}
+						/>
 						<Button
-							variant="outline"
-							className="h-8 w-8 p-0"
+							variant="secondary"
+							size="sm"
+							shape="square"
+							aria-label="Go to previous page"
 							onClick={() => table.previousPage()}
 							disabled={!table.getCanPreviousPage()}
-						>
-							<span className="sr-only">Go to previous page</span>
-							<IconChevronLeft className="size-4" />
-						</Button>
+							icon={<CaretLeftIcon size={16} />}
+						/>
 						<Button
-							variant="outline"
-							className="h-8 w-8 p-0"
+							variant="secondary"
+							size="sm"
+							shape="square"
+							aria-label="Go to next page"
 							onClick={() => table.nextPage()}
 							disabled={!table.getCanNextPage()}
-						>
-							<span className="sr-only">Go to next page</span>
-							<IconChevronRight className="size-4" />
-						</Button>
+							icon={<CaretRightIcon size={16} />}
+						/>
 						<Button
-							variant="outline"
-							className="hidden h-8 w-8 p-0 lg:flex"
+							variant="secondary"
+							size="sm"
+							shape="square"
+							aria-label="Go to last page"
+							className="hidden lg:inline-flex"
 							onClick={() => table.setPageIndex(table.getPageCount() - 1)}
 							disabled={!table.getCanNextPage()}
-						>
-							<span className="sr-only">Go to last page</span>
-							<IconChevronsRight className="size-4" />
-						</Button>
+							icon={<CaretLineRightIcon size={16} />}
+						/>
 					</div>
 				</div>
 			</div>

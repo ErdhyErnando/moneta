@@ -1,14 +1,8 @@
 // recharts ships in an async chunk: this module loads only via React.lazy
 // in routes/_authenticated/index.tsx, never in the initial bundle (#48).
 // react-doctor-disable-next-line react-doctor/prefer-dynamic-import
+import { LayerCard } from "@cloudflare/kumo";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
 import {
 	type ChartConfig,
 	ChartContainer,
@@ -21,11 +15,11 @@ const description = "An interactive area chart for cash flow";
 const chartConfig = {
 	income: {
 		label: "Income",
-		color: "hsl(142 76% 36%)", // emerald-600
+		color: "var(--color-positive)",
 	},
 	expense: {
 		label: "Expense",
-		color: "hsl(0 84% 60%)", // rose-500
+		color: "var(--color-negative)",
 	},
 } satisfies ChartConfig;
 
@@ -47,20 +41,20 @@ export function ChartAreaInteractive({
 	isLoading = false,
 }: ChartAreaInteractiveProps) {
 	return (
-		<Card className="flex h-full flex-col">
-			<CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
+		<LayerCard className="flex h-full flex-col gap-0 rounded-xl p-0 shadow-none">
+			<div className="flex items-center gap-2 border-kumo-hairline border-b px-6 py-4 sm:flex-row">
 				<div className="grid flex-1 gap-1 text-center sm:text-left">
-					<CardTitle>Cash Flow</CardTitle>
-					<CardDescription>Income vs Expenses over time</CardDescription>
-				</div>
-			</CardHeader>
-			<CardContent className="flex min-h-[250px] flex-1 flex-col px-1 pt-1 sm:px-2 sm:pt-2 sm:pb-4">
-				{isLoading ? (
-					<div className="flex h-full flex-1 items-center justify-center">
-						<div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+					<div className="font-semibold text-base">Cash Flow</div>
+					<div className="text-kumo-subtle text-sm">
+						Income vs Expenses over time
 					</div>
+				</div>
+			</div>
+			<div className="flex min-h-[250px] flex-1 flex-col px-1 pt-1 sm:px-2 sm:pt-2 sm:pb-4">
+				{isLoading ? (
+					<div className="h-full flex-1 animate-pulse rounded-lg bg-kumo-fill" />
 				) : data.length === 0 ? (
-					<div className="flex h-full flex-1 items-center justify-center text-muted-foreground">
+					<div className="flex h-full flex-1 items-center justify-center text-kumo-subtle">
 						No data available for the selected time range
 					</div>
 				) : (
@@ -152,7 +146,7 @@ export function ChartAreaInteractive({
 						</AreaChart>
 					</ChartContainer>
 				)}
-			</CardContent>
-		</Card>
+			</div>
+		</LayerCard>
 	);
 }

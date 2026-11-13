@@ -1,21 +1,16 @@
-import { IconPlus, IconWallet } from "@tabler/icons-react";
+import { Button } from "@cloudflare/kumo";
+import { PlusIcon, WalletIcon } from "@phosphor-icons/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 
+import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
+import { ResponsiveDialog } from "@/components/responsive-dialog";
 import StartingBalanceForm from "@/components/starting-balance-form";
 import {
 	type StartingBalance,
 	StartingBalanceList,
 } from "@/components/starting-balance-list";
-import { Button } from "@/components/ui/button";
-import {
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { api } from "@/lib/api";
 import { asUtcDay, toUtcDayIso } from "@/lib/date";
@@ -36,6 +31,8 @@ function StartingBalancePage() {
 	const [editingBalance, setEditingBalance] = useState<StartingBalance | null>(
 		null,
 	);
+	const [deletingBalance, setDeletingBalance] =
+		useState<StartingBalance | null>(null);
 	const { toast } = useToast();
 	const queryClient = useQueryClient();
 
@@ -134,65 +131,63 @@ function StartingBalancePage() {
 		<div className="flex flex-col gap-6 p-6">
 			<div className="flex items-center justify-between">
 				<div className="flex items-center gap-2">
-					<div className="rounded-lg bg-blue-100 p-2 dark:bg-blue-900/20">
-						<IconWallet className="size-6 text-blue-600 dark:text-blue-400" />
+					<div className="rounded-lg bg-kumo-tint p-2">
+						<WalletIcon className="text-kumo-strong" size={20} />
 					</div>
 					<h1 className="font-bold text-3xl">Starting Balance</h1>
 				</div>
-				<Dialog
+				<Button
+					variant="primary"
+					icon={<PlusIcon size={16} />}
+					onClick={() => {
+						setEditingBalance(null);
+						setIsDialogOpen(true);
+					}}
+				>
+					Add Balance
+				</Button>
+				<ResponsiveDialog
 					open={isDialogOpen}
 					onOpenChange={(open) => {
 						setIsDialogOpen(open);
 						if (!open) setEditingBalance(null);
 					}}
+					title={
+						editingBalance ? "Edit Starting Balance" : "Add Starting Balance"
+					}
 				>
-					<DialogTrigger asChild>
-						<Button onClick={() => setEditingBalance(null)}>
-							<IconPlus className="mr-2 size-4" />
-							Add Balance
-						</Button>
-					</DialogTrigger>
-					<DialogContent>
-						<DialogHeader>
-							<DialogTitle>
-								{editingBalance
-									? "Edit Starting Balance"
-									: "Add Starting Balance"}
-							</DialogTitle>
-						</DialogHeader>
-						<StartingBalanceForm
-							defaultValues={
-								editingBalance
-									? {
-											amount: editingBalance.amount,
-											description: editingBalance.description,
-											date: asUtcDay(editingBalance.date),
-											categoryId: editingBalance.categoryId,
-										}
-									: undefined
+					<StartingBalanceForm
+						defaultValues={
+							editingBalance
+								? {
+										amount: editingBalance.amount,
+										description: editingBalance.description,
+										date: asUtcDay(editingBalance.date),
+										categoryId: editingBalance.categoryId,
+									}
+								: undefined
+						}
+						onSubmit={async (data) => {
+							if (editingBalance) {
+								await editMutation.mutateAsync({
+									id: editingBalance.id,
+									data,
+								});
+							} else {
+								await createMutation.mutateAsync(data);
 							}
-							onSubmit={async (data) => {
-								if (editingBalance) {
-									await editMutation.mutateAsync({
-										id: editingBalance.id,
-										data,
-									});
-								} else {
-									await createMutation.mutateAsync(data);
-								}
-							}}
-						/>
-					</DialogContent>
-				</Dialog>
+						}}
+					/>
+				</ResponsiveDialog>
 			</div>
 
-			<div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+			<div className="rounded-xl border border-kumo-hairline bg-kumo-base">
 				<div className="p-6">
 					{isLoading ? (
 						<div className="space-y-2">
-							<div className="h-12 w-full animate-pulse rounded bg-muted" />
-							<div className="h-12 w-full animate-pulse rounded bg-muted" />
-							<div className="h-12 w-full animate-pulse rounded bg-muted" />
+							<div className="h-12 w-full animate-pulse rounded-lg bg-kumo-fill" />
+							<div className="h-12 w-full animate-pulse rounded-lg bg-kumo-fill" />
+							<div className="h-12 w-full animate-pulse rounded-lg bg-kumo-fill" />
 						</div>
 					) : (
 						<StartingBalanceList
@@ -205,19 +200,27 @@ function StartingBalancePage() {
 								setEditingBalance(balance);
 								setIsDialogOpen(true);
 							}}
-							onDelete={(balance) => {
-								if (
-									confirm(
-										"Are you sure you want to delete this starting balance?",
-									)
-								) {
-									deleteMutation.mutate(balance.id);
-								}
-							}}
+							onDelete={setDeletingBalance}
 						/>
 					)}
 				</div>
 			</div>
+
+			<DeleteConfirmDialog
+				open={deletingBalance !== null}
+				onOpenChange={(open) => {
+					if (!open) setDeletingBalance(null);
+				}}
+				title="Delete Starting Balance"
+				description="This entry will be removed from your balance history. This action cannot be undone."
+				onConfirm={() => {
+					if (deletingBalance) {
+						deleteMutation.mutate(deletingBalance.id);
+						setDeletingBalance(null);
+					}
+				}}
+				pending={deleteMutation.isPending}
+			/>
 		</div>
 	);
 }

@@ -1,4 +1,5 @@
-import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
+import { Button } from "@cloudflare/kumo";
+import { CaretLeftIcon, CaretRightIcon } from "@phosphor-icons/react";
 import {
 	flexRender,
 	getCoreRowModel,
@@ -6,7 +7,6 @@ import {
 	useReactTable,
 } from "@tanstack/react-table";
 import * as React from "react";
-import { Button } from "@/components/ui/button";
 import {
 	TableBody,
 	TableCell,
@@ -63,7 +63,7 @@ function MutationsTableBody({
 	isLoading: boolean;
 }) {
 	return (
-		<div className="overflow-x-auto rounded-md border">
+		<div className="overflow-x-auto rounded-xl border border-kumo-hairline">
 			<UITable>
 				<TableHeader>
 					{table.getHeaderGroups().map((hg) => (
@@ -105,7 +105,7 @@ function MutationsTableBody({
 						<TableRow>
 							<TableCell
 								colSpan={table.getAllColumns().length}
-								className="h-24 text-center text-muted-foreground"
+								className="h-24 text-center text-kumo-subtle"
 							>
 								No mutations for this period.
 							</TableCell>
@@ -132,7 +132,7 @@ export function MutationsPagination({
 }: PaginationProps) {
 	return (
 		<div className="flex flex-col gap-4 px-2 pt-3 sm:flex-row sm:items-center sm:justify-between">
-			<div className="text-muted-foreground text-sm">
+			<div className="text-kumo-subtle text-sm">
 				{total} mutation{total === 1 ? "" : "s"} total
 			</div>
 			<div className="flex items-center gap-2">
@@ -140,23 +140,23 @@ export function MutationsPagination({
 					Page {page} of {totalPages}
 				</div>
 				<Button
-					variant="outline"
-					className="h-8 w-8 p-0"
+					variant="secondary"
+					size="sm"
+					shape="square"
+					aria-label="Go to previous page"
 					onClick={() => onPageChange(page - 1)}
 					disabled={page <= 1}
-				>
-					<span className="sr-only">Go to previous page</span>
-					<IconChevronLeft className="size-4" />
-				</Button>
+					icon={<CaretLeftIcon size={16} />}
+				/>
 				<Button
-					variant="outline"
-					className="h-8 w-8 p-0"
+					variant="secondary"
+					size="sm"
+					shape="square"
+					aria-label="Go to next page"
 					onClick={() => onPageChange(page + 1)}
 					disabled={page >= totalPages}
-				>
-					<span className="sr-only">Go to next page</span>
-					<IconChevronRight className="size-4" />
-				</Button>
+					icon={<CaretRightIcon size={16} />}
+				/>
 			</div>
 		</div>
 	);

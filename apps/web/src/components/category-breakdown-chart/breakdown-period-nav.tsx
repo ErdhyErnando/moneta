@@ -1,13 +1,6 @@
+import { Button, Select } from "@cloudflare/kumo";
+import { CaretLeftIcon, CaretRightIcon } from "@phosphor-icons/react";
 import { format } from "date-fns";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
 
 // Module-scope statics per #25/#27
 const MONTHS = [
@@ -56,56 +49,54 @@ export function BreakdownPeriodNav({
 	return (
 		<div className="mb-6 flex items-center justify-center gap-2">
 			<Button
-				variant="outline"
-				size="icon"
+				variant="secondary"
+				shape="square"
 				className="shrink-0"
 				onClick={() => onNavigate("prev")}
 				aria-label="Previous period"
-			>
-				<ChevronLeft className="h-4 w-4" />
-			</Button>
+				icon={<CaretLeftIcon size={16} />}
+			/>
 			<div className="flex items-center gap-2">
 				{period !== "yearly" && (
-					<Select value={String(currentMonth)} onValueChange={onMonthChange}>
-						<SelectTrigger className="w-[130px]">
-							<SelectValue />
-						</SelectTrigger>
-						<SelectContent>
-							{MONTHS.map((month, index) => (
-								<SelectItem key={month} value={String(index)}>
-									{month}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
+					<Select
+						className="w-[130px]"
+						aria-label="Month"
+						value={String(currentMonth)}
+						onValueChange={(value) => {
+							if (value) onMonthChange(value);
+						}}
+						items={MONTHS.map((month, index) => ({
+							label: month,
+							value: String(index),
+						}))}
+					/>
 				)}
-				<Select value={String(currentYear)} onValueChange={onYearChange}>
-					<SelectTrigger className="w-[90px]">
-						<SelectValue />
-					</SelectTrigger>
-					<SelectContent>
-						{YEAR_OPTIONS.map((year) => (
-							<SelectItem key={year} value={String(year)}>
-								{year}
-							</SelectItem>
-						))}
-					</SelectContent>
-				</Select>
+				<Select
+					className="w-[90px]"
+					aria-label="Year"
+					value={String(currentYear)}
+					onValueChange={(value) => {
+						if (value) onYearChange(value);
+					}}
+					items={YEAR_OPTIONS.map((year) => ({
+						label: String(year),
+						value: String(year),
+					}))}
+				/>
 				{period === "weekly" && (
-					<span className="text-muted-foreground text-sm">
+					<span className="text-kumo-subtle text-sm">
 						{format(start, "MMM d")} - {format(end, "MMM d")}
 					</span>
 				)}
 			</div>
 			<Button
-				variant="outline"
-				size="icon"
+				variant="secondary"
+				shape="square"
 				className="shrink-0"
 				onClick={() => onNavigate("next")}
 				aria-label="Next period"
-			>
-				<ChevronRight className="h-4 w-4" />
-			</Button>
+				icon={<CaretRightIcon size={16} />}
+			/>
 		</div>
 	);
 }

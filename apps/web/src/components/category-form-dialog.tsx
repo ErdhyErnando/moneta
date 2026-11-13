@@ -1,14 +1,9 @@
-import type { Category } from "@/components/category-types";
-import { Button } from "@/components/ui/button";
+import { Button, Input } from "@cloudflare/kumo";
 import {
-	Dialog,
-	DialogContent,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+	type Category,
+	DEFAULT_CATEGORY_COLOR,
+} from "@/components/category-types";
+import { ResponsiveDialog } from "@/components/responsive-dialog";
 
 type CategoryFormDialogProps = {
 	open: boolean;
@@ -35,67 +30,62 @@ export function CategoryFormDialog({
 	onSubmit,
 }: CategoryFormDialogProps) {
 	return (
-		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent>
-				<DialogHeader>
-					<DialogTitle>
-						{editingCategory ? "Edit Category" : "Add Category"}
-					</DialogTitle>
-				</DialogHeader>
-				<form onSubmit={onSubmit} className="space-y-4 py-4">
-					<div className="space-y-2">
-						<Label htmlFor="name">Category Name</Label>
+		<ResponsiveDialog
+			open={open}
+			onOpenChange={onOpenChange}
+			title={editingCategory ? "Edit Category" : "Add Category"}
+		>
+			<form onSubmit={onSubmit} className="space-y-4">
+				<Input
+					label="Category Name"
+					id="name"
+					placeholder="e.g. Salary, Groceries, Rent"
+					value={name}
+					onChange={(e) => onNameChange(e.target.value)}
+					required
+				/>
+				<div className="space-y-2">
+					<span className="font-medium text-sm">Color</span>
+					<div className="flex items-center gap-2">
 						<Input
-							id="name"
-							placeholder="e.g. Salary, Groceries, Rent"
-							value={name}
-							onChange={(e) => onNameChange(e.target.value)}
-							required
+							id="color"
+							type="color"
+							value={color}
+							onChange={(e) => onColorChange(e.target.value)}
+							className="h-9 w-14 p-1"
+						/>
+						<Input
+							type="text"
+							value={color}
+							onChange={(e) => onColorChange(e.target.value)}
+							placeholder={DEFAULT_CATEGORY_COLOR}
+							className="flex-1"
+							pattern="^#[0-9a-fA-F]{6}$"
+						/>
+						<span
+							className="inline-flex h-6 w-6 rounded-full border"
+							style={{ backgroundColor: color }}
+							aria-hidden
 						/>
 					</div>
-					<div className="space-y-2">
-						<Label htmlFor="color">Color</Label>
-						<div className="flex items-center gap-2">
-							<Input
-								id="color"
-								type="color"
-								value={color}
-								onChange={(e) => onColorChange(e.target.value)}
-								className="h-9 w-14 p-1"
-							/>
-							<Input
-								type="text"
-								value={color}
-								onChange={(e) => onColorChange(e.target.value)}
-								placeholder="#0ea5e9"
-								className="flex-1"
-								pattern="^#[0-9a-fA-F]{6}$"
-							/>
-							<span
-								className="inline-flex h-6 w-6 rounded-full border"
-								style={{ backgroundColor: color }}
-								aria-hidden
-							/>
-						</div>
-						<p className="text-muted-foreground text-xs">
-							Hex color used for pie + pill (solid badge, white text) — same for
-							dashboard and income/expense tables
-						</p>
-					</div>
-					<DialogFooter>
-						<Button
-							type="button"
-							variant="outline"
-							onClick={() => onOpenChange(false)}
-						>
-							Cancel
-						</Button>
-						<Button type="submit" disabled={submitting}>
-							{editingCategory ? "Update" : "Add"}
-						</Button>
-					</DialogFooter>
-				</form>
-			</DialogContent>
-		</Dialog>
+					<p className="text-kumo-subtle text-xs">
+						Hex color used for pie + pill (solid badge, white text) — same for
+						dashboard and income/expense tables
+					</p>
+				</div>
+				<div className="flex justify-end gap-2 pt-2">
+					<Button
+						type="button"
+						variant="secondary"
+						onClick={() => onOpenChange(false)}
+					>
+						Cancel
+					</Button>
+					<Button type="submit" variant="primary" disabled={submitting}>
+						{editingCategory ? "Update" : "Add"}
+					</Button>
+				</div>
+			</form>
+		</ResponsiveDialog>
 	);
 }

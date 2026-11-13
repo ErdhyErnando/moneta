@@ -1,29 +1,24 @@
+import { Button } from "@cloudflare/kumo";
+import { DropdownMenu } from "@cloudflare/kumo/components/dropdown";
 import {
-	IconArrowsExchange,
-	IconDashboard,
-	IconHelp,
-	IconLogout,
-	IconMoon,
-	IconSettings,
-	IconStack2,
-	IconSun,
-	IconTrendingDown,
-	IconTrendingUp,
-	IconWallet,
-} from "@tabler/icons-react";
+	ArrowsLeftRightIcon,
+	GearSixIcon,
+	MoonIcon,
+	QuestionIcon,
+	SignOutIcon,
+	SquaresFourIcon,
+	StackIcon,
+	SunIcon,
+	TrendDownIcon,
+	TrendUpIcon,
+	WalletIcon,
+} from "@phosphor-icons/react";
 import { useNavigate } from "@tanstack/react-router";
 import type * as React from "react";
 import { NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
 import { useTheme } from "@/components/theme-provider";
-import { Button } from "@/components/ui/button";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
 	Sidebar,
 	SidebarContent,
@@ -40,32 +35,32 @@ const navMainItems = [
 	{
 		title: "Dashboard",
 		url: "/",
-		icon: IconDashboard,
+		icon: SquaresFourIcon,
 	},
 	{
 		title: "Income",
 		url: "/income",
-		icon: IconTrendingUp,
+		icon: TrendUpIcon,
 	},
 	{
 		title: "Expense",
 		url: "/expense",
-		icon: IconTrendingDown,
+		icon: TrendDownIcon,
 	},
 	{
 		title: "Mutations",
 		url: "/mutations",
-		icon: IconArrowsExchange,
+		icon: ArrowsLeftRightIcon,
 	},
 	{
 		title: "Assets",
 		url: "/assets",
-		icon: IconStack2,
+		icon: StackIcon,
 	},
 	{
 		title: "Starting Balance",
 		url: "/starting-balance",
-		icon: IconWallet,
+		icon: WalletIcon,
 	},
 ];
 
@@ -73,18 +68,20 @@ const navSecondaryItems = [
 	{
 		title: "Settings",
 		url: "/settings",
-		icon: IconSettings,
+		icon: GearSixIcon,
 	},
 	{
 		title: "Help",
 		url: "#",
-		icon: IconHelp,
+		icon: QuestionIcon,
 	},
 ];
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({
+	...props
+}: React.ComponentProps<typeof Sidebar>): React.JSX.Element {
 	const navigate = useNavigate();
-	const { setTheme } = useTheme();
+	const { resolvedTheme, setTheme } = useTheme();
 	const { data: session } = authClient.useSession();
 
 	const handleSignOut = () => {
@@ -120,7 +117,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 						>
 							<a href="/">
 								<img src="/logo.png" alt="Logo" className="size-7 rounded-md" />
-								<h3 className="font-bold text-base">Moneta</h3>
+								<h3 className="font-semibold text-base">Moneta</h3>
 							</a>
 						</SidebarMenuButton>
 					</SidebarMenuItem>
@@ -134,34 +131,39 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				<SidebarSeparator />
 				<div className="flex items-center justify-between gap-2 px-2 py-2">
 					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-							<Button variant="outline" size="icon" className="size-9">
-								<IconSun className="dark:-rotate-90 size-4 rotate-0 scale-100 opacity-100 transition-opacity transition-transform dark:scale-50 dark:opacity-0" />
-								<IconMoon className="absolute size-4 rotate-90 scale-50 opacity-0 transition-opacity transition-transform dark:rotate-0 dark:scale-100 dark:opacity-100" />
-								<span className="sr-only">Toggle theme</span>
-							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent align="end">
-							<DropdownMenuItem onClick={() => setTheme("light")}>
+						<DropdownMenu.Trigger>
+							<Button
+								variant="secondary"
+								shape="square"
+								aria-label="Toggle theme"
+								icon={
+									resolvedTheme === "dark" ? (
+										<MoonIcon size={16} />
+									) : (
+										<SunIcon size={16} />
+									)
+								}
+							/>
+						</DropdownMenu.Trigger>
+						<DropdownMenu.Content align="end">
+							<DropdownMenu.Item onClick={() => setTheme("light")}>
 								Light
-							</DropdownMenuItem>
-							<DropdownMenuItem onClick={() => setTheme("dark")}>
+							</DropdownMenu.Item>
+							<DropdownMenu.Item onClick={() => setTheme("dark")}>
 								Dark
-							</DropdownMenuItem>
-							<DropdownMenuItem onClick={() => setTheme("system")}>
+							</DropdownMenu.Item>
+							<DropdownMenu.Item onClick={() => setTheme("system")}>
 								System
-							</DropdownMenuItem>
-						</DropdownMenuContent>
+							</DropdownMenu.Item>
+						</DropdownMenu.Content>
 					</DropdownMenu>
 					<Button
-						variant="outline"
-						size="icon"
-						className="size-9"
+						variant="secondary"
+						shape="square"
+						aria-label="Sign out"
 						onClick={handleSignOut}
-					>
-						<IconLogout className="size-4" />
-						<span className="sr-only">Sign out</span>
-					</Button>
+						icon={<SignOutIcon size={16} />}
+					/>
 				</div>
 				<NavUser user={user} />
 			</SidebarFooter>

@@ -1,16 +1,15 @@
+import { Button, Tabs } from "@cloudflare/kumo";
+import { PlusIcon } from "@phosphor-icons/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
 import { useState } from "react";
 import { CategoryFormDialog } from "@/components/category-form-dialog";
 import { CategoryTable } from "@/components/category-table";
 import {
 	type Category,
 	type CategoryType,
-	categoryTypes,
+	DEFAULT_CATEGORY_COLOR,
 } from "@/components/category-types";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import type { AxiosError } from "@/lib/api";
 import { api } from "@/lib/api";
@@ -48,7 +47,7 @@ export function CategorySettings() {
 	);
 	const [activeTab, setActiveTab] = useState<CategoryType>("income");
 	const [name, setName] = useState("");
-	const [color, setColor] = useState("#0ea5e9");
+	const [color, setColor] = useState(DEFAULT_CATEGORY_COLOR);
 
 	const { data: categories = [], isLoading } = useQuery({
 		queryKey: ["categories", "includeArchived"],
@@ -174,7 +173,7 @@ export function CategorySettings() {
 	const handleEdit = (category: Category) => {
 		setEditingCategory(category);
 		setName(category.name);
-		setColor(category.color || "#0ea5e9");
+		setColor(category.color || DEFAULT_CATEGORY_COLOR);
 		setIsOpen(true);
 	};
 
@@ -186,7 +185,7 @@ export function CategorySettings() {
 	const openCreateDialog = () => {
 		setEditingCategory(null);
 		setName("");
-		setColor("#0ea5e9");
+		setColor(DEFAULT_CATEGORY_COLOR);
 		setIsOpen(true);
 	};
 
@@ -194,35 +193,37 @@ export function CategorySettings() {
 		<div className="space-y-6">
 			<div className="flex items-center justify-between">
 				<h2 className="font-semibold text-xl">Categories</h2>
-				<Button onClick={openCreateDialog}>
-					<Plus className="mr-2 h-4 w-4" /> Add Category
+				<Button
+					variant="primary"
+					icon={<PlusIcon size={16} />}
+					onClick={openCreateDialog}
+				>
+					Add Category
 				</Button>
 			</div>
 
 			<Tabs
+				variant="segmented"
+				className="w-full"
+				tabs={[
+					{ value: "income", label: "Income" },
+					{ value: "expense", label: "Expense" },
+					{ value: "starting_balance", label: "Starting Balance" },
+				]}
 				value={activeTab}
 				onValueChange={(value) => setActiveTab(value as CategoryType)}
-				className="w-full"
-			>
-				<TabsList className="grid w-full grid-cols-3">
-					<TabsTrigger value="income">Income</TabsTrigger>
-					<TabsTrigger value="expense">Expense</TabsTrigger>
-					<TabsTrigger value="starting_balance">Starting Balance</TabsTrigger>
-				</TabsList>
-				{categoryTypes.map((type) => (
-					<TabsContent key={type} value={type} className="mt-4">
-						<CategoryTable
-							categories={categories}
-							isLoading={isLoading}
-							type={type}
-							isRestoring={restoreMutation.isPending}
-							onEdit={handleEdit}
-							onArchive={handleArchive}
-							onRestore={restoreMutation.mutate}
-						/>
-					</TabsContent>
-				))}
-			</Tabs>
+			/>
+			<div className="mt-4">
+				<CategoryTable
+					categories={categories}
+					isLoading={isLoading}
+					type={activeTab}
+					isRestoring={restoreMutation.isPending}
+					onEdit={handleEdit}
+					onArchive={handleArchive}
+					onRestore={restoreMutation.mutate}
+				/>
+			</div>
 
 			<CategoryFormDialog
 				open={isOpen}
@@ -231,7 +232,7 @@ export function CategorySettings() {
 					if (!open) {
 						setEditingCategory(null);
 						setName("");
-						setColor("#0ea5e9");
+						setColor(DEFAULT_CATEGORY_COLOR);
 					}
 				}}
 				editingCategory={editingCategory}

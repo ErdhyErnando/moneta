@@ -627,13 +627,40 @@ Review checklist:
 | ✅ Warm neutrals — replaced by kumo's ramp in Phase 2 (`--background`→canvas, `--card`→base, `--muted`→tint, `--secondary`→recessed, `--border`→hairline) | done |
 | ✅ `html, body` raw colours — body now paints `--background` | done |
 | ✅ kumo type scale (D9) — live since Phase 2; form controls forced to 16px below `md` | done |
-| Legacy `components/ui/*` still consume the shadcn aliases (Radix) | Phase 3 |
-| `--chart-6` / `--chart-8` in `chart-pie-categories.tsx` (never existed) | Phase 5 |
-| Type scale (app shrinks 1–2px) | Phase 2, when kumo CSS lands (D9 — intended) |
-| `doc-spec/chart-example.md` (violet ramp, Recharts) | Phase 5 rewrites/deletes |
-| `components/dashboard/summary-cards.tsx` hardcodes `text-emerald-600` / `text-rose-600` / a blue for "Current Balance" | Phase 4 dashboard batch → `--positive` / `--negative` / `text-kumo-default` |
+| ✅ Primitives, overlays, toasts and icons — every Button/Input/Select/Checkbox/Tabs/Card/Dropdown/Popover/Tooltip/modal/toast is kumo; Radix, `class-variance-authority`, `lucide-react`, `@tabler/icons-react` and `sonner` are gone from `apps/web` | done (Phase 3) |
+| ✅ `--chart-6` / `--chart-8` in `chart-pie-categories.tsx` — replaced by the real `--chart-1…5` ramp | done |
+| ✅ `summary-cards.tsx` palette literals — now `text-positive` / `text-negative` / `text-kumo-default` | done |
+| `components/ui/{calendar,date-input,table,sidebar}.tsx` — kumo-styled composites that kumo does not ship (kept, no Radix); `calendar`/`date-input` are replaced by kumo `DatePicker` | Phase 5 |
+| `components/ui/chart.tsx` — Recharts helpers | Phase 5 (kumo `Chart` + ECharts, #48) |
 | `components/category-badge.tsx` cycles raw Tailwind palettes instead of `categories.color` | Phase 4 (payload already exists in the DB) |
+| `doc-spec/chart-example.md` (violet ramp, Recharts) | Phase 5 rewrites/deletes |
 | Render-blocking Google Fonts `@import` | separate perf PR |
+
+---
+
+## 13.1 `components/ui` inventory (Phase 3 result)
+
+| File | Replacement | Status |
+|---|---|---|
+| `button.tsx`, `button-variants.ts` | kumo `Button` (`variant`/`size`/`shape`/`icon`/`loading`) + `buttonVariants()` for `<Link>` CTAs | deleted |
+| `input.tsx` | kumo `Input` (built-in `label`/`description`/`error` Field wrapper) | deleted |
+| `label.tsx` | kumo `Label` | deleted |
+| `select.tsx` | kumo `Select` (single component + `items`) | deleted |
+| `checkbox.tsx` | kumo `Checkbox` (`checked`/`indeterminate`/`onCheckedChange`) | deleted |
+| `tabs.tsx` | kumo `Tabs` (data-driven `tabs` prop, no panels) | deleted |
+| `card.tsx` | kumo `LayerCard` | deleted |
+| `dropdown-menu.tsx` | kumo `DropdownMenu` compound | deleted |
+| `popover.tsx` | kumo `Popover` compound | deleted |
+| `tooltip.tsx` | kumo `Tooltip` (`content`, `asChild`) + `TooltipProvider` | deleted |
+| `accordion.tsx` | custom, kumo-styled, on `@cloudflare/kumo/primitives/accordion` (Base UI) | deleted |
+| `dialog.tsx` | `ResponsiveDialog` → kumo `LayerDialog` (D11) | deleted |
+| `sheet.tsx` | removed — the mobile sidebar drawer is a `LayerDialog` too (one modal primitive) | deleted |
+| `toast.tsx`, `toaster.tsx` | kumo `Toasty` + `useKumoToastManager` behind the existing `useToast()` adapter | deleted |
+| `avatar.tsx`, `separator.tsx`, `skeleton.tsx` | custom, kumo-styled (`components/primitives/`) — kumo ships no equivalent | deleted |
+| `table.tsx` | kumo `Table` | Phase 5 |
+| `calendar.tsx`, `date-input.tsx` | kumo `DatePicker` | Phase 5 |
+| `sidebar.tsx` | kumo `Sidebar` | Phase 5 |
+| `chart.tsx` | kumo `Chart` + ECharts (#48) | Phase 5 |
 
 ---
 
@@ -649,3 +676,16 @@ Review checklist:
    `dev`/`build`/`postinstall`, and exits non-zero when kumo is missing or nothing matches.
 5. **Dark mode** — kumo's dark tokens resolve through `color-scheme`, so `enableColorScheme` must
    stay on; overrides target both `:root.dark` and `:root[data-mode="dark"]` (D14).
+6. **Single-child triggers are automatic** — `DropdownMenu.Trigger`, `Popover.Trigger` and `Tooltip`
+   accept a kumo `Button` as their only child (they forward it as `render`); no `asChild` needed.
+   Icon-only triggers must carry `aria-label` (kumo's types enforce it for `shape="square"`).
+7. **`LayerDialog` shape is strict** — `Content` requires exactly one `Title` and one `Body` (an empty
+   `Body` is fine); `Actions` renders the dismiss button itself, so a destructive confirm passes
+   `dismissLabel="Cancel"` and one `Action`. Never branch the layout on viewport (D11).
+8. **Portals beat `z-index: 50`** — only one modal primitive exists now (kumo `LayerDialog`), so
+   Select/Dropdown/Popover open *inside* it without stacking hacks. Mixing a foreign dialog
+   (the old Radix one, `z-50`) with a Base UI popup (`z-index: auto`) silently put the popup
+   behind the dialog — one more reason D11 forbids a second modal implementation.
+9. **Toasts** — mount `<Toasty>` once at the root (`routes/__root.tsx`) and call
+   `useKumoToastManager().add({ title, description, variant })`; `hooks/use-toast.ts` is a thin
+   adapter that keeps the old `toast({ title, description, variant })` signature for call sites.

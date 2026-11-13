@@ -1,3 +1,4 @@
+import { Toasty } from "@cloudflare/kumo/components/toast";
 import {
 	createRootRouteWithContext,
 	HeadContent,
@@ -5,7 +6,6 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { ThemeProvider } from "@/components/theme-provider";
-import { Toaster } from "@/components/ui/toaster";
 import "../index.css";
 
 export type RouterAppContext = Record<string, never>;
@@ -45,10 +45,11 @@ function RootComponent() {
 			>
 				{/* kumo: isolating the app root keeps portalled popups above our own
 				    sticky headers, which use positive z-index. */}
-				<div className="isolate h-svh">
-					<Outlet />
-				</div>
-				<Toaster />
+				<Toasty>
+					<div className="isolate h-svh">
+						<Outlet />
+					</div>
+				</Toasty>
 			</ThemeProvider>
 			<TanStackRouterDevtools position="bottom-left" />
 		</>

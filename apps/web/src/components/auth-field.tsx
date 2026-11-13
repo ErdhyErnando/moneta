@@ -1,6 +1,5 @@
+import { Input } from "@cloudflare/kumo";
 import type { AnyFieldApi } from "@tanstack/react-form";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
 
 type AuthFieldProps = {
 	field: AnyFieldApi;
@@ -17,24 +16,18 @@ export function AuthField({
 	label,
 	type,
 	autoComplete,
-}: AuthFieldProps) {
+}: AuthFieldProps): React.JSX.Element {
 	return (
-		<div className="space-y-2">
-			<Label htmlFor={field.name}>{label}</Label>
-			<Input
-				id={field.name}
-				name={field.name}
-				type={type}
-				autoComplete={autoComplete}
-				value={field.state.value}
-				onBlur={field.handleBlur}
-				onChange={(e) => field.handleChange(e.target.value)}
-			/>
-			{field.state.meta.errors.map((error) => (
-				<p key={error?.message} className="text-red-500 text-sm">
-					{error?.message}
-				</p>
-			))}
-		</div>
+		<Input
+			label={label}
+			id={field.name}
+			name={field.name}
+			type={type}
+			autoComplete={autoComplete}
+			value={field.state.value}
+			onBlur={field.handleBlur}
+			onChange={(e) => field.handleChange(e.target.value)}
+			error={field.state.meta.errors[0]?.message}
+		/>
 	);
 }

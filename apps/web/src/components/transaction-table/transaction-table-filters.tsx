@@ -1,20 +1,7 @@
+import { Button, Input, Label, Select } from "@cloudflare/kumo";
+import { Popover } from "@cloudflare/kumo/components/popover";
 import { format } from "date-fns";
-import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { ClearButton } from "./transaction-table-toolbar";
 
@@ -55,99 +42,116 @@ export function TransactionTableFilters({
 		<div className="rounded-lg border bg-muted/50 p-4">
 			<div className="flex flex-wrap items-end gap-4">
 				<div className="flex flex-col gap-1.5">
-					<Label className="font-medium text-muted-foreground text-xs">
+					<Label className="font-medium text-kumo-subtle text-xs">
 						Start Date
 					</Label>
-					<Popover>
-						<PopoverTrigger asChild>
-							<Button
-								variant="outline"
-								size="sm"
-								className={cn(
-									"w-[140px] justify-start text-left font-normal",
-									!startDate && "text-muted-foreground",
-								)}
-							>
-								{startDate ? format(startDate, "MMM d, yyyy") : "Pick date"}
-							</Button>
-						</PopoverTrigger>
-						<PopoverContent className="w-auto p-0" align="start">
-							<Calendar
-								mode="single"
-								selected={startDate}
-								onSelect={setStartDate}
-								initialFocus
-							/>
-						</PopoverContent>
-					</Popover>
+					<Popover.Root>
+						<Popover.Trigger
+							render={
+								<Button
+									variant="secondary"
+									size="sm"
+									className={cn(
+										"w-[140px] justify-start text-left",
+										!startDate && "text-kumo-subtle",
+									)}
+								/>
+							}
+						>
+							{startDate ? format(startDate, "MMM d, yyyy") : "Pick date"}
+						</Popover.Trigger>
+						<Popover.Portal>
+							<Popover.Positioner align="start">
+								<Popover.Popup className="w-auto p-0">
+									<Calendar
+										mode="single"
+										selected={startDate}
+										onSelect={setStartDate}
+										initialFocus
+									/>
+								</Popover.Popup>
+							</Popover.Positioner>
+						</Popover.Portal>
+					</Popover.Root>
 				</div>
 				<div className="flex flex-col gap-1.5">
-					<Label className="font-medium text-muted-foreground text-xs">
+					<Label className="font-medium text-kumo-subtle text-xs">
 						End Date
 					</Label>
-					<Popover>
-						<PopoverTrigger asChild>
-							<Button
-								variant="outline"
-								size="sm"
-								className={cn(
-									"w-[140px] justify-start text-left font-normal",
-									!endDate && "text-muted-foreground",
-								)}
-							>
-								{endDate ? format(endDate, "MMM d, yyyy") : "Pick date"}
-							</Button>
-						</PopoverTrigger>
-						<PopoverContent className="w-auto p-0" align="start">
-							<Calendar
-								mode="single"
-								selected={endDate}
-								onSelect={setEndDate}
-								initialFocus
-							/>
-						</PopoverContent>
-					</Popover>
+					<Popover.Root>
+						<Popover.Trigger
+							render={
+								<Button
+									variant="secondary"
+									size="sm"
+									className={cn(
+										"w-[140px] justify-start text-left",
+										!endDate && "text-kumo-subtle",
+									)}
+								/>
+							}
+						>
+							{endDate ? format(endDate, "MMM d, yyyy") : "Pick date"}
+						</Popover.Trigger>
+						<Popover.Portal>
+							<Popover.Positioner align="start">
+								<Popover.Popup className="w-auto p-0">
+									<Calendar
+										mode="single"
+										selected={endDate}
+										onSelect={setEndDate}
+										initialFocus
+									/>
+								</Popover.Popup>
+							</Popover.Positioner>
+						</Popover.Portal>
+					</Popover.Root>
 				</div>
 				<div className="flex flex-col gap-1.5">
-					<Label className="font-medium text-muted-foreground text-xs">
+					<Label className="font-medium text-kumo-subtle text-xs">
 						Category
 					</Label>
-					<Select value={selectedCategory} onValueChange={setSelectedCategory}>
-						<SelectTrigger className="h-8 w-40">
-							<SelectValue placeholder="All categories" />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="all">All categories</SelectItem>
-							{categories.map((c) => (
-								<SelectItem key={c.id} value={String(c.id)}>
-									{c.name}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
+					<Select
+						size="sm"
+						className="w-40"
+						aria-label="Category"
+						value={selectedCategory}
+						onValueChange={(value) => setSelectedCategory(value ?? "all")}
+						items={[
+							{ label: "All categories", value: "all" },
+							...categories.map((c) => ({
+								label: c.name,
+								value: String(c.id),
+							})),
+						]}
+					/>
 				</div>
 				<div className="flex flex-col gap-1.5">
-					<Label className="font-medium text-muted-foreground text-xs">
+					<Label className="font-medium text-kumo-subtle text-xs">
 						Min Amount
 					</Label>
 					<Input
 						type="number"
+						size="sm"
+						aria-label="Min amount"
 						placeholder="0"
 						value={minAmount}
 						onChange={(e) => setMinAmount(e.target.value)}
-						className="h-8 w-[100px]"
+						className="w-[100px]"
 					/>
 				</div>
 				<div className="flex flex-col gap-1.5">
-					<Label className="font-medium text-muted-foreground text-xs">
+					<Label className="font-medium text-kumo-subtle text-xs">
 						Max Amount
 					</Label>
 					<Input
 						type="number"
+						size="sm"
+						aria-label="Max amount"
 						placeholder="No limit"
 						value={maxAmount}
 						onChange={(e) => setMaxAmount(e.target.value)}
-						className="h-8 w-[100px]"
+						className="w-[100px]"
 					/>
 				</div>
 				{hasActiveFilters && <ClearButton onClick={clearFilters} />}

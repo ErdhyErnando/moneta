@@ -1,4 +1,6 @@
-import { IconDotsVertical, IconPlus } from "@tabler/icons-react";
+import { Button, Checkbox } from "@cloudflare/kumo";
+import { DropdownMenu } from "@cloudflare/kumo/components/dropdown";
+import { DotsThreeVerticalIcon, PlusIcon } from "@phosphor-icons/react";
 import {
 	type ColumnDef,
 	type ColumnFiltersState,
@@ -15,15 +17,6 @@ import { z } from "zod";
 import { CategoryBadge } from "@/components/category-badge";
 
 import { DataTableShell } from "@/components/data-table-shell";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useCurrency } from "@/contexts/currency-context";
 import { asUtcDay } from "@/lib/date";
 
@@ -48,9 +41,10 @@ const columns: ColumnDef<StartingBalance>[] = [
 		header: ({ table }) => (
 			<div className="flex items-center justify-center">
 				<Checkbox
-					checked={
-						table.getIsAllPageRowsSelected() ||
-						(table.getIsSomePageRowsSelected() && "indeterminate")
+					checked={table.getIsAllPageRowsSelected()}
+					indeterminate={
+						table.getIsSomePageRowsSelected() &&
+						!table.getIsAllPageRowsSelected()
 					}
 					onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
 					aria-label="Select all"
@@ -108,7 +102,7 @@ const columns: ColumnDef<StartingBalance>[] = [
 				: `$${amount.toFixed(2)}`;
 
 			return (
-				<div className="text-right font-medium text-blue-600">+{formatted}</div>
+				<div className="text-right font-medium tabular-nums">+{formatted}</div>
 			);
 		},
 	},
@@ -122,28 +116,27 @@ const columns: ColumnDef<StartingBalance>[] = [
 
 			return (
 				<DropdownMenu>
-					<DropdownMenuTrigger asChild>
+					<DropdownMenu.Trigger>
 						<Button
 							variant="ghost"
-							className="flex size-8 text-muted-foreground data-[state=open]:bg-muted"
-							size="icon"
-						>
-							<IconDotsVertical className="size-4" />
-							<span className="sr-only">Open menu</span>
-						</Button>
-					</DropdownMenuTrigger>
-					<DropdownMenuContent align="end" className="w-32">
-						<DropdownMenuItem onClick={() => meta?.onEdit(row.original)}>
+							size="sm"
+							shape="square"
+							aria-label="Open menu"
+							icon={<DotsThreeVerticalIcon size={16} />}
+						/>
+					</DropdownMenu.Trigger>
+					<DropdownMenu.Content align="end" className="w-32">
+						<DropdownMenu.Item onClick={() => meta?.onEdit(row.original)}>
 							Edit
-						</DropdownMenuItem>
-						<DropdownMenuSeparator />
-						<DropdownMenuItem
-							variant="destructive"
+						</DropdownMenu.Item>
+						<DropdownMenu.Separator />
+						<DropdownMenu.Item
+							variant="danger"
 							onClick={() => meta?.onDelete(row.original)}
 						>
 							Delete
-						</DropdownMenuItem>
-					</DropdownMenuContent>
+						</DropdownMenu.Item>
+					</DropdownMenu.Content>
 				</DropdownMenu>
 			);
 		},
@@ -209,8 +202,12 @@ export function StartingBalanceList({
 			table={table}
 			colCount={columns.length}
 			addControl={
-				<Button size="sm" onClick={onAddClick}>
-					<IconPlus className="mr-2 size-4" />
+				<Button
+					variant="primary"
+					size="sm"
+					icon={<PlusIcon size={16} />}
+					onClick={onAddClick}
+				>
 					Add Starting Balance
 				</Button>
 			}

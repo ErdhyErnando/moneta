@@ -3,7 +3,7 @@ import {
 	AccordionContent,
 	AccordionItem,
 	AccordionTrigger,
-} from "@/components/ui/accordion";
+} from "@/components/primitives/accordion";
 import {
 	TableBody,
 	TableCell,
@@ -45,12 +45,12 @@ export function TransactionTableMonthGroup({
 					<span
 						className={cn(
 							"flex items-center gap-2 text-sm",
-							type === "income" ? "text-emerald-600" : "text-rose-600",
+							type === "income" ? "text-positive" : "text-negative",
 						)}
 					>
 						total {type === "income" ? "+" : "-"}
 						{formatCurrency(group.total)}
-						<span className="text-muted-foreground">
+						<span className="text-kumo-subtle">
 							({group.rows.length} transaction
 							{group.rows.length === 1 ? "" : "s"})
 						</span>

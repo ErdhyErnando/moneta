@@ -1,24 +1,16 @@
+import { Button, buttonVariants } from "@cloudflare/kumo";
+import { ChartBarIcon, PlusIcon } from "@phosphor-icons/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { BarChart3, Plus } from "lucide-react";
 import { useRef, useState } from "react";
 import { CurrencySelector } from "@/components/currency-selector";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
+import { ResponsiveDialog } from "@/components/responsive-dialog";
 import TransactionForm from "@/components/transaction-form";
 import {
 	type Transaction,
 	TransactionTable,
 } from "@/components/transaction-table";
-import { Button } from "@/components/ui/button";
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import type { AxiosError } from "@/lib/api";
 import { api } from "@/lib/api";
@@ -165,46 +157,43 @@ function ExpensePage() {
 			<div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 				<h1 className="font-bold text-2xl sm:text-3xl">Expenses</h1>
 				<div className="flex items-center gap-2">
-					<Button variant="outline" asChild>
-						<Link to="/expense/breakdown">
-							<BarChart3 className="mr-2 h-4 w-4" /> Breakdown
-						</Link>
-					</Button>
+					<Link
+						to="/expense/breakdown"
+						className={buttonVariants({ variant: "secondary" })}
+					>
+						<ChartBarIcon className="mr-2" size={16} /> Breakdown
+					</Link>
 					<CurrencySelector />
-					<Dialog
+					<Button
+						variant="primary"
+						icon={<PlusIcon size={16} />}
+						onClick={() => setIsOpen(true)}
+					>
+						Add Expense
+					</Button>
+					<ResponsiveDialog
 						open={isOpen}
 						onOpenChange={(open) => {
 							setIsOpen(open);
 							if (!open) setEditingId(null);
 						}}
+						title={editingId ? "Edit Expense" : "Add Expense"}
 					>
-						<DialogTrigger asChild>
-							<Button variant="destructive">
-								<Plus className="mr-2 h-4 w-4" /> Add Expense
-							</Button>
-						</DialogTrigger>
-						<DialogContent>
-							<DialogHeader>
-								<DialogTitle>
-									{editingId ? "Edit Expense" : "Add Expense"}
-								</DialogTitle>
-							</DialogHeader>
-							<TransactionForm
-								type="expense"
-								onSubmit={handleSubmit}
-								defaultValues={
-									editingExpense
-										? {
-												amount: editingExpense.amount,
-												description: editingExpense.description,
-												date: asUtcDay(editingExpense.date),
-												categoryId: editingExpense.categoryId,
-											}
-										: undefined
-								}
-							/>
-						</DialogContent>
-					</Dialog>
+						<TransactionForm
+							type="expense"
+							onSubmit={handleSubmit}
+							defaultValues={
+								editingExpense
+									? {
+											amount: editingExpense.amount,
+											description: editingExpense.description,
+											date: asUtcDay(editingExpense.date),
+											categoryId: editingExpense.categoryId,
+										}
+									: undefined
+							}
+						/>
+					</ResponsiveDialog>
 				</div>
 			</div>
 

@@ -1,12 +1,5 @@
-import { Pencil, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
+import { Button, LayerCard } from "@cloudflare/kumo";
+import { PencilSimpleIcon, TrashIcon } from "@phosphor-icons/react";
 import {
 	Table,
 	TableBody,
@@ -41,19 +34,21 @@ export function AssetsGroup({
 	const { formatCurrency } = useCurrency();
 
 	return (
-		<Card>
-			<CardHeader>
-				<div className="flex items-center justify-between">
-					<div>
-						<CardTitle>{ASSET_TYPE_LABELS[type]}</CardTitle>
-						<CardDescription>
-							{assets.length} holding{assets.length === 1 ? "" : "s"}
-						</CardDescription>
+		<LayerCard className="gap-0 rounded-xl p-0 shadow-none">
+			<div className="flex items-center justify-between px-6 pt-6 pb-4">
+				<div>
+					<div className="font-semibold text-base">
+						{ASSET_TYPE_LABELS[type]}
 					</div>
-					<p className="font-semibold text-lg">{formatCurrency(total)}</p>
+					<div className="text-kumo-subtle text-sm">
+						{assets.length} holding{assets.length === 1 ? "" : "s"}
+					</div>
 				</div>
-			</CardHeader>
-			<CardContent>
+				<p className="font-semibold text-lg tabular-nums">
+					{formatCurrency(total)}
+				</p>
+			</div>
+			<div className="px-6 pb-6">
 				<Table>
 					<TableHeader>
 						<TableRow>
@@ -70,7 +65,7 @@ export function AssetsGroup({
 								<TableCell>
 									<div className="font-medium">{asset.name}</div>
 									{asset.symbol && (
-										<div className="text-muted-foreground text-xs">
+										<div className="text-kumo-subtle text-xs">
 											{asset.symbol}
 										</div>
 									)}
@@ -78,7 +73,7 @@ export function AssetsGroup({
 								<TableCell className="text-right">
 									{formatQuantity(asset.quantity)}
 								</TableCell>
-								<TableCell className="text-right">
+								<TableCell className="text-right tabular-nums">
 									{formatCurrency(Number(asset.amount))}
 								</TableCell>
 								<TableCell>
@@ -88,27 +83,27 @@ export function AssetsGroup({
 									<div className="flex justify-end gap-1">
 										<Button
 											variant="ghost"
-											size="icon"
+											size="sm"
+											shape="square"
 											onClick={() => onEdit(asset)}
 											aria-label={`Edit ${asset.name}`}
-										>
-											<Pencil className="h-4 w-4" />
-										</Button>
+											icon={<PencilSimpleIcon size={16} />}
+										/>
 										<Button
 											variant="ghost"
-											size="icon"
+											size="sm"
+											shape="square"
 											onClick={() => onDelete(asset)}
 											aria-label={`Delete ${asset.name}`}
-										>
-											<Trash2 className="h-4 w-4" />
-										</Button>
+											icon={<TrashIcon size={16} />}
+										/>
 									</div>
 								</TableCell>
 							</TableRow>
 						))}
 					</TableBody>
 				</Table>
-			</CardContent>
-		</Card>
+			</div>
+		</LayerCard>
 	);
 }

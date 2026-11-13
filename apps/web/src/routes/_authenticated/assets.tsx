@@ -1,6 +1,7 @@
+import { Button, LayerCard } from "@cloudflare/kumo";
+import { PlusIcon } from "@phosphor-icons/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Plus } from "lucide-react";
 import { lazy, Suspense, useMemo, useRef, useState } from "react";
 import {
 	AssetForm,
@@ -9,23 +10,8 @@ import {
 import { AssetsGroup } from "@/components/assets/assets-group";
 import { CurrencySelector } from "@/components/currency-selector";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
-import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from "@/components/ui/dialog";
+import { EmptyState } from "@/components/layout";
+import { ResponsiveDialog } from "@/components/responsive-dialog";
 import { useCurrency } from "@/contexts/currency-context";
 import { useToast } from "@/hooks/use-toast";
 import { type AxiosError, api } from "@/lib/api";
@@ -205,103 +191,90 @@ function AssetsPage() {
 				</div>
 				<div className="flex items-center gap-2">
 					<CurrencySelector />
-					<Dialog
+					<Button
+						variant="primary"
+						icon={<PlusIcon size={16} />}
+						onClick={() => setIsOpen(true)}
+					>
+						Add Asset
+					</Button>
+					<ResponsiveDialog
 						open={isOpen}
 						onOpenChange={(open) => {
 							setIsOpen(open);
 							if (!open) setEditingId(null);
 						}}
+						title={editingId ? "Edit Asset" : "Add Asset"}
 					>
-						<DialogTrigger asChild>
-							<Button>
-								<Plus className="mr-2 h-4 w-4" /> Add Asset
-							</Button>
-						</DialogTrigger>
-						<DialogContent>
-							<DialogHeader>
-								<DialogTitle>
-									{editingId ? "Edit Asset" : "Add Asset"}
-								</DialogTitle>
-							</DialogHeader>
-							<AssetForm
-								onSubmit={handleSubmit}
-								defaultValues={
-									editingAsset
-										? {
-												type: editingAsset.type,
-												name: editingAsset.name,
-												symbol: editingAsset.symbol ?? "",
-												quantity: editingAsset.quantity ?? "",
-												amount: editingAsset.amount,
-												date: asUtcDay(editingAsset.date),
-												notes: editingAsset.notes ?? "",
-											}
-										: undefined
-								}
-							/>
-						</DialogContent>
-					</Dialog>
+						<AssetForm
+							onSubmit={handleSubmit}
+							defaultValues={
+								editingAsset
+									? {
+											type: editingAsset.type,
+											name: editingAsset.name,
+											symbol: editingAsset.symbol ?? "",
+											quantity: editingAsset.quantity ?? "",
+											amount: editingAsset.amount,
+											date: asUtcDay(editingAsset.date),
+											notes: editingAsset.notes ?? "",
+										}
+									: undefined
+							}
+						/>
+					</ResponsiveDialog>
 				</div>
 			</div>
 
 			{isLoading ? (
-				<div className="flex h-[300px] items-center justify-center">
-					<div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-				</div>
+				<div className="h-[300px] animate-pulse rounded-xl bg-kumo-fill" />
 			) : (
 				<div className="space-y-6">
 					<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-						<Card>
-							<CardHeader className="pb-2">
-								<CardDescription>Total Assets</CardDescription>
-								<CardTitle className="text-2xl">
-									{formatCurrency(totalValue)}
-								</CardTitle>
-							</CardHeader>
-							<CardContent>
-								<p className="text-muted-foreground text-xs">
-									{assets.length} holding{assets.length === 1 ? "" : "s"}
-								</p>
-							</CardContent>
-						</Card>
+						<LayerCard className="gap-1 rounded-xl p-6 shadow-none">
+							<div className="text-kumo-subtle text-sm">Total Assets</div>
+							<div className="font-semibold text-2xl tabular-nums">
+								{formatCurrency(totalValue)}
+							</div>
+							<p className="text-kumo-subtle text-xs">
+								{assets.length} holding{assets.length === 1 ? "" : "s"}
+							</p>
+						</LayerCard>
 						{groups.map((group) => (
-							<Card key={group.type}>
-								<CardHeader className="pb-2">
-									<CardDescription>
-										{ASSET_TYPE_LABELS[group.type]}
-									</CardDescription>
-									<CardTitle className="text-2xl">
-										{formatCurrency(group.total)}
-									</CardTitle>
-								</CardHeader>
-								<CardContent>
-									<p className="text-muted-foreground text-xs">
-										{group.assets.length} holding
-										{group.assets.length === 1 ? "" : "s"}
-									</p>
-								</CardContent>
-							</Card>
+							<LayerCard
+								key={group.type}
+								className="gap-1 rounded-xl p-6 shadow-none"
+							>
+								<div className="text-kumo-subtle text-sm">
+									{ASSET_TYPE_LABELS[group.type]}
+								</div>
+								<div className="font-semibold text-2xl tabular-nums">
+									{formatCurrency(group.total)}
+								</div>
+								<p className="text-kumo-subtle text-xs">
+									{group.assets.length} holding
+									{group.assets.length === 1 ? "" : "s"}
+								</p>
+							</LayerCard>
 						))}
 					</div>
 
 					<Suspense
 						fallback={
-							<div className="flex h-[200px] items-center justify-center">
-								<div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-							</div>
+							<div className="h-[200px] animate-pulse rounded-xl bg-kumo-fill" />
 						}
 					>
 						<AssetsChart />
 					</Suspense>
 
 					{groups.length === 0 ? (
-						<Card>
-							<CardContent className="py-16 text-center">
-								<p className="text-muted-foreground">
-									No assets yet. Add your first holding to start tracking.
-								</p>
-							</CardContent>
-						</Card>
+						<LayerCard className="rounded-xl p-6 shadow-none">
+							<EmptyState
+								size="base"
+								title="No assets yet"
+								description="Add your first holding to start tracking its value."
+							/>
+						</LayerCard>
 					) : (
 						groups.map((group) => (
 							<AssetsGroup

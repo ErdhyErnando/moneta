@@ -1,4 +1,4 @@
-import type { Icon } from "@tabler/icons-react";
+import type { Icon } from "@phosphor-icons/react";
 import type * as React from "react";
 
 import {
@@ -18,7 +18,7 @@ export function NavSecondary({
 		url: string;
 		icon: Icon;
 	}[];
-} & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
+} & React.ComponentPropsWithoutRef<typeof SidebarGroup>): React.JSX.Element {
 	return (
 		<SidebarGroup {...props}>
 			<SidebarGroupContent>
@@ -27,7 +27,7 @@ export function NavSecondary({
 						<SidebarMenuItem key={item.title}>
 							<SidebarMenuButton asChild>
 								<a href={item.url}>
-									<item.icon />
+									<item.icon size={20} />
 									<span>{item.title}</span>
 								</a>
 							</SidebarMenuButton>

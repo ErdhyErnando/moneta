@@ -1,5 +1,9 @@
+import {
+	ChartLineUpIcon,
+	PiggyBankIcon,
+	WalletIcon,
+} from "@phosphor-icons/react";
 import { createFileRoute } from "@tanstack/react-router";
-import { AreaChart, PiggyBank, Wallet } from "lucide-react";
 import { useState } from "react";
 import SignInForm from "@/components/sign-in-form";
 import SignUpForm from "@/components/sign-up-form";
@@ -10,18 +14,18 @@ export const Route = createFileRoute("/login")({
 
 const valueProps = [
 	{
-		icon: Wallet,
+		icon: WalletIcon,
 		title: "Income & expenses",
 		description:
 			"Track every transaction with categories that match your life.",
 	},
 	{
-		icon: AreaChart,
+		icon: ChartLineUpIcon,
 		title: "Visual progress",
 		description: "Monthly charts and breakdowns that make trends easy to read.",
 	},
 	{
-		icon: PiggyBank,
+		icon: PiggyBankIcon,
 		title: "Holdings included",
 		description: "Cash, stocks, bonds and crypto in one personal ledger.",
 	},
@@ -29,11 +33,11 @@ const valueProps = [
 
 function BrandPanel() {
 	return (
-		<div className="relative hidden flex-col justify-between overflow-hidden bg-muted p-10 lg:flex dark:border-sidebar-border dark:border-r">
+		<div className="relative hidden flex-col justify-between overflow-hidden bg-kumo-recessed p-10 lg:flex">
 			{/* kumo-inspired warm accents */}
-			<div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-brand-accent/10 via-transparent to-transparent" />
-			<div className="-top-24 -right-24 pointer-events-none absolute size-96 rounded-full bg-brand-accent/10 blur-3xl" />
-			<div className="-bottom-32 -left-24 pointer-events-none absolute size-96 rounded-full bg-brand-accent/5 blur-3xl" />
+			<div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-brand/10 via-transparent to-transparent" />
+			<div className="-top-24 -right-24 pointer-events-none absolute size-96 rounded-full bg-brand/10 blur-3xl" />
+			<div className="-bottom-32 -left-24 pointer-events-none absolute size-96 rounded-full bg-brand/5 blur-3xl" />
 
 			<div className="relative flex items-center gap-2">
 				<img src="/logo.png" alt="Moneta logo" className="size-8 rounded-md" />
@@ -41,7 +45,7 @@ function BrandPanel() {
 			</div>
 
 			<div className="relative max-w-md">
-				<p className="font-semibold text-brand-accent-strong text-xs uppercase tracking-widest dark:text-brand-accent">
+				<p className="font-semibold text-brand-strong text-xs uppercase tracking-widest">
 					Personal finance, simply put
 				</p>
 				<h1 className="mt-4 font-bold text-4xl leading-tight tracking-tight">
@@ -50,21 +54,19 @@ function BrandPanel() {
 				<ul className="mt-10 space-y-6">
 					{valueProps.map(({ icon: Icon, title, description }) => (
 						<li key={title} className="flex gap-4">
-							<div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-brand-accent/10 text-brand-accent">
-								<Icon className="size-5" aria-hidden="true" />
+							<div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand-strong">
+								<Icon size={20} aria-hidden="true" />
 							</div>
 							<div>
 								<p className="font-semibold">{title}</p>
-								<p className="mt-0.5 text-muted-foreground text-sm">
-									{description}
-								</p>
+								<p className="mt-0.5 text-kumo-subtle text-sm">{description}</p>
 							</div>
 						</li>
 					))}
 				</ul>
 			</div>
 
-			<p className="relative text-muted-foreground text-sm">
+			<p className="relative text-kumo-subtle text-sm">
 				© {new Date().getFullYear()} Moneta
 			</p>
 		</div>

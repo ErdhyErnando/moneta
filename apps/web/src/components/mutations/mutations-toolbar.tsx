@@ -1,14 +1,6 @@
+import { Button, Input, Label, Select } from "@cloudflare/kumo";
+import { XIcon } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
 import { api } from "@/lib/api";
 import type { MutationsSearch } from "@/lib/mutations";
 import { MutationsDateField } from "./mutations-date-field";
@@ -62,52 +54,54 @@ export function MutationsToolbar({ search, onCommit }: Props) {
 		search.max !== undefined;
 
 	return (
-		<div className="rounded-lg border bg-muted/50 p-4">
+		<div className="rounded-lg border border-kumo-hairline bg-kumo-recessed p-4">
 			<div className="flex flex-wrap items-end gap-4">
 				<div className="flex flex-col gap-1.5">
 					<Label
 						htmlFor="mutations-search"
-						className="font-medium text-muted-foreground text-xs"
+						className="font-medium text-kumo-subtle text-xs"
 					>
 						Search
 					</Label>
 					<Input
 						id="mutations-search"
+						size="sm"
 						placeholder="Description or category…"
 						value={qInput}
 						onChange={(event) => setQInput(event.target.value)}
-						className="h-8 w-[200px]"
+						className="w-[200px]"
 					/>
 				</div>
 				<div className="flex flex-col gap-1.5">
-					<Label className="font-medium text-muted-foreground text-xs">
-						Type
-					</Label>
+					<Label className="font-medium text-kumo-subtle text-xs">Type</Label>
 					<Select
+						size="sm"
+						className="w-[120px]"
+						aria-label="Type"
 						value={search.type}
 						onValueChange={(value) =>
 							onCommit({
-								type: value as MutationsSearch["type"],
+								type: (value ?? "all") as MutationsSearch["type"],
 								// category lists differ per type (#32 toggle behavior)
 								categoryId: undefined,
 							})
 						}
-					>
-						<SelectTrigger className="h-8 w-[120px]">
-							<SelectValue />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="all">All types</SelectItem>
-							<SelectItem value="income">Income</SelectItem>
-							<SelectItem value="expense">Expense</SelectItem>
-						</SelectContent>
-					</Select>
+						items={[
+							{ label: "All types", value: "all" },
+							{ label: "Income", value: "income" },
+							{ label: "Expense", value: "expense" },
+						]}
+					/>
 				</div>
 				<div className="flex flex-col gap-1.5">
-					<Label className="font-medium text-muted-foreground text-xs">
+					<Label className="font-medium text-kumo-subtle text-xs">
 						Category
 					</Label>
 					<Select
+						size="sm"
+						className="w-[160px]"
+						aria-label="Category"
+						placeholder="All categories"
 						value={
 							search.categoryId === undefined
 								? "all"
@@ -115,22 +109,18 @@ export function MutationsToolbar({ search, onCommit }: Props) {
 						}
 						onValueChange={(value) =>
 							onCommit({
-								categoryId: value === "all" ? undefined : Number(value),
+								categoryId:
+									!value || value === "all" ? undefined : Number(value),
 							})
 						}
-					>
-						<SelectTrigger className="h-8 w-[160px]">
-							<SelectValue placeholder="All categories" />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="all">All categories</SelectItem>
-							{visibleCategories.map((cat) => (
-								<SelectItem key={cat.id} value={String(cat.id)}>
-									{cat.name}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
+						items={[
+							{ label: "All categories", value: "all" },
+							...visibleCategories.map((cat) => ({
+								label: cat.name,
+								value: String(cat.id),
+							})),
+						]}
+					/>
 				</div>
 				<MutationsDateField
 					label="From"
@@ -143,34 +133,38 @@ export function MutationsToolbar({ search, onCommit }: Props) {
 					onSelect={(to) => onCommit({ to })}
 				/>
 				<div className="flex flex-col gap-1.5">
-					<Label className="font-medium text-muted-foreground text-xs">
+					<Label className="font-medium text-kumo-subtle text-xs">
 						Min Amount
 					</Label>
 					<Input
 						type="number"
+						size="sm"
+						aria-label="Min amount"
 						placeholder="0"
 						value={minInput}
 						onChange={(event) => setMinInput(event.target.value)}
-						className="h-8 w-[100px]"
+						className="w-[100px]"
 					/>
 				</div>
 				<div className="flex flex-col gap-1.5">
-					<Label className="font-medium text-muted-foreground text-xs">
+					<Label className="font-medium text-kumo-subtle text-xs">
 						Max Amount
 					</Label>
 					<Input
 						type="number"
+						size="sm"
+						aria-label="Max amount"
 						placeholder="No limit"
 						value={maxInput}
 						onChange={(event) => setMaxInput(event.target.value)}
-						className="h-8 w-[100px]"
+						className="w-[100px]"
 					/>
 				</div>
 				{hasActiveFilters && (
 					<Button
 						variant="ghost"
 						size="sm"
-						className="h-8"
+						icon={<XIcon size={16} />}
 						onClick={() => {
 							// Reset the local field buffers directly (no external sync).
 							setQInput("");

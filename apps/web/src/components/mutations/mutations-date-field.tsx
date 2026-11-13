@@ -1,12 +1,7 @@
+import { Button, Label } from "@cloudflare/kumo";
+import { Popover } from "@cloudflare/kumo/components/popover";
 import { format } from "date-fns";
-import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { Label } from "@/components/ui/label";
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from "@/components/ui/popover";
 import { utcDayString } from "@/lib/date";
 import { cn } from "@/lib/utils";
 
@@ -33,31 +28,35 @@ export function MutationsDateField({
 
 	return (
 		<div className="flex flex-col gap-1.5">
-			<Label className="font-medium text-muted-foreground text-xs">
-				{label}
-			</Label>
-			<Popover>
-				<PopoverTrigger asChild>
-					<Button
-						variant="outline"
-						size="sm"
-						className={cn(
-							"h-8 w-[140px] justify-start text-left font-normal",
-							!selected && "text-muted-foreground",
-						)}
-					>
-						{selected ? format(selected, "MMM d, yyyy") : placeholder}
-					</Button>
-				</PopoverTrigger>
-				<PopoverContent className="w-auto p-0" align="start">
-					<Calendar
-						mode="single"
-						selected={selected}
-						onSelect={(day) => onSelect(day ? utcDayString(day) : "")}
-						initialFocus
-					/>
-				</PopoverContent>
-			</Popover>
+			<Label className="font-medium text-kumo-subtle text-xs">{label}</Label>
+			<Popover.Root>
+				<Popover.Trigger
+					render={
+						<Button
+							variant="secondary"
+							size="sm"
+							className={cn(
+								"w-[140px] justify-start text-left",
+								!selected && "text-kumo-subtle",
+							)}
+						/>
+					}
+				>
+					{selected ? format(selected, "MMM d, yyyy") : placeholder}
+				</Popover.Trigger>
+				<Popover.Portal>
+					<Popover.Positioner align="start">
+						<Popover.Popup className="w-auto p-0">
+							<Calendar
+								mode="single"
+								selected={selected}
+								onSelect={(day) => onSelect(day ? utcDayString(day) : "")}
+								initialFocus
+							/>
+						</Popover.Popup>
+					</Popover.Positioner>
+				</Popover.Portal>
+			</Popover.Root>
 		</div>
 	);
 }

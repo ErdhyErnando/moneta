@@ -1,3 +1,4 @@
+import { LayerCard, Select } from "@cloudflare/kumo";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 // recharts ships in an async chunk: this module loads only via React.lazy
@@ -5,24 +6,11 @@ import { useState } from "react";
 // react-doctor-disable-next-line react-doctor/prefer-dynamic-import
 import { Pie, PieChart } from "recharts";
 import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-} from "@/components/ui/card";
-import {
 	type ChartConfig,
 	ChartContainer,
 	ChartTooltip,
 	ChartTooltipContent,
 } from "@/components/ui/chart";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
 import { useCurrency } from "@/contexts/currency-context";
 import { api } from "@/lib/api";
 
@@ -49,14 +37,12 @@ interface CategoriesResponse {
 
 // Fallback palette if category has no color (should not happen, but keep for safety)
 const FALLBACK_COLORS = [
-	"var(--destructive)",
-	"var(--chart-2)",
-	"var(--sidebar-foreground)",
-	"var(--sidebar)",
-	"var(--sidebar-primary)",
-	"var(--chart-6)",
-	"var(--foreground)",
-	"var(--chart-8)",
+	"var(--color-chart-1)",
+	"var(--color-chart-2)",
+	"var(--color-chart-3)",
+	"var(--color-chart-4)",
+	"var(--color-chart-5)",
+	"var(--color-kumo-subtle)",
 ];
 
 function getCategoryFill(color: string | undefined, index: number): string {
@@ -130,31 +116,27 @@ export function ChartPieCategories({
 		categoryType === "expense" ? "Total Expenses" : "Total Income";
 
 	return (
-		<Card className="flex h-full flex-col">
-			<CardHeader className="items-center pb-0">
+		<LayerCard className="flex h-full flex-col gap-0 rounded-xl p-0 shadow-none">
+			<div className="flex flex-col items-center px-6 pt-6 pb-0">
 				<Select
+					className="w-[180px]"
+					aria-label="Category type"
 					value={categoryType}
-					onValueChange={(value) =>
-						setCategoryType(value as "expense" | "income")
-					}
-				>
-					<SelectTrigger className="w-[180px] border-none font-semibold text-lg shadow-none focus:ring-0">
-						<SelectValue placeholder="Select category type" />
-					</SelectTrigger>
-					<SelectContent>
-						<SelectItem value="expense">Expense</SelectItem>
-						<SelectItem value="income">Income</SelectItem>
-					</SelectContent>
-				</Select>
-				<CardDescription>Breakdown by category</CardDescription>
-			</CardHeader>
-			<CardContent className="flex-1 pb-0">
+					onValueChange={(value) => {
+						if (value) setCategoryType(value as "expense" | "income");
+					}}
+					items={[
+						{ label: "Expense", value: "expense" },
+						{ label: "Income", value: "income" },
+					]}
+				/>
+				<div className="text-kumo-subtle text-sm">Breakdown by category</div>
+			</div>
+			<div className="flex-1 px-6 pb-0">
 				{isLoading ? (
-					<div className="flex h-[280px] items-center justify-center">
-						<div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-					</div>
+					<div className="h-[280px] animate-pulse rounded-lg bg-kumo-fill" />
 				) : chartData.length === 0 ? (
-					<div className="flex h-[280px] items-center justify-center text-muted-foreground">
+					<div className="flex h-[280px] items-center justify-center text-kumo-subtle">
 						{emptyMessage}
 					</div>
 				) : (
@@ -183,7 +165,7 @@ export function ChartPieCategories({
 									data={chartData}
 									dataKey="amount"
 									nameKey="category"
-									fill="#8884d8"
+									fill="var(--color-chart-1)"
 									label={({ percentage }) => `${percentage.toFixed(1)}%`}
 									outerRadius="85%"
 									labelLine
@@ -191,13 +173,13 @@ export function ChartPieCategories({
 							</PieChart>
 						</ChartContainer>
 						<div className="mt-4 text-center">
-							<p className="text-muted-foreground text-sm">
+							<p className="text-kumo-subtle text-sm tabular-nums">
 								{totalLabel}: {formatCurrency(total)}
 							</p>
 						</div>
 					</>
 				)}
-			</CardContent>
-		</Card>
+			</div>
+		</LayerCard>
 	);
 }

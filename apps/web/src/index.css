@@ -7,8 +7,9 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* Kept until Phase 3 removes the last shadcn/Radix component. */
-@custom-variant dark (&:where(.dark, .dark *));
+/* No component may use `dark:` — kumo resolves through `data-mode` +
+   `color-scheme`. The variant is kept only so third-party CSS (react-day-picker,
+   the Recharts chart helpers) keeps compiling until Phase 5. */
 
 @theme {
 	--font-sans:
@@ -44,15 +45,6 @@
 	--brand-hover: oklch(0.76 0.11 156);
 	--brand-foreground: #0f1912;
 	--brand-strong: oklch(0.8 0.1 156);
-}
-
-/* Deprecated aliases — removed in Phase 3 once the last call site is migrated. */
-:root,
-.dark {
-	--brand-accent: var(--brand);
-	--brand-accent-foreground: var(--brand-foreground);
-	--brand-accent-strong: var(--brand-strong);
-	--brand-accent-subtle: var(--brand-subtle);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -205,12 +197,6 @@
 	--color-brand-foreground: var(--brand-foreground);
 	--color-brand-strong: var(--brand-strong);
 	--color-brand-subtle: var(--brand-subtle);
-	/* deprecated aliases (removed in Phase 3) */
-	--color-brand-accent: var(--brand);
-	--color-brand-accent-foreground: var(--brand-foreground);
-	--color-brand-accent-strong: var(--brand-strong);
-	--color-brand-accent-subtle: var(--brand-subtle);
-
 	--color-positive: var(--positive);
 	--color-negative: var(--negative);
 

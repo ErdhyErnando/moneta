@@ -1,9 +1,9 @@
+import { LayerCard } from "@cloudflare/kumo";
 import {
-	IconArrowDownRight,
-	IconArrowUpRight,
-	IconWallet,
-} from "@tabler/icons-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+	ArrowDownRightIcon,
+	ArrowUpRightIcon,
+	WalletIcon,
+} from "@phosphor-icons/react";
 
 export interface DashboardSummary {
 	totalIncome: number;
@@ -19,89 +19,92 @@ type SummaryCardsProps = {
 	formatCurrency: (amount: number) => string;
 };
 
+type MetricCardProps = {
+	label: string;
+	icon: React.ReactNode;
+	isLoading: boolean;
+	value: React.ReactNode;
+};
+
+function MetricCard({
+	label,
+	icon,
+	isLoading,
+	value,
+}: MetricCardProps): React.JSX.Element {
+	return (
+		<LayerCard className="gap-2 rounded-xl p-6 shadow-none">
+			<div className="flex items-center justify-between">
+				<span className="font-medium text-kumo-subtle text-sm">{label}</span>
+				{icon}
+			</div>
+			{isLoading ? (
+				<div className="h-8 w-32 animate-pulse rounded-lg bg-kumo-fill" />
+			) : (
+				value
+			)}
+		</LayerCard>
+	);
+}
+
 // Summary cards row for the dashboard (#49).
 export function SummaryCards({
 	summary,
 	isLoading,
 	formatCurrency,
-}: SummaryCardsProps) {
+}: SummaryCardsProps): React.JSX.Element {
+	const netBalance = summary?.netBalance || 0;
+	const currentBalance = summary?.currentBalance || 0;
+
 	return (
 		<div className="grid gap-4 md:grid-cols-4">
-			<Card>
-				<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-					<CardTitle className="font-medium text-sm">Total Income</CardTitle>
-					<IconArrowUpRight className="size-4 text-emerald-500" />
-				</CardHeader>
-				<CardContent>
-					{isLoading ? (
-						<div className="h-8 w-32 animate-pulse rounded bg-muted" />
-					) : (
-						<div className="font-bold text-2xl text-emerald-600">
-							+{formatCurrency(summary?.totalIncome || 0)}
-						</div>
-					)}
-				</CardContent>
-			</Card>
+			<MetricCard
+				label="Total Income"
+				icon={<ArrowUpRightIcon className="text-positive" size={16} />}
+				isLoading={isLoading}
+				value={
+					<div className="font-semibold text-2xl text-positive tabular-nums">
+						+{formatCurrency(summary?.totalIncome || 0)}
+					</div>
+				}
+			/>
 
-			<Card>
-				<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-					<CardTitle className="font-medium text-sm">Total Expenses</CardTitle>
-					<IconArrowDownRight className="size-4 text-rose-500" />
-				</CardHeader>
-				<CardContent>
-					{isLoading ? (
-						<div className="h-8 w-32 animate-pulse rounded bg-muted" />
-					) : (
-						<div className="font-bold text-2xl text-rose-600">
-							-{formatCurrency(summary?.totalExpenses || 0)}
-						</div>
-					)}
-				</CardContent>
-			</Card>
+			<MetricCard
+				label="Total Expenses"
+				icon={<ArrowDownRightIcon className="text-negative" size={16} />}
+				isLoading={isLoading}
+				value={
+					<div className="font-semibold text-2xl text-negative tabular-nums">
+						-{formatCurrency(summary?.totalExpenses || 0)}
+					</div>
+				}
+			/>
 
-			<Card>
-				<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-					<CardTitle className="font-medium text-sm">Net Balance</CardTitle>
-					<IconWallet className="size-4 text-muted-foreground" />
-				</CardHeader>
-				<CardContent>
-					{isLoading ? (
-						<div className="h-8 w-32 animate-pulse rounded bg-muted" />
-					) : (
-						<div
-							className={`font-bold text-2xl ${
-								(summary?.netBalance || 0) >= 0
-									? "text-emerald-600"
-									: "text-rose-600"
-							}`}
-						>
-							{formatCurrency(summary?.netBalance || 0)}
-						</div>
-					)}
-				</CardContent>
-			</Card>
+			<MetricCard
+				label="Net Balance"
+				icon={<WalletIcon className="text-kumo-subtle" size={16} />}
+				isLoading={isLoading}
+				value={
+					<div
+						className={`font-semibold text-2xl tabular-nums ${
+							netBalance >= 0 ? "text-positive" : "text-negative"
+						}`}
+					>
+						{formatCurrency(netBalance)}
+					</div>
+				}
+			/>
 
-			<Card>
-				<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-					<CardTitle className="font-medium text-sm">Current Balance</CardTitle>
-					<IconWallet className="size-4 text-blue-500" />
-				</CardHeader>
-				<CardContent>
-					{isLoading ? (
-						<div className="h-8 w-32 animate-pulse rounded bg-muted" />
-					) : (
-						<div
-							className={`font-bold text-2xl ${
-								(summary?.currentBalance || 0) >= 0
-									? "text-blue-600"
-									: "text-rose-600"
-							}`}
-						>
-							{formatCurrency(summary?.currentBalance || 0)}
-						</div>
-					)}
-				</CardContent>
-			</Card>
+			<MetricCard
+				label="Current Balance"
+				icon={<WalletIcon className="text-kumo-subtle" size={16} />}
+				isLoading={isLoading}
+				value={
+					<div className="font-semibold text-2xl text-kumo-default tabular-nums">
+						{formatCurrency(currentBalance)}
+					</div>
+				}
+			/>
 		</div>
 	);
 }
