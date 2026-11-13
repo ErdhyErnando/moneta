@@ -1,0 +1,99 @@
+{
+	"light": {
+		"attr": {
+			"class": "light",
+			"dataMode": "light",
+			"colorScheme": "light"
+		},
+		"tokens": {
+			"brand": "oklch(0.52 0.1 156)",
+			"brandHover": "oklch(0.48 0.095 156)",
+			"textBrand": "oklch(0.42 0.085 156)",
+			"focus": "oklch(0.52 0.1 156)",
+			"canvas": "light-dark(\n    oklch(98.75% 0 0),\n    oklch(10% 0 0)\n  )",
+			"base": "light-dark(\n    #fff,\n    oklch(17% 0 0)\n  )"
+		},
+		"primary": {
+			"color": "rgb(255, 255, 255)",
+			"bg": "oklch(0.663998 0.0700149 156)",
+			"height": "36px",
+			"radius": "20px",
+			"shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklch(0.468 0.09 1"
+		},
+		"destructive": {
+			"color": "rgb(255, 255, 255)",
+			"bg": "oklch(0.745898 0.165915 25.331)",
+			"height": "36px",
+			"radius": "20px",
+			"shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklch(0.5733 0.213"
+		},
+		"secondary": {
+			"color": "oklch(0.205 0 none)",
+			"bg": "rgb(255, 255, 255)",
+			"height": "36px",
+			"radius": "20px",
+			"shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklch(0.145 0 0 / "
+		}
+	},
+	"dark": {
+		"attr": {
+			"class": "dark",
+			"dataMode": "dark",
+			"colorScheme": "dark"
+		},
+		"tokens": {
+			"brand": "oklch(0.72 0.11 156)",
+			"brandHover": "oklch(0.76 0.11 156)",
+			"textBrand": "oklch(0.8 0.1 156)",
+			"focus": "oklch(0.72 0.11 156)",
+			"canvas": "light-dark(\n    oklch(98.75% 0 0),\n    oklch(10% 0 0)\n  )",
+			"base": "light-dark(\n    #fff,\n    oklch(17% 0 0)\n  )"
+		},
+		"primary": {
+			"color": "rgb(15, 25, 18)",
+			"bg": "oklch(0.803998 0.0770149 156)",
+			"height": "36px",
+			"radius": "20px",
+			"shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklch(0.648 0.099 "
+		},
+		"destructive": {
+			"color": "rgb(255, 255, 255)",
+			"bg": "oklch(0.703898 0.171515 27.325)",
+			"height": "36px",
+			"radius": "20px",
+			"shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklch(0.5193 0.220"
+		},
+		"secondary": {
+			"color": "oklch(0.97 0 none)",
+			"bg": "oklch(0.17 0 0)",
+			"height": "36px",
+			"radius": "20px",
+			"shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklch(0.32 0 0) 0p"
+		}
+	},
+	"bridge": {
+		"start": {
+			"class": "dark",
+			"dataMode": "dark",
+			"colorScheme": "dark"
+		},
+		"afterClick1": {
+			"class": "light",
+			"dataMode": "light",
+			"colorScheme": "light"
+		},
+		"afterClick2": {
+			"class": "dark",
+			"dataMode": "dark",
+			"colorScheme": "dark"
+		}
+	},
+	"stacking": {
+		"dialogZ": "auto",
+		"dialogParentIsBody": "BODY",
+		"headerZ": "40",
+		"rootIsolated": "isolate",
+		"whatIsOnTopAtY8": "portal overlay/backdrop"
+	},
+	"errors": []
+}
