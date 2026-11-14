@@ -41,13 +41,9 @@ export type ChartTheme = {
 };
 
 const TOKENS = {
-	palette: [
-		"--color-chart-1",
-		"--color-chart-2",
-		"--color-chart-3",
-		"--color-chart-4",
-		"--color-chart-5",
-	],
+	// The source tokens, not Tailwind's `--color-chart-*` aliases: those are only
+	// emitted when Tailwind's scanner happens to see them used.
+	palette: ["--chart-1", "--chart-2", "--chart-3", "--chart-4", "--chart-5"],
 	positive: "--positive",
 	negative: "--negative",
 	grid: "--color-kumo-hairline",
