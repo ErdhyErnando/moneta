@@ -28,7 +28,7 @@ const THEMES = [
 
 /**
  * The account block in the sidebar footer. Collapsed, it is the avatar alone —
- * and because a 48px rail cannot show the dedicated theme/sign-out buttons, it
+ * and because a 57px rail cannot show the dedicated theme/sign-out buttons, it
  * absorbs them as menu items so nothing becomes unreachable (§8.1).
  */
 export function NavUser({ user, onSignOut }: NavUserProps): React.JSX.Element {

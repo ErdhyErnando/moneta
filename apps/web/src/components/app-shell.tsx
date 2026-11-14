@@ -105,14 +105,11 @@ export function AppShell(): React.JSX.Element {
 			className="h-full min-h-0"
 			defaultOpen={defaultOpen}
 			onOpenChange={(open) => writeSidebarCookie(open)}
-			// kumo's defaults (260px / 57px rail) are a few px off the contract's
-			// 256px / 48px; both are plain CSS vars, so override them here.
-			style={
-				{
-					"--sidebar-width": "16rem",
-					"--sidebar-width-icon": "3rem",
-				} as React.CSSProperties
-			}
+			// Expanded width follows the contract (256px vs kumo's 260px). The icon
+			// rail stays at kumo's 57px: its row padding, icon offset and per-row
+			// overflow clip are tuned for that width, and at 48px the 20px icons
+			// lose their right edge.
+			style={{ "--sidebar-width": "16rem" } as React.CSSProperties}
 		>
 			<Shell />
 		</SidebarProvider>

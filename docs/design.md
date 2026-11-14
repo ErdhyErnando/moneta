@@ -500,7 +500,7 @@ affordances.
 
 | Property | Spec |
 |---|---|
-| Width | 256px (`w-64`), collapsible to an icon rail (48px) — icon rail is the only collapsed state |
+| Width | 256px (`w-64`), collapsible to an icon rail (57px, kumo's default — its row padding and clip are tuned for it; don't narrow it) — icon rail is the only collapsed state |
 | Surface | `bg-kumo-canvas` with `border-r border-kumo-hairline`; nav items on `bg-kumo-base` hover → `bg-kumo-tint` |
 | Item | 36px tall, `rounded-lg`, icon 20px + label `text-base`, gap `space-2` |
 | Active | `bg-kumo-tint` + `text-kumo-strong` + **fill** icon; a 2px brand bar is allowed only if the tint is removed |
