@@ -18,6 +18,7 @@ import {
 } from "date-fns";
 import { useState } from "react";
 import { api } from "@/lib/api";
+import { categoryMark, useCategoryColorMode } from "@/lib/category-color";
 
 type Period = "weekly" | "monthly" | "yearly";
 
@@ -30,21 +31,14 @@ interface CategoriesResponse {
 	}>;
 }
 
+// Contract §10: a datum without a colour cycles `--chart-1..5` — nothing else exists.
 const FALLBACK_COLORS = [
-	"oklch(0.6368 0.2078 25.3313)",
-	"oklch(0.65 0.2 45)",
-	"oklch(0.7 0.15 70)",
-	"oklch(0.6 0.2 15)",
-	"oklch(0.55 0.18 35)",
-	"oklch(0.5 0.2 25)",
-	"oklch(0.68 0.18 160)",
-	"oklch(0.65 0.15 190)",
+	"var(--color-chart-1)",
+	"var(--color-chart-2)",
+	"var(--color-chart-3)",
+	"var(--color-chart-4)",
+	"var(--color-chart-5)",
 ] as const;
-
-function getCategoryFill(color: string | undefined, index: number): string {
-	if (color && /^#[0-9a-fA-F]{6}$/.test(color)) return color;
-	return FALLBACK_COLORS[index % FALLBACK_COLORS.length];
-}
 
 export function useCategoryBreakdownData(type: "income" | "expense") {
 	const [period, setPeriod] = useState<Period>("monthly");
@@ -70,7 +64,9 @@ export function useCategoryBreakdownData(type: "income" | "expense") {
 	const startDateParam = format(start, "yyyy-MM-dd");
 	const endDateParam = format(end, "yyyy-MM-dd");
 
-	const { data, isLoading } = useQuery({
+	const colorMode = useCategoryColorMode();
+
+	const { data, isLoading, isError, refetch } = useQuery({
 		queryKey: [
 			`${type}-categories-breakdown`,
 			period,
@@ -109,12 +105,15 @@ export function useCategoryBreakdownData(type: "income" | "expense") {
 		}
 	};
 
+	// Shared category palette (#19): the bar is the same mark the chip renders.
 	const chartData = (data?.categories || [])
 		.map((cat, index) => ({
 			name: cat.name,
 			amount: Number(cat.amount),
 			percentage: cat.percentage,
-			fill: getCategoryFill(cat.color, index),
+			fill:
+				categoryMark(cat.color, colorMode) ??
+				FALLBACK_COLORS[index % FALLBACK_COLORS.length],
 		}))
 		.sort((a, b) => b.amount - a.amount);
 
@@ -132,6 +131,8 @@ export function useCategoryBreakdownData(type: "income" | "expense") {
 		end,
 		data,
 		isLoading,
+		isError,
+		refetch,
 		chartData,
 		total,
 		navigatePeriod,

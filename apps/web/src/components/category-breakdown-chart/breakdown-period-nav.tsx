@@ -47,19 +47,19 @@ export function BreakdownPeriodNav({
 	onYearChange,
 }: Props) {
 	return (
-		<div className="mb-6 flex items-center justify-center gap-2">
+		<div className="flex w-full items-center justify-center gap-1.5 sm:gap-2">
 			<Button
 				variant="secondary"
 				shape="square"
-				className="shrink-0"
+				className="shrink-0 max-md:size-11"
 				onClick={() => onNavigate("prev")}
 				aria-label="Previous period"
 				icon={<CaretLeftIcon size={16} />}
 			/>
-			<div className="flex items-center gap-2">
+			<div className="flex min-w-0 flex-1 items-center justify-center gap-1.5 sm:flex-none sm:gap-2">
 				{period !== "yearly" && (
 					<Select
-						className="w-[130px]"
+						className="min-w-0 flex-1 max-md:h-11 sm:w-32 sm:flex-none"
 						aria-label="Month"
 						value={String(currentMonth)}
 						onValueChange={(value) => {
@@ -72,7 +72,7 @@ export function BreakdownPeriodNav({
 					/>
 				)}
 				<Select
-					className="w-[90px]"
+					className="w-20 shrink-0 max-md:h-11 sm:w-22"
 					aria-label="Year"
 					value={String(currentYear)}
 					onValueChange={(value) => {
@@ -84,7 +84,7 @@ export function BreakdownPeriodNav({
 					}))}
 				/>
 				{period === "weekly" && (
-					<span className="text-kumo-subtle text-sm">
+					<span className="whitespace-nowrap text-kumo-subtle text-sm">
 						{format(start, "MMM d")} - {format(end, "MMM d")}
 					</span>
 				)}
@@ -92,7 +92,7 @@ export function BreakdownPeriodNav({
 			<Button
 				variant="secondary"
 				shape="square"
-				className="shrink-0"
+				className="shrink-0 max-md:size-11"
 				onClick={() => onNavigate("next")}
 				aria-label="Next period"
 				icon={<CaretRightIcon size={16} />}

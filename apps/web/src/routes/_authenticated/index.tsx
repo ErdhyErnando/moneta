@@ -23,7 +23,7 @@ const ChartPieCategories = lazy(() =>
 	})),
 );
 
-import { ChartCard } from "@/components/dashboard/chart-card";
+import { ChartCard } from "@/components/charts/chart-card";
 import {
 	DashboardHeader,
 	type TimeRange,
@@ -33,10 +33,10 @@ import {
 	type DashboardSummary,
 	SummaryCards,
 } from "@/components/dashboard/summary-cards";
-import type { Transaction } from "@/components/data-table";
 import { PageContainer, Section } from "@/components/layout";
 import { useCurrency } from "@/contexts/currency-context";
 import { api } from "@/lib/api";
+import type { DashboardTransaction } from "@/lib/dashboard";
 import { utcDayString } from "@/lib/date";
 
 export const Route = createFileRoute("/_authenticated/")({
@@ -62,13 +62,13 @@ async function fetchRecentTransactions(
 	limit = 10,
 	startDate?: string,
 	endDate?: string,
-): Promise<Transaction[]> {
+): Promise<DashboardTransaction[]> {
 	const params = new URLSearchParams();
 	params.append("limit", limit.toString());
 	if (startDate) params.append("startDate", startDate);
 	if (endDate) params.append("endDate", endDate);
 
-	const response = await api.get<{ transactions: Transaction[] }>(
+	const response = await api.get<{ transactions: DashboardTransaction[] }>(
 		`/api/dashboard/transactions?${params.toString()}`,
 	);
 	return response.data.transactions;

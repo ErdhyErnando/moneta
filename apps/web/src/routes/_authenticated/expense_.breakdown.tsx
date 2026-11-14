@@ -2,6 +2,9 @@ import { buttonVariants } from "@cloudflare/kumo";
 import { CaretLeftIcon } from "@phosphor-icons/react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { lazy, Suspense } from "react";
+import { ChartCard } from "@/components/charts/chart-card";
+import { PageContainer, PageHeader } from "@/components/layout";
+import { cn } from "@/lib/utils";
 
 // recharts-heavy chart loads on demand per #48 (route-level code split)
 const CategoryBreakdownChart = lazy(() =>
@@ -14,25 +17,38 @@ export const Route = createFileRoute("/_authenticated/expense_/breakdown")({
 	component: ExpenseBreakdownPage,
 });
 
-function ExpenseBreakdownPage() {
+function ExpenseBreakdownPage(): React.JSX.Element {
 	return (
-		<div className="container mx-auto min-h-0 px-4 py-3 sm:px-6 sm:py-4">
-			<div className="mb-3">
-				<Link
-					to="/expense"
-					className={`${buttonVariants({ variant: "ghost" })} -ml-2 mb-2`}
-				>
-					<CaretLeftIcon className="mr-2" size={16} />
-					Back to Expenses
-				</Link>
-				<h1 className="font-bold text-2xl sm:text-3xl">Expense Breakdown</h1>
-			</div>
+		<PageContainer>
+			<PageHeader
+				title="Expense Breakdown"
+				description="Expenses by category, for the period you pick."
+				actions={
+					<Link
+						to="/expense"
+						className={cn(
+							buttonVariants({ variant: "secondary" }),
+							"max-md:h-11",
+						)}
+					>
+						<CaretLeftIcon className="mr-2" size={16} />
+						Back to Expenses
+					</Link>
+				}
+			/>
 
 			<Suspense
-				fallback={<div className="h-[300px] animate-pulse rounded bg-muted" />}
+				fallback={
+					<ChartCard
+						title="By category"
+						description="Where the money went, per category."
+						height="auto"
+						isLoading
+					/>
+				}
 			>
 				<CategoryBreakdownChart type="expense" />
 			</Suspense>
-		</div>
+		</PageContainer>
 	);
 }

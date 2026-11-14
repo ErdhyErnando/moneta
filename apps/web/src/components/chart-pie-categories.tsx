@@ -5,8 +5,8 @@ import { useState } from "react";
 // in routes/_authenticated/index.tsx, never in the initial bundle (#48).
 // react-doctor-disable-next-line react-doctor/prefer-dynamic-import
 import { Pie, PieChart } from "recharts";
-import { ChartCard } from "@/components/dashboard/chart-card";
-import { SignedAmount } from "@/components/dashboard/signed-amount";
+import { ChartCard } from "@/components/charts/chart-card";
+import { SignedAmount } from "@/components/money/signed-amount";
 import {
 	type ChartConfig,
 	ChartContainer,

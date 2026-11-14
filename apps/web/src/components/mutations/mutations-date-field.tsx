@@ -36,7 +36,7 @@ export function MutationsDateField({
 							variant="secondary"
 							size="sm"
 							className={cn(
-								"w-[140px] justify-start text-left",
+								"w-36 justify-start text-left max-md:h-11",
 								!selected && "text-kumo-subtle",
 							)}
 						/>

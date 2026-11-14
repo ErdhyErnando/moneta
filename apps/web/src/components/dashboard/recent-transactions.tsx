@@ -5,14 +5,14 @@ import {
 	WarningCircleIcon,
 } from "@phosphor-icons/react";
 import { CategoryBadge } from "@/components/category-badge";
-import { SignedAmount } from "@/components/dashboard/signed-amount";
-import type { Transaction } from "@/components/data-table";
 import { EmptyState } from "@/components/layout";
+import { SignedAmount } from "@/components/money/signed-amount";
 import { useCurrency } from "@/contexts/currency-context";
+import type { DashboardTransaction } from "@/lib/dashboard";
 import { asUtcDay } from "@/lib/date";
 
 type RecentTransactionsProps = {
-	transactions: Transaction[];
+	transactions: DashboardTransaction[];
 	isLoading: boolean;
 	isError?: boolean;
 	onRetry?: () => void;

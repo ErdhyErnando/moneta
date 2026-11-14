@@ -13,6 +13,16 @@ type Props = {
 	onCommit: (patch: Partial<MutationsSearch>) => void;
 };
 
+/** One option per {sort, dir} pair, only shown below `md` (no table header). */
+const SORT_ITEMS = [
+	{ label: "Date, newest first", value: "date-desc" },
+	{ label: "Date, oldest first", value: "date-asc" },
+	{ label: "Amount, high to low", value: "amount-desc" },
+	{ label: "Amount, low to high", value: "amount-asc" },
+];
+
+const FIELD_LABEL = "font-medium text-kumo-subtle text-xs";
+
 function parseAmount(raw: string): number | undefined {
 	if (!raw) return undefined;
 	const n = Number(raw);
@@ -20,7 +30,10 @@ function parseAmount(raw: string): number | undefined {
 }
 
 /** All state lives in the URL search params (#33 shareable filters). */
-export function MutationsToolbar({ search, onCommit }: Props) {
+export function MutationsToolbar({
+	search,
+	onCommit,
+}: Props): React.JSX.Element {
 	const [qInput, setQInput] = useDebouncedField(search.q, (q) =>
 		onCommit({ q }),
 	);
@@ -54,13 +67,10 @@ export function MutationsToolbar({ search, onCommit }: Props) {
 		search.max !== undefined;
 
 	return (
-		<div className="rounded-lg border border-kumo-hairline bg-kumo-recessed p-4">
+		<div className="rounded-lg bg-kumo-recessed p-4">
 			<div className="flex flex-wrap items-end gap-4">
 				<div className="flex flex-col gap-1.5">
-					<Label
-						htmlFor="mutations-search"
-						className="font-medium text-kumo-subtle text-xs"
-					>
+					<Label htmlFor="mutations-search" className={FIELD_LABEL}>
 						Search
 					</Label>
 					<Input
@@ -69,14 +79,14 @@ export function MutationsToolbar({ search, onCommit }: Props) {
 						placeholder="Description or category…"
 						value={qInput}
 						onChange={(event) => setQInput(event.target.value)}
-						className="w-[200px]"
+						className="w-50 max-md:h-11"
 					/>
 				</div>
 				<div className="flex flex-col gap-1.5">
-					<Label className="font-medium text-kumo-subtle text-xs">Type</Label>
+					<Label className={FIELD_LABEL}>Type</Label>
 					<Select
 						size="sm"
-						className="w-[120px]"
+						className="w-30 max-md:h-11"
 						aria-label="Type"
 						value={search.type}
 						onValueChange={(value) =>
@@ -94,12 +104,10 @@ export function MutationsToolbar({ search, onCommit }: Props) {
 					/>
 				</div>
 				<div className="flex flex-col gap-1.5">
-					<Label className="font-medium text-kumo-subtle text-xs">
-						Category
-					</Label>
+					<Label className={FIELD_LABEL}>Category</Label>
 					<Select
 						size="sm"
-						className="w-[160px]"
+						className="w-40 max-md:h-11"
 						aria-label="Category"
 						placeholder="All categories"
 						value={
@@ -133,9 +141,7 @@ export function MutationsToolbar({ search, onCommit }: Props) {
 					onSelect={(to) => onCommit({ to })}
 				/>
 				<div className="flex flex-col gap-1.5">
-					<Label className="font-medium text-kumo-subtle text-xs">
-						Min Amount
-					</Label>
+					<Label className={FIELD_LABEL}>Min Amount</Label>
 					<Input
 						type="number"
 						size="sm"
@@ -143,13 +149,11 @@ export function MutationsToolbar({ search, onCommit }: Props) {
 						placeholder="0"
 						value={minInput}
 						onChange={(event) => setMinInput(event.target.value)}
-						className="w-[100px]"
+						className="w-25 max-md:h-11"
 					/>
 				</div>
 				<div className="flex flex-col gap-1.5">
-					<Label className="font-medium text-kumo-subtle text-xs">
-						Max Amount
-					</Label>
+					<Label className={FIELD_LABEL}>Max Amount</Label>
 					<Input
 						type="number"
 						size="sm"
@@ -157,7 +161,26 @@ export function MutationsToolbar({ search, onCommit }: Props) {
 						placeholder="No limit"
 						value={maxInput}
 						onChange={(event) => setMaxInput(event.target.value)}
-						className="w-[100px]"
+						className="w-25 max-md:h-11"
+					/>
+				</div>
+				{/* Below md there is no table header, so sorting needs its own control. */}
+				<div className="flex flex-col gap-1.5 md:hidden">
+					<Label className={FIELD_LABEL}>Sort</Label>
+					<Select
+						size="sm"
+						className="w-50 max-md:h-11"
+						aria-label="Sort"
+						value={`${search.sort}-${search.dir}`}
+						onValueChange={(value) => {
+							if (!value) return;
+							const [sort, dir] = value.split("-");
+							onCommit({
+								sort: sort as MutationsSearch["sort"],
+								dir: dir as MutationsSearch["dir"],
+							});
+						}}
+						items={SORT_ITEMS}
 					/>
 				</div>
 				{hasActiveFilters && (
@@ -165,6 +188,7 @@ export function MutationsToolbar({ search, onCommit }: Props) {
 						variant="ghost"
 						size="sm"
 						icon={<XIcon size={16} />}
+						className="max-md:h-11"
 						onClick={() => {
 							// Reset the local field buffers directly (no external sync).
 							setQInput("");

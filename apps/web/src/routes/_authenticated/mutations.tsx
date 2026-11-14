@@ -3,13 +3,13 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import * as React from "react";
 import { CurrencySelector } from "@/components/currency-selector";
 import { AddTransactionDialog } from "@/components/dashboard/add-transaction-dialog";
+import { PageContainer, PageHeader } from "@/components/layout";
 import {
 	MutationsPagination,
 	MutationsTable,
 } from "@/components/mutations/mutations-table";
 import { MutationsToolbar } from "@/components/mutations/mutations-toolbar";
-import { useToast } from "@/hooks/use-toast";
-import { type AxiosError, api } from "@/lib/api";
+import { api } from "@/lib/api";
 import {
 	type MutationsResponse,
 	type MutationsSearch,
@@ -24,8 +24,7 @@ export const Route = createFileRoute("/_authenticated/mutations")({
 		mutationsSearchSchema.parse(search),
 });
 
-function MutationsPage() {
-	const { toast } = useToast();
+function MutationsPage(): React.JSX.Element {
 	const search = Route.useSearch();
 	const navigate = useNavigate({ from: Route.fullPath });
 
@@ -52,7 +51,7 @@ function MutationsPage() {
 		[search.sort, search.dir, setSearch],
 	);
 
-	const { data, isLoading, isError, error } = useQuery({
+	const { data, isLoading, isError, refetch } = useQuery({
 		queryKey: ["mutations", search],
 		queryFn: async () => {
 			const res = await api.get<MutationsResponse>("/api/mutations", {
@@ -62,39 +61,28 @@ function MutationsPage() {
 		},
 	});
 
-	React.useEffect(() => {
-		if (isError) {
-			const axiosError = error as AxiosError<{ error: { message: string } }>;
-			toast({
-				title: "Error",
-				description:
-					axiosError.response?.data?.error?.message ||
-					"Failed to load mutations",
-				variant: "destructive",
-			});
-		}
-	}, [isError, error, toast]);
-
 	return (
-		<div className="container mx-auto px-4 py-6 sm:px-6 sm:py-10">
-			<div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-				<div>
-					<h1 className="font-bold text-2xl sm:text-3xl">Mutations</h1>
-					<p className="text-muted-foreground text-sm">
-						Combined income and expense ledger
-					</p>
-				</div>
-				<div className="flex items-center gap-2">
-					<CurrencySelector />
-					<AddTransactionDialog />
-				</div>
-			</div>
+		<PageContainer>
+			<PageHeader
+				title="Mutations"
+				description="Combined income and expense ledger."
+				actions={
+					<>
+						<CurrencySelector />
+						<AddTransactionDialog className="max-md:hidden" />
+					</>
+				}
+			/>
 
 			<div className="space-y-4">
 				<MutationsToolbar search={search} onCommit={setSearch} />
 				<MutationsTable
 					mutations={data?.mutations ?? []}
 					isLoading={isLoading}
+					isError={isError}
+					onRetry={() => {
+						void refetch();
+					}}
 					sort={search.sort}
 					dir={search.dir}
 					onSortChange={handleSortChange}
@@ -106,6 +94,6 @@ function MutationsPage() {
 					onPageChange={(page) => setSearch({ page })}
 				/>
 			</div>
-		</div>
+		</PageContainer>
 	);
 }
