@@ -1,25 +1,19 @@
-// recharts ships in an async chunk: this module loads only via React.lazy
-// in routes/_authenticated/expense_.breakdown.tsx + income_.breakdown.tsx, never in the initial bundle (#48).
-// react-doctor-disable-next-line react-doctor/prefer-dynamic-import
-
+// ECharts ships in an async chunk: this module loads only via React.lazy in
+// routes/_authenticated/{expense,income}_.breakdown.tsx, never in the initial
+// bundle (#48).
 import { Tabs } from "@cloudflare/kumo";
-import {
-	Bar,
-	BarChart,
-	CartesianGrid,
-	LabelList,
-	XAxis,
-	YAxis,
-} from "recharts";
+import { Chart, type KumoChartOption } from "@cloudflare/kumo/components/chart";
+import { useMemo } from "react";
 import { ChartCard } from "@/components/charts/chart-card";
+import { echarts, REPLACE_OPTION } from "@/components/charts/echarts";
 import { SignedAmount } from "@/components/money/signed-amount";
-import {
-	type ChartConfig,
-	ChartContainer,
-	ChartTooltip,
-	ChartTooltipContent,
-} from "@/components/ui/chart";
 import { useCurrency } from "@/contexts/currency-context";
+import {
+	axisStyle,
+	baseChartOption,
+	tooltipHtml,
+	useChartTheme,
+} from "@/lib/chart-theme";
 import { BreakdownPeriodNav } from "./breakdown-period-nav";
 import { useCategoryBreakdownData } from "./use-category-breakdown-data";
 
@@ -47,15 +41,74 @@ export function CategoryBreakdownChart({ type }: Props): React.JSX.Element {
 		handleMonthChange,
 	} = useCategoryBreakdownData(type);
 
-	const chartConfig: ChartConfig = chartData.reduce(
-		(config, item) => {
-			config[item.name] = { label: item.name, color: item.fill };
-			return config;
-		},
-		{ amount: { label: "Amount" } } as ChartConfig,
-	);
-
+	// Bar height: one row per category, so the card can size itself (height="auto").
 	const chartHeight = Math.max(300, chartData.length * 56);
+	const theme = useChartTheme();
+
+	const option = useMemo<KumoChartOption>(() => {
+		const base = baseChartOption(theme);
+		const axis = axisStyle(theme);
+		const values = chartData.map((item) => item.amount);
+		const maxAmount = Math.max(...values, 0);
+
+		return {
+			...base,
+			grid: { left: 4, right: 8, top: 4, bottom: 4, containLabel: true },
+			xAxis: {
+				type: "value",
+				// Decorations off, axis still rendered: ECharts skips series-label
+				// layout on a hidden axis and parks every label at the origin.
+				axisLabel: { show: false },
+				axisLine: { show: false },
+				axisTick: { show: false },
+				splitLine: { show: false },
+				max: maxAmount > 0 ? Math.ceil(maxAmount * 1.5) : 1,
+			},
+			yAxis: {
+				type: "category",
+				// Newest/largest at the top: reverse the categories rather than
+				// `inverse: true`, which lands the series labels on the wrong row.
+				data: [...chartData].reverse().map((item) => item.name),
+				...axis,
+				splitLine: { show: false },
+			},
+			series: [
+				{
+					name: type === "income" ? "Income" : "Expense",
+					type: "bar",
+					// Capped thickness: a single category used to render one
+					// full-height slab with its label clipped outside the grid.
+					barMaxWidth: 22,
+					data: [...chartData].reverse().map((item) => ({
+						value: item.amount,
+						itemStyle: { color: item.fill, borderRadius: 4 },
+					})),
+					label: {
+						show: true,
+						position: "right",
+						color: theme.text,
+						fontSize: theme.fontSize,
+						padding: [0, 0, 0, 6],
+						// Exact value on the bar; only the axes are compact.
+						formatter: ({ value }: { value: number }) => formatCurrency(value),
+					},
+				},
+			],
+			tooltip: {
+				...base.tooltip,
+				trigger: "item",
+				dangerousHtmlFormatter: (params: unknown) => {
+					const row = params as { name?: string; value?: number };
+					return tooltipHtml(theme, row.name, [
+						{
+							label: type === "income" ? "Income" : "Expense",
+							value: formatCurrency(Number(row.value ?? 0)),
+						},
+					]);
+				},
+			},
+		} as unknown as KumoChartOption;
+	}, [theme, chartData, type, formatCurrency]);
 
 	return (
 		<ChartCard
@@ -99,60 +152,19 @@ export function CategoryBreakdownChart({ type }: Props): React.JSX.Element {
 			emptyDescription="Pick another month or year to compare."
 			bodyClassName="space-y-4"
 		>
-			<ChartContainer
-				config={chartConfig}
-				className="w-full"
-				style={{ height: `${chartHeight}px` }}
+			<div
+				role="img"
+				aria-label={`${type === "income" ? "Income" : "Expenses"} by category: ${chartData
+					.map((item) => `${item.name} ${formatCurrency(item.amount)}`)
+					.join(", ")}. Total ${formatCurrency(total)}.`}
 			>
-				<BarChart
-					accessibilityLayer
-					data={chartData}
-					layout="vertical"
-					margin={{ right: 32, left: 32, top: 8, bottom: 8 }}
-				>
-					<CartesianGrid horizontal={false} />
-					<YAxis
-						dataKey="name"
-						type="category"
-						tickLine={false}
-						tickMargin={10}
-						axisLine={false}
-						hide
-					/>
-					<XAxis dataKey="amount" type="number" hide />
-					<ChartTooltip
-						cursor={false}
-						content={
-							<ChartTooltipContent
-								indicator="line"
-								formatter={(value) => formatCurrency(Number(value))}
-							/>
-						}
-					/>
-					<Bar
-						dataKey="amount"
-						layout="vertical"
-						fill="var(--color-amount)"
-						radius={4}
-					>
-						<LabelList
-							dataKey="name"
-							position="insideLeft"
-							offset={12}
-							className="fill-background font-medium"
-							fontSize={12}
-						/>
-						<LabelList
-							dataKey="amount"
-							position="right"
-							offset={12}
-							className="fill-foreground font-semibold"
-							fontSize={12}
-							formatter={(value: number) => formatCurrency(value)}
-						/>
-					</Bar>
-				</BarChart>
-			</ChartContainer>
+				<Chart
+					echarts={echarts}
+					options={option}
+					height={chartHeight}
+					optionUpdateBehavior={REPLACE_OPTION}
+				/>
+			</div>
 
 			<div className="flex flex-wrap items-center justify-center gap-2 border-kumo-hairline border-t pt-4 text-kumo-subtle text-sm">
 				<span>Total {type === "income" ? "income" : "expenses"}</span>

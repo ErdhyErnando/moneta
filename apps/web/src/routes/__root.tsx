@@ -17,11 +17,12 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 	head: () => ({
 		meta: [
 			{
-				title: "moneta",
+				title: "Moneta",
 			},
 			{
 				name: "description",
-				content: "Moneta is an expense and income tracking application",
+				content:
+					"Moneta — personal finance: income, expenses and holdings in one ledger.",
 			},
 		],
 		links: [

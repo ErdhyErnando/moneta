@@ -89,34 +89,16 @@
 }
 
 /* -------------------------------------------------------------------------- */
-/* 3. Legacy shadcn tokens → kumo's ramp (docs/design.md §2.1, §2.3)           */
-/*    components/ui/* keep working until Phase 3 swaps them.                   */
+/* 3. Status + chart tokens (docs/design.md §2.4, §2.6)                        */
+/*    These are contract values, not kumo tokens, so they stay literals and    */
+/*    are exposed as Tailwind colors below.                                    */
 /* -------------------------------------------------------------------------- */
 
 :root {
-	--background: var(--color-kumo-canvas);
-	--foreground: var(--text-color-kumo-default);
-	--card: var(--color-kumo-base);
-	--card-foreground: var(--text-color-kumo-default);
-	--popover: var(--color-kumo-base);
-	--popover-foreground: var(--text-color-kumo-default);
-	--primary: var(--brand);
-	--primary-foreground: var(--brand-foreground);
-	--secondary: var(--color-kumo-recessed);
-	--secondary-foreground: var(--text-color-kumo-default);
-	--muted: var(--color-kumo-tint);
-	--muted-foreground: var(--text-color-kumo-subtle);
-	--accent: var(--color-kumo-tint);
-	--accent-foreground: var(--text-color-kumo-default);
-	/* Charts, status and destructive stay literals: the contract fixes these
-	   values and they are not kumo tokens. */
-	--destructive: #b91c1c;
-	--destructive-foreground: #ffffff;
-	--border: var(--color-kumo-hairline);
-	--input: var(--color-kumo-line);
-	--ring: var(--brand);
 	--positive: oklch(0.48 0.11 156);
 	--negative: #be123c;
+	--destructive: #b91c1c;
+	--destructive-foreground: #ffffff;
 	--chart-1: oklch(0.52 0.1 156);
 	--chart-2: oklch(0.6 0.095 156);
 	--chart-3: oklch(0.68 0.085 156);
@@ -126,14 +108,6 @@
 	--chart-negative: var(--negative);
 	--chart-grid: var(--color-kumo-hairline);
 	--chart-axis: var(--text-color-kumo-subtle);
-	--sidebar: var(--color-kumo-canvas);
-	--sidebar-foreground: var(--text-color-kumo-default);
-	--sidebar-primary: var(--brand);
-	--sidebar-primary-foreground: var(--brand-foreground);
-	--sidebar-accent: var(--color-kumo-tint);
-	--sidebar-accent-foreground: var(--text-color-kumo-strong);
-	--sidebar-border: var(--color-kumo-hairline);
-	--sidebar-ring: var(--brand);
 	--font-sans: "Google Sans Flex", "Plus Jakarta Sans", sans-serif;
 	--font-serif: Lora, serif;
 	--font-mono: Roboto Mono, monospace;
@@ -159,25 +133,6 @@
 }
 
 @theme inline {
-	--color-background: var(--background);
-	--color-foreground: var(--foreground);
-	--color-card: var(--card);
-	--color-card-foreground: var(--card-foreground);
-	--color-popover: var(--popover);
-	--color-popover-foreground: var(--popover-foreground);
-	--color-primary: var(--primary);
-	--color-primary-foreground: var(--primary-foreground);
-	--color-secondary: var(--secondary);
-	--color-secondary-foreground: var(--secondary-foreground);
-	--color-muted: var(--muted);
-	--color-muted-foreground: var(--muted-foreground);
-	--color-accent: var(--accent);
-	--color-accent-foreground: var(--accent-foreground);
-	--color-destructive: var(--destructive);
-	--color-destructive-foreground: var(--destructive-foreground);
-	--color-border: var(--border);
-	--color-input: var(--input);
-	--color-ring: var(--ring);
 	--color-chart-1: var(--chart-1);
 	--color-chart-2: var(--chart-2);
 	--color-chart-3: var(--chart-3);
@@ -187,14 +142,6 @@
 	--color-chart-negative: var(--chart-negative);
 	--color-chart-grid: var(--chart-grid);
 	--color-chart-axis: var(--chart-axis);
-	--color-sidebar: var(--sidebar);
-	--color-sidebar-foreground: var(--sidebar-foreground);
-	--color-sidebar-primary: var(--sidebar-primary);
-	--color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-	--color-sidebar-accent: var(--sidebar-accent);
-	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-	--color-sidebar-border: var(--sidebar-border);
-	--color-sidebar-ring: var(--sidebar-ring);
 
 	--color-brand: var(--brand);
 	--color-brand-hover: var(--brand-hover);
@@ -203,6 +150,8 @@
 	--color-brand-subtle: var(--brand-subtle);
 	--color-positive: var(--positive);
 	--color-negative: var(--negative);
+	--color-destructive: var(--destructive);
+	--color-destructive-foreground: var(--destructive-foreground);
 
 	--font-sans: var(--font-sans);
 	--font-mono: var(--font-mono);
@@ -216,11 +165,11 @@
 
 @layer base {
 	* {
-		@apply border-border outline-ring/50;
+		@apply border-kumo-hairline outline-kumo-focus/50;
 	}
 
 	body {
-		@apply bg-background text-foreground antialiased;
+		@apply bg-kumo-canvas text-kumo-default antialiased;
 	}
 }
 

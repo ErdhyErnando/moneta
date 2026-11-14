@@ -1,19 +1,19 @@
 import { Select } from "@cloudflare/kumo";
+import { Chart, type KumoChartOption } from "@cloudflare/kumo/components/chart";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-// recharts ships in an async chunk: this module loads only via React.lazy
-// in routes/_authenticated/assets.tsx, never in the initial bundle (#48).
-// react-doctor-disable-next-line react-doctor/prefer-dynamic-import
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
+import { useMemo, useState } from "react";
 import { ChartCard } from "@/components/charts/chart-card";
-import {
-	type ChartConfig,
-	ChartContainer,
-	ChartTooltip,
-	ChartTooltipContent,
-} from "@/components/ui/chart";
+import { echarts, REPLACE_OPTION } from "@/components/charts/echarts";
+import { useElementHeight } from "@/components/charts/use-element-height";
 import { useCurrency } from "@/contexts/currency-context";
 import { api } from "@/lib/api";
+import {
+	axisStyle,
+	baseChartOption,
+	formatCompactMoney,
+	tooltipHtml,
+	useChartTheme,
+} from "@/lib/chart-theme";
 
 const MONTH_NAMES = [
 	"Jan",
@@ -30,20 +30,14 @@ const MONTH_NAMES = [
 	"Dec",
 ];
 
-const chartConfig = {
-	amount: {
-		label: "Assets",
-		color: "var(--chart-1)",
-	},
-} satisfies ChartConfig;
-
 /**
  * Asset value by month. Card chrome comes from the shared `ChartCard`
- * (§7.2/§7.8/#10) so this card has the same header, skeleton, empty and error
- * states as every other chart; the plot itself is untouched until Phase 5.
+ * (§7.2/§7.8/#10); the plot is ECharts through kumo's `Chart`.
  */
 export function AssetsChart(): React.JSX.Element {
-	const { formatCurrency } = useCurrency();
+	const { formatCurrency, currency } = useCurrency();
+	const theme = useChartTheme();
+	const { ref, height } = useElementHeight<HTMLDivElement>();
 	// Use UTC year to match server DATE_TRUNC UTC per #22
 	const currentYear = new Date().getUTCFullYear();
 	const [selectedYear, setSelectedYear] = useState(() =>
@@ -76,11 +70,78 @@ export function AssetsChart(): React.JSX.Element {
 
 	const totalAssets = chartData.reduce((sum, item) => sum + item.amount, 0);
 
+	// Assembled from the shared theme helpers, so the option is validated by
+	// ECharts at runtime and typed once at this boundary instead of field by field.
+	const option = useMemo<KumoChartOption>(() => {
+		const base = baseChartOption(theme);
+		const axis = axisStyle(theme);
+
+		return {
+			...base,
+			grid: { left: 4, right: 12, top: 8, bottom: 4, containLabel: true },
+			xAxis: {
+				type: "category" as const,
+				boundaryGap: false,
+				data: chartData.map((d) => d.month),
+				...axis,
+				splitLine: { show: false },
+				// Deliberate density, not silent auto-hiding: every other month is
+				// labelled at every width, so a 375px screen never drops a label
+				// without telling the reader.
+				axisLabel: { ...axis.axisLabel, interval: 1 },
+			},
+			yAxis: {
+				type: "value" as const,
+				min: 0,
+				...axis,
+				axisLabel: {
+					...axis.axisLabel,
+					formatter: (value: number) =>
+						formatCompactMoney(value, currency.symbol),
+				},
+			},
+			series: [
+				{
+					name: "Assets",
+					type: "line" as const,
+					// Monotone between points: the old natural spline dipped below
+					// zero between two zero months.
+					smooth: true,
+					smoothMonotone: "x" as const,
+					symbol: "none",
+					lineStyle: { width: 2, color: theme.palette[0] },
+					itemStyle: { color: theme.palette[0] },
+					areaStyle: { color: theme.palette[0], opacity: 0.18 },
+					data: chartData.map((d) => d.amount),
+				},
+			],
+			tooltip: {
+				...base.tooltip,
+				trigger: "axis" as const,
+				axisPointer: {
+					type: "line" as const,
+					lineStyle: { color: theme.grid },
+				},
+				dangerousHtmlFormatter: (params: unknown) => {
+					const rows = Array.isArray(params) ? params : [params];
+					const first = rows[0] as { axisValue?: string; value?: number };
+					return tooltipHtml(theme, first?.axisValue, [
+						{
+							label: "Assets",
+							value: formatCurrency(Number(first?.value ?? 0)),
+						},
+					]);
+				},
+			},
+		} as unknown as KumoChartOption;
+	}, [theme, chartData, currency.symbol, formatCurrency]);
+
 	return (
 		<ChartCard
 			title="Asset value"
 			description={`Total holdings by month for ${selectedYear}`}
 			height="base"
+			bodyClassName="flex flex-col gap-4"
 			actions={
 				<Select
 					size="sm"
@@ -104,47 +165,24 @@ export function AssetsChart(): React.JSX.Element {
 			emptyTitle="No holdings this year"
 			emptyDescription="Add an asset and its value will show up here."
 		>
-			<div className="flex h-full flex-col">
-				<ChartContainer config={chartConfig} className="h-50 w-full">
-					<AreaChart
-						accessibilityLayer
-						data={chartData}
-						margin={{
-							left: 12,
-							right: 12,
-						}}
+			<div ref={ref} data-chart-h={height} className="min-h-0 flex-1">
+				{height > 0 ? (
+					<div
+						role="img"
+						aria-label={`Asset value by month in ${selectedYear}. Total ${formatCurrency(totalAssets)}.`}
 					>
-						<CartesianGrid vertical={false} />
-						<XAxis
-							dataKey="month"
-							tickLine={false}
-							axisLine={false}
-							tickMargin={8}
-							tickFormatter={(value) => value.slice(0, 3)}
+						<Chart
+							echarts={echarts}
+							options={option}
+							height={height}
+							optionUpdateBehavior={REPLACE_OPTION}
 						/>
-						<ChartTooltip
-							cursor={false}
-							content={
-								<ChartTooltipContent
-									indicator="line"
-									formatter={(value) => formatCurrency(Number(value))}
-								/>
-							}
-						/>
-						<Area
-							dataKey="amount"
-							type="natural"
-							fill="var(--color-amount)"
-							fillOpacity={0.3}
-							stroke="var(--color-amount)"
-							strokeWidth={2}
-						/>
-					</AreaChart>
-				</ChartContainer>
-				<p className="mt-4 text-center text-kumo-subtle text-sm tabular-nums">
-					Total for {selectedYear}: {formatCurrency(totalAssets)}
-				</p>
+					</div>
+				) : null}
 			</div>
+			<p className="text-center text-kumo-subtle text-sm tabular-nums">
+				Total for {selectedYear}: {formatCurrency(totalAssets)}
+			</p>
 		</ChartCard>
 	);
 }

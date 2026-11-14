@@ -14,11 +14,18 @@ export default defineConfig({
 		react(),
 		VitePWA({
 			registerType: "autoUpdate",
+			// D13: the manifest is part of the brand surface. `theme_color` is the
+			// brand fill (light), so the OS chrome matches the app (§11).
 			manifest: {
-				name: "moneta",
-				short_name: "moneta",
-				description: "moneta - PWA Application",
-				theme_color: "#0c0c0c",
+				name: "Moneta",
+				short_name: "Moneta",
+				description:
+					"Personal finance: income, expenses and holdings in one ledger.",
+				theme_color: "#2e7a50",
+				background_color: "#ffffff",
+				display: "standalone",
+				orientation: "portrait-primary",
+				categories: ["finance", "productivity"],
 			},
 			pwaAssets: { disabled: false, config: true },
 			devOptions: { enabled: true },

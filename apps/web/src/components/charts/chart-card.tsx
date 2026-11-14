@@ -70,6 +70,7 @@ export function ChartCard({
 }: ChartCardProps): React.JSX.Element {
 	return (
 		<LayerCard
+			data-slot="chart-card"
 			className={cn(
 				"flex h-full flex-col gap-0 rounded-xl p-0 shadow-none",
 				className,

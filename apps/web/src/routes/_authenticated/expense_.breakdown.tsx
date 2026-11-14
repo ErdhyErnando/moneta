@@ -6,7 +6,7 @@ import { ChartCard } from "@/components/charts/chart-card";
 import { PageContainer, PageHeader } from "@/components/layout";
 import { cn } from "@/lib/utils";
 
-// recharts-heavy chart loads on demand per #48 (route-level code split)
+// ECharts-heavy chart loads on demand per #48 (route-level code split)
 const CategoryBreakdownChart = lazy(() =>
 	import("@/components/category-breakdown-chart/category-breakdown-chart").then(
 		(m) => ({ default: m.CategoryBreakdownChart }),
