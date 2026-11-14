@@ -13,6 +13,7 @@ import {
 } from "@phosphor-icons/react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import type * as React from "react";
+import { Logo } from "@/components/brand/logo";
 import { type NavItem, NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser, SidebarThemeMenu } from "@/components/nav-user";
@@ -70,19 +71,10 @@ export function AppSidebar(): React.JSX.Element {
 				{collapsed ? null : (
 					<Link
 						to="/"
-						className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden rounded-lg p-1"
+						className="flex min-w-0 flex-1 items-center overflow-hidden rounded-lg p-1"
 						aria-label="Moneta — go to dashboard"
 					>
-						<img
-							src="/logo.png"
-							alt=""
-							className="size-7 shrink-0 rounded-md"
-							width={28}
-							height={28}
-						/>
-						<span className="truncate font-semibold text-base text-kumo-strong">
-							Moneta
-						</span>
+						<Logo />
 					</Link>
 				)}
 				<Sidebar.Trigger aria-label="Toggle sidebar" />

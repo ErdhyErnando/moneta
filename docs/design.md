@@ -563,6 +563,31 @@ lives in the chart module — and every chart stays behind `React.lazy` (#48). O
 | Empty | chart card shows `EmptyState`, not an empty canvas |
 | Motion | respect `prefers-reduced-motion`; no animation on data update beyond ECharts defaults |
 
+### 10.1 Implementation recipe
+
+**One adapter, one import, one lazy boundary.**
+
+| Piece | Rule |
+|---|---|
+| Theme | `lib/chart-theme.ts` is the only place that touches colours. It reads the CSS vars (`--chart-1..5`, `--positive`, `--negative`, `--color-kumo-hairline`, `--text-color-kumo-subtle`, `--color-kumo-base`), resolves `light-dark()` through a probe element, and normalises the result to `rgb()` through a 1×1 canvas — ECharts' own parser does not understand `oklch()`/`light-dark()`. Re-read on every mode change (`useChartTheme()`), never cached across themes. |
+| Tokens | `baseChartOption(theme)` (typography, grid, tooltip surface) + `axisStyle(theme)` (no axis lines, contract grid, muted ticks). Charts pass their own `grid`, `xAxis`, `yAxis`, `series`. No hex, no palette colour, no `var(--…)` reaches the ECharts option. |
+| Import | `components/charts/echarts.ts` registers only what the six charts use (`Bar`, `Line`, `Pie`, `Grid`, `Tooltip`, `CanvasRenderer`) and is imported **only** from modules behind `React.lazy`. Entry and `login` chunks must contain zero `zrender` matches. |
+| Update | `optionUpdateBehavior={REPLACE_OPTION}` (`notMerge: true`): every render rebuilds the whole option, so merging leaves stale axes behind. Data must be memoised on the query result — a fresh array per render means a `setOption` per render. |
+| Colour | Category series take `categoryMark(categories.color, mode)` and pass it through `toChartColor()` (#19). The fallback is `theme.palette[index % 5]`; there is no other palette. |
+| Numbers | Axes: `formatCompactMoney` (`$1.2k`, `$3.4M`). Tooltips and bar labels: the app's `formatCurrency`. Both `tabular-nums` on screen, money only ever via the currency context. |
+| Legend | `ChartLegend` (React, `components/charts/chart-legend.tsx`), rendered only for ≥2 series, always with the name. Never ECharts' canvas legend: it is unreachable for screen readers and unselectable. |
+| A11y | Every chart is wrapped in `role="img"` + an `aria-label` that states what it shows **and** its totals/series. |
+| Motion | `animation: theme.animated` (false under `prefers-reduced-motion`). |
+
+**ECharts patterns that bite** (found while porting, all fixed here — do not reintroduce):
+
+1. `label.offset` silently breaks label layout on `bar` series: every label collapses to the origin. Use `label.padding` for the gap instead.
+2. `xAxis: { show: false }` also disables *series label layout* on a horizontal bar chart. Hide the decorations (`axisLabel/axisLine/axisTick/splitLine: { show: false }`) but keep the axis rendered.
+3. `yAxis.inverse: true` puts series labels on the wrong row. Reverse the category data instead.
+4. A bar's value label at `position: "right"` is clipped when the bar reaches the axis max. Give the value axis ~50 % headroom (`max = ceil(max × 1.5)`) so the label always fits inside the canvas, at 375 px too.
+5. `smooth: true` overshoots below zero between two zero points. Use `smoothMonotone: "x"` **and** `min: 0` on non-negative series.
+6. Axis label density must be deliberate: 12 months at 375 px get `interval: 1` (every other month) rather than ECharts' silent auto-hiding.
+
 ---
 
 ## 11. Branding
@@ -575,7 +600,9 @@ lives in the chart module — and every chart stays behind `React.lazy` (#48). O
 | On light | logo on `bg-kumo-canvas`/`base` only; if it must sit on brand, use the light logo variant |
 | On dark | same asset (the coin reads on `#0f0f0f`); no glow, no shadow, no ring |
 | Wordmark | "Moneta", `Google Sans Flex` 600, `tracking-tight`, 16px in the sidebar / 20px on auth, `text-kumo-strong`; gap to mark `space-2`; never lowercase, never letter-spaced |
-| Favicons (Phase 5, via the existing `vite-plugin-pwa` `pwaAssets` pipeline, D13) | `favicon.ico` (16+32), `favicon-16.png`, `favicon-32.png`, `apple-touch-icon-180.png`, `icon-192.png`, `icon-512.png`, `maskable-512.png` |
+| Component | `components/brand/logo.tsx` is the only lockup: mark + wordmark, `size="sm"` (sidebar, 28 px) / `size="lg"` (auth, 32 px), `markOnly` for the collapsed rail. The image is `alt=""` because the wordmark carries the name. |
+| Source | `apps/web/public/logo.png` (409×409). The PWA pipeline upscales it to 512 px + maskable — acceptable today, a larger or SVG source is the fix if the store icons read soft. |
+| Favicons (via the existing `vite-plugin-pwa` `pwaAssets` pipeline, D13) | `favicon.ico` (16+32), `favicon-16.png`, `favicon-32.png`, `apple-touch-icon-180.png`, `icon-192.png`, `icon-512.png`, `maskable-512.png` |
 | Manifest | `name: "Moneta"`, `short_name: "Moneta"`, real description, `theme_color: #2e7a50` (brand fill, light), `background_color: #ffffff` |
 
 ---

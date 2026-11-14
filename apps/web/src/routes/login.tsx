@@ -5,6 +5,7 @@ import {
 } from "@phosphor-icons/react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { Logo } from "@/components/brand/logo";
 import SignInForm from "@/components/sign-in-form";
 import SignUpForm from "@/components/sign-up-form";
 
@@ -32,20 +33,7 @@ const valueProps = [
 ];
 
 function BrandMark(): React.JSX.Element {
-	return (
-		<div className="flex items-center gap-2">
-			<img
-				src="/logo.png"
-				alt=""
-				className="size-8 shrink-0 rounded-md"
-				width={32}
-				height={32}
-			/>
-			<span className="font-semibold text-kumo-strong text-lg tracking-tight">
-				Moneta
-			</span>
-		</div>
-	);
+	return <Logo size="lg" />;
 }
 
 /**

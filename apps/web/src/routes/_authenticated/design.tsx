@@ -1,6 +1,7 @@
 import { Badge } from "@cloudflare/kumo/components/badge";
 import { Banner } from "@cloudflare/kumo/components/banner";
 import { Button } from "@cloudflare/kumo/components/button";
+import { Chart } from "@cloudflare/kumo/components/chart";
 import { Checkbox } from "@cloudflare/kumo/components/checkbox";
 import { DropdownMenu } from "@cloudflare/kumo/components/dropdown";
 import { Input } from "@cloudflare/kumo/components/input";
@@ -24,9 +25,18 @@ import {
 } from "@phosphor-icons/react";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { ChartCard } from "@/components/charts/chart-card";
+import { ChartLegend } from "@/components/charts/chart-legend";
+import { echarts, REPLACE_OPTION } from "@/components/charts/echarts";
 import { EmptyState } from "@/components/layout";
 import { ResponsiveDialog } from "@/components/responsive-dialog";
 import { useTheme } from "@/components/theme-provider";
+import {
+	axisStyle,
+	baseChartOption,
+	formatCompactMoney,
+	useChartTheme,
+} from "@/lib/chart-theme";
 import { cn } from "@/lib/utils";
 
 /**
@@ -271,6 +281,188 @@ function ToastTrigger(): React.JSX.Element {
 		>
 			Show toast
 		</Button>
+	);
+}
+
+/* -------------------------------------------------------------------------- */
+/* charts (§10) — the three shapes the app uses, wired to the live theme        */
+/* -------------------------------------------------------------------------- */
+
+const DEMO_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
+const DEMO_SERIES = [1200, 2100, 1800, 2600, 3000, 2400];
+const DEMO_SECOND = [900, 1400, 1200, 1900, 2200, 1600];
+const DEMO_CATEGORIES = [
+	{ name: "Rent", value: 450 },
+	{ name: "Groceries", value: 86 },
+	{ name: "Travel", value: 32 },
+];
+
+function ChartsDemo(): React.JSX.Element {
+	const theme = useChartTheme();
+	const base = baseChartOption(theme);
+	const axis = axisStyle(theme);
+
+	return (
+		<div className="mt-2 grid gap-4 lg:grid-cols-2">
+			<ChartCard
+				title="Area (two series + legend)"
+				description="Cash flow shape"
+				height="auto"
+				bodyClassName="flex flex-col gap-3"
+			>
+				<div role="img" aria-label="Demo area chart">
+					<Chart
+						echarts={echarts}
+						height={180}
+						optionUpdateBehavior={REPLACE_OPTION}
+						options={
+							{
+								...base,
+								xAxis: {
+									type: "category",
+									boundaryGap: false,
+									data: DEMO_MONTHS,
+									...axis,
+									splitLine: { show: false },
+								},
+								yAxis: {
+									type: "value",
+									min: 0,
+									...axis,
+								},
+								series: [
+									{
+										name: "Income",
+										type: "line",
+										smooth: true,
+										smoothMonotone: "x",
+										symbol: "none",
+										lineStyle: { width: 2, color: theme.positive },
+										itemStyle: { color: theme.positive },
+										areaStyle: { color: theme.positive, opacity: 0.18 },
+										data: DEMO_SERIES,
+									},
+									{
+										name: "Expense",
+										type: "line",
+										smooth: true,
+										smoothMonotone: "x",
+										symbol: "none",
+										lineStyle: { width: 2, color: theme.negative },
+										itemStyle: { color: theme.negative },
+										areaStyle: { color: theme.negative, opacity: 0.18 },
+										data: DEMO_SECOND,
+									},
+								],
+							} as never
+						}
+					/>
+				</div>
+				<ChartLegend
+					items={[
+						{ label: "Income", color: theme.positive },
+						{ label: "Expense", color: theme.negative },
+					]}
+				/>
+			</ChartCard>
+
+			<ChartCard
+				title="Bars (category axis)"
+				description="Month rows, capped thickness"
+				height="auto"
+			>
+				<div role="img" aria-label="Demo bar chart">
+					<Chart
+						echarts={echarts}
+						height={180}
+						optionUpdateBehavior={REPLACE_OPTION}
+						options={
+							{
+								...base,
+								xAxis: {
+									type: "value",
+									axisLabel: { show: false },
+									axisLine: { show: false },
+									axisTick: { show: false },
+									splitLine: { show: false },
+									max: 3750,
+								},
+								yAxis: {
+									type: "category",
+									data: [...DEMO_MONTHS].reverse(),
+									...axis,
+									splitLine: { show: false },
+								},
+								series: [
+									{
+										type: "bar",
+										barMaxWidth: 18,
+										itemStyle: { color: theme.palette[0], borderRadius: 3 },
+										label: {
+											show: true,
+											position: "right",
+											color: theme.text,
+											fontSize: theme.fontSize,
+											padding: [0, 0, 0, 6],
+											formatter: ({ value }: { value: number }) =>
+												formatCompactMoney(value, "$"),
+										},
+										data: [...DEMO_SERIES].reverse(),
+									},
+								],
+							} as never
+						}
+					/>
+				</div>
+			</ChartCard>
+
+			<ChartCard
+				title="Pie (legend, no leader labels)"
+				description="Breakdown shape"
+				height="auto"
+				bodyClassName="flex flex-col gap-3"
+			>
+				<div role="img" aria-label="Demo pie chart">
+					<Chart
+						echarts={echarts}
+						height={180}
+						optionUpdateBehavior={REPLACE_OPTION}
+						options={
+							{
+								...base,
+								series: [
+									{
+										type: "pie",
+										radius: "76%",
+										center: ["50%", "50%"],
+										label: { show: false },
+										labelLine: { show: false },
+										itemStyle: {
+											borderColor: theme.surface,
+											borderWidth: 1,
+										},
+										data: DEMO_CATEGORIES.map((item, index) => ({
+											name: item.name,
+											value: item.value,
+											itemStyle: {
+												color: theme.palette[index % theme.palette.length],
+											},
+										})),
+									},
+								],
+							} as never
+						}
+					/>
+				</div>
+				<ChartLegend
+					className="justify-start"
+					items={DEMO_CATEGORIES.map((item, index) => ({
+						label: item.name,
+						color: theme.palette[index % theme.palette.length] as string,
+					}))}
+				/>
+			</ChartCard>
+		</div>
 	);
 }
 
@@ -560,6 +752,13 @@ function DesignPage(): React.JSX.Element {
 						Below md every dialog is a swipeable bottom sheet (kumo
 						LayerDialog).
 					</p>
+				</Group>
+
+				<Group
+					title="Charts"
+					description="ECharts through kumo's Chart, themed from the live tokens (§10)."
+				>
+					<ChartsDemo />
 				</Group>
 
 				<Group title="Empty state" description="Used by every data region.">

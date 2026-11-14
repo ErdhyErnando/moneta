@@ -73,8 +73,13 @@ function Shell(): React.JSX.Element {
 
 			{/* No app-level top bar: every page owns its PageHeader (§7.1), and the
 			    only thing the old bar held was the collapse toggle, which now lives
-			    in the sidebar header. */}
-			<div className="flex min-w-0 flex-1 flex-col overflow-auto pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pb-0">
+			    in the sidebar header.
+			    `relative` makes this scroll column the containing block for absolutely
+			    positioned descendants (e.g. `sr-only` labels in SignedAmount). Without
+			    it they resolve against the shell root, escape the overflow clip and
+			    stretch the document — a second scrollbar plus empty space below the
+			    page. */}
+			<div className="relative flex min-w-0 flex-1 flex-col overflow-auto pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pb-0">
 				<Outlet />
 			</div>
 

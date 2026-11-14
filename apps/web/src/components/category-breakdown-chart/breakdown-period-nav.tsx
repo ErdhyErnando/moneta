@@ -72,7 +72,7 @@ export function BreakdownPeriodNav({
 					/>
 				)}
 				<Select
-					className="w-20 shrink-0 max-md:h-11 sm:w-22"
+					className="w-24 shrink-0 max-md:h-11 sm:w-22"
 					aria-label="Year"
 					value={String(currentYear)}
 					onValueChange={(value) => {
