@@ -1,6 +1,8 @@
-import { Button } from "@cloudflare/kumo";
+import { Banner, Button } from "@cloudflare/kumo";
+import { WarningCircleIcon } from "@phosphor-icons/react";
 import { useForm } from "@tanstack/react-form";
 import { useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 import z from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { authClient } from "@/lib/auth-client";
@@ -11,12 +13,11 @@ export default function SignUpForm({
 	onSwitchToSignIn,
 }: {
 	onSwitchToSignIn: () => void;
-}) {
-	const navigate = useNavigate({
-		from: "/",
-	});
+}): React.JSX.Element {
+	const navigate = useNavigate({ from: "/" });
 	const { isPending } = authClient.useSession();
 	const { toast } = useToast();
+	const [formError, setFormError] = useState<string | null>(null);
 
 	const form = useForm({
 		defaultValues: {
@@ -25,6 +26,7 @@ export default function SignUpForm({
 			name: "",
 		},
 		onSubmit: async ({ value }) => {
+			setFormError(null);
 			await authClient.signUp.email(
 				{
 					email: value.email,
@@ -39,11 +41,7 @@ export default function SignUpForm({
 						toast({ title: "Sign up successful" });
 					},
 					onError: (error) => {
-						toast({
-							title: "Error",
-							description: error.error.message || error.error.statusText,
-							variant: "destructive",
-						});
+						setFormError(error.error.message || error.error.statusText);
 					},
 				},
 			);
@@ -64,11 +62,22 @@ export default function SignUpForm({
 	return (
 		<div className="space-y-6">
 			<div className="space-y-2">
-				<h1 className="font-bold text-2xl tracking-tight">Create account</h1>
-				<p className="text-muted-foreground text-sm">
-					Start tracking your finances in minutes
+				<h1 className="font-semibold text-2xl text-kumo-strong tracking-tight">
+					Create account
+				</h1>
+				<p className="text-kumo-subtle text-sm">
+					Start tracking your finances in minutes.
 				</p>
 			</div>
+
+			{formError ? (
+				<Banner
+					variant="error"
+					icon={<WarningCircleIcon size={16} />}
+					title="Could not create your account"
+					description={formError}
+				/>
+			) : null}
 
 			<form
 				onSubmit={(e) => {
@@ -78,39 +87,33 @@ export default function SignUpForm({
 				}}
 				className="space-y-4"
 			>
-				<div>
-					<form.Field name="name">
-						{(field) => (
-							<AuthField field={field} label="Name" autoComplete="name" />
-						)}
-					</form.Field>
-				</div>
+				<form.Field name="name">
+					{(field) => (
+						<AuthField field={field} label="Name" autoComplete="name" />
+					)}
+				</form.Field>
 
-				<div>
-					<form.Field name="email">
-						{(field) => (
-							<AuthField
-								field={field}
-								label="Email"
-								type="email"
-								autoComplete="email"
-							/>
-						)}
-					</form.Field>
-				</div>
+				<form.Field name="email">
+					{(field) => (
+						<AuthField
+							field={field}
+							label="Email"
+							type="email"
+							autoComplete="email"
+						/>
+					)}
+				</form.Field>
 
-				<div>
-					<form.Field name="password">
-						{(field) => (
-							<AuthField
-								field={field}
-								label="Password"
-								type="password"
-								autoComplete="new-password"
-							/>
-						)}
-					</form.Field>
-				</div>
+				<form.Field name="password">
+					{(field) => (
+						<AuthField
+							field={field}
+							label="Password"
+							type="password"
+							autoComplete="new-password"
+						/>
+					)}
+				</form.Field>
 
 				<form.Subscribe>
 					{(state) => (
@@ -119,21 +122,26 @@ export default function SignUpForm({
 							variant="primary"
 							size="lg"
 							className="w-full"
-							disabled={!state.canSubmit || state.isSubmitting}
+							disabled={!state.canSubmit}
+							loading={state.isSubmitting}
 						>
-							{state.isSubmitting ? "Submitting..." : "Sign Up"}
+							Sign up
 						</Button>
 					)}
 				</form.Subscribe>
 			</form>
 
-			<div className="text-center">
+			<div className="flex flex-wrap items-center justify-center gap-1">
+				<span className="text-kumo-subtle text-sm">
+					Already have an account?
+				</span>
 				<Button
 					variant="ghost"
+					size="sm"
 					onClick={onSwitchToSignIn}
-					className="text-brand-strong"
+					className="text-kumo-brand"
 				>
-					Already have an account? Sign in
+					Sign in
 				</Button>
 			</div>
 		</div>

@@ -1,5 +1,6 @@
 import { Input } from "@cloudflare/kumo";
 import type { AnyFieldApi } from "@tanstack/react-form";
+import type * as React from "react";
 
 type AuthFieldProps = {
 	field: AnyFieldApi;
@@ -8,9 +9,14 @@ type AuthFieldProps = {
 	autoComplete?: string;
 };
 
-// Shared text field (label + input + validation errors) for the sign-in and
-// sign-up forms (#49). Callers keep their own <form.Field> wrapper so the
-// field name stays fully typed at each call site.
+/**
+ * One auth text field (§7.4): label above the control, validation message below
+ * it, and a visible required marker plus `aria-required` — never colour-only.
+ * No native `required`: the browser's bubble would pre-empt the inline zod
+ * message every other form uses.
+ *
+ * Callers keep their own `<form.Field>` wrapper so the field name stays typed.
+ */
 export function AuthField({
 	field,
 	label,
@@ -19,11 +25,19 @@ export function AuthField({
 }: AuthFieldProps): React.JSX.Element {
 	return (
 		<Input
-			label={label}
+			label={
+				<span className="inline-flex items-center gap-1">
+					{label}
+					<span aria-hidden="true" className="text-kumo-danger">
+						*
+					</span>
+				</span>
+			}
 			id={field.name}
 			name={field.name}
 			type={type}
 			autoComplete={autoComplete}
+			aria-required="true"
 			value={field.state.value}
 			onBlur={field.handleBlur}
 			onChange={(e) => field.handleChange(e.target.value)}
