@@ -1,16 +1,14 @@
 // recharts ships in an async chunk: this module loads only via React.lazy
 // in routes/_authenticated/index.tsx, never in the initial bundle (#48).
 // react-doctor-disable-next-line react-doctor/prefer-dynamic-import
-import { LayerCard } from "@cloudflare/kumo";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
+import { ChartCard } from "@/components/dashboard/chart-card";
 import {
 	type ChartConfig,
 	ChartContainer,
 	ChartTooltip,
 	ChartTooltipContent,
 } from "@/components/ui/chart";
-
-const description = "An interactive area chart for cash flow";
 
 const chartConfig = {
 	income: {
@@ -34,119 +32,115 @@ const EMPTY_CHART_DATA: ChartData[] = [];
 interface ChartAreaInteractiveProps {
 	data?: ChartData[];
 	isLoading?: boolean;
+	isError?: boolean;
+	onRetry?: () => void;
 }
 
 export function ChartAreaInteractive({
 	data = EMPTY_CHART_DATA,
 	isLoading = false,
+	isError = false,
+	onRetry,
 }: ChartAreaInteractiveProps) {
 	return (
-		<LayerCard className="flex h-full flex-col gap-0 rounded-xl p-0 shadow-none">
-			<div className="flex items-center gap-2 border-kumo-hairline border-b px-6 py-4 sm:flex-row">
-				<div className="grid flex-1 gap-1 text-center sm:text-left">
-					<div className="font-semibold text-base">Cash Flow</div>
-					<div className="text-kumo-subtle text-sm">
-						Income vs Expenses over time
-					</div>
-				</div>
-			</div>
-			<div className="flex min-h-[250px] flex-1 flex-col px-1 pt-1 sm:px-2 sm:pt-2 sm:pb-4">
-				{isLoading ? (
-					<div className="h-full flex-1 animate-pulse rounded-lg bg-kumo-fill" />
-				) : data.length === 0 ? (
-					<div className="flex h-full flex-1 items-center justify-center text-kumo-subtle">
-						No data available for the selected time range
-					</div>
-				) : (
-					<ChartContainer
-						config={chartConfig}
-						className="!flex-1 aspect-auto h-full w-full"
-					>
-						<AreaChart
-							accessibilityLayer
-							data={data}
-							margin={{
-								left: 12,
-								right: 12,
-								bottom: 10,
-							}}
-						>
-							<CartesianGrid vertical={false} />
-							<XAxis
-								dataKey="date"
-								tickLine={false}
-								axisLine={false}
-								tickMargin={8}
-								minTickGap={32}
-								tickFormatter={(value) => {
-									const date = new Date(value);
-									return date.toLocaleDateString("en-US", {
+		<ChartCard
+			title="Cash Flow"
+			description="Income vs expenses over time"
+			height="base"
+			isLoading={isLoading}
+			isError={isError}
+			onRetry={onRetry}
+			isEmpty={data.length === 0}
+			emptyTitle="No cash flow in this period"
+			emptyDescription="Try a wider date range from the period filter."
+		>
+			<ChartContainer
+				config={chartConfig}
+				className="!flex-1 aspect-auto h-full w-full"
+			>
+				<AreaChart
+					accessibilityLayer
+					data={data}
+					margin={{
+						left: 12,
+						right: 12,
+						bottom: 10,
+					}}
+				>
+					<CartesianGrid vertical={false} />
+					<XAxis
+						dataKey="date"
+						tickLine={false}
+						axisLine={false}
+						tickMargin={8}
+						minTickGap={32}
+						tickFormatter={(value) => {
+							const date = new Date(value);
+							return date.toLocaleDateString("en-US", {
+								month: "short",
+								day: "numeric",
+							});
+						}}
+					/>
+					<ChartTooltip
+						cursor={false}
+						content={
+							<ChartTooltipContent
+								labelFormatter={(value) => {
+									return new Date(value).toLocaleDateString("en-US", {
 										month: "short",
 										day: "numeric",
+										year: "numeric",
 									});
 								}}
+								indicator="dot"
 							/>
-							<ChartTooltip
-								cursor={false}
-								content={
-									<ChartTooltipContent
-										labelFormatter={(value) => {
-											return new Date(value).toLocaleDateString("en-US", {
-												month: "short",
-												day: "numeric",
-												year: "numeric",
-											});
-										}}
-										indicator="dot"
-									/>
-								}
+						}
+					/>
+					<defs>
+						<linearGradient id="fillIncome" x1="0" y1="0" x2="0" y2="1">
+							<stop
+								offset="5%"
+								stopColor="var(--color-income)"
+								stopOpacity={0.8}
 							/>
-							<defs>
-								<linearGradient id="fillIncome" x1="0" y1="0" x2="0" y2="1">
-									<stop
-										offset="5%"
-										stopColor="var(--color-income)"
-										stopOpacity={0.8}
-									/>
-									<stop
-										offset="95%"
-										stopColor="var(--color-income)"
-										stopOpacity={0.1}
-									/>
-								</linearGradient>
-								<linearGradient id="fillExpense" x1="0" y1="0" x2="0" y2="1">
-									<stop
-										offset="5%"
-										stopColor="var(--color-expense)"
-										stopOpacity={0.8}
-									/>
-									<stop
-										offset="95%"
-										stopColor="var(--color-expense)"
-										stopOpacity={0.1}
-									/>
-								</linearGradient>
-							</defs>
-							<Area
-								dataKey="expense"
-								type="natural"
-								fill="url(#fillExpense)"
-								fillOpacity={0.3}
-								stroke="var(--color-expense)"
-								strokeWidth={2}
+							<stop
+								offset="95%"
+								stopColor="var(--color-income)"
+								stopOpacity={0.1}
 							/>
-							<Area
-								dataKey="income"
-								type="natural"
-								fill="url(#fillIncome)"
-								fillOpacity={0.3}
-								stroke="var(--color-income)"
-								strokeWidth={2}
+						</linearGradient>
+						<linearGradient id="fillExpense" x1="0" y1="0" x2="0" y2="1">
+							<stop
+								offset="5%"
+								stopColor="var(--color-expense)"
+								stopOpacity={0.8}
 							/>
-						</AreaChart>
-					</ChartContainer>
-				)}
-			</div>
-		</LayerCard>
+							<stop
+								offset="95%"
+								stopColor="var(--color-expense)"
+								stopOpacity={0.1}
+							/>
+						</linearGradient>
+					</defs>
+					<Area
+						dataKey="expense"
+						type="natural"
+						fill="url(#fillExpense)"
+						fillOpacity={0.3}
+						stroke="var(--color-expense)"
+						strokeWidth={2}
+					/>
+					<Area
+						dataKey="income"
+						type="natural"
+						fill="url(#fillIncome)"
+						fillOpacity={0.3}
+						stroke="var(--color-income)"
+						strokeWidth={2}
+					/>
+				</AreaChart>
+			</ChartContainer>
+		</ChartCard>
 	);
 }

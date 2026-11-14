@@ -23,6 +23,7 @@ const ChartPieCategories = lazy(() =>
 	})),
 );
 
+import { ChartCard } from "@/components/dashboard/chart-card";
 import {
 	DashboardHeader,
 	type TimeRange,
@@ -33,6 +34,7 @@ import {
 	SummaryCards,
 } from "@/components/dashboard/summary-cards";
 import type { Transaction } from "@/components/data-table";
+import { PageContainer, Section } from "@/components/layout";
 import { useCurrency } from "@/contexts/currency-context";
 import { api } from "@/lib/api";
 import { utcDayString } from "@/lib/date";
@@ -72,6 +74,20 @@ async function fetchRecentTransactions(
 	return response.data.transactions;
 }
 
+/**
+ * Lazy charts load on demand; the fallback keeps the card chrome and the body
+ * height identical to the loaded chart so nothing shifts when it arrives.
+ */
+function ChartFallback({
+	title,
+	height,
+}: {
+	title: string;
+	height: "base" | "lg" | "xl";
+}): React.JSX.Element {
+	return <ChartCard title={title} height={height} isLoading />;
+}
+
 function HomeComponent() {
 	const { formatCurrency } = useCurrency();
 	const [timeRange, setTimeRange] = useState<TimeRange>("30d");
@@ -104,19 +120,34 @@ function HomeComponent() {
 	}, [timeRange, customStartDate, customEndDate]);
 
 	// Fetch dashboard summary
-	const { data: summary, isLoading: summaryLoading } = useQuery({
+	const {
+		data: summary,
+		isLoading: summaryLoading,
+		isError: summaryError,
+		refetch: refetchSummary,
+	} = useQuery({
 		queryKey: ["dashboard-summary", startDate, endDate],
 		queryFn: () => fetchDashboardSummary(startDate, endDate),
 	});
 
 	// Fetch recent transactions
-	const { data: transactions = [], isLoading: transactionsLoading } = useQuery({
+	const {
+		data: transactions = [],
+		isLoading: transactionsLoading,
+		isError: transactionsError,
+		refetch: refetchTransactions,
+	} = useQuery({
 		queryKey: ["dashboard-transactions", startDate, endDate],
 		queryFn: () => fetchRecentTransactions(10, startDate, endDate),
 	});
 
 	// Fetch chart data
-	const { data: chartDataResponse, isLoading: chartLoading } = useQuery({
+	const {
+		data: chartDataResponse,
+		isLoading: chartLoading,
+		isError: chartError,
+		refetch: refetchChart,
+	} = useQuery({
 		queryKey: ["dashboard-chart", startDate, endDate],
 		queryFn: async () => {
 			const params = new URLSearchParams();
@@ -131,7 +162,7 @@ function HomeComponent() {
 	});
 
 	return (
-		<div className="flex flex-col gap-6 p-6">
+		<PageContainer>
 			<DashboardHeader
 				timeRange={timeRange}
 				onTimeRangeChange={setTimeRange}
@@ -141,56 +172,82 @@ function HomeComponent() {
 				onCustomEndChange={setCustomEndDate}
 			/>
 
-			<SummaryCards
-				summary={summary}
-				isLoading={summaryLoading}
-				formatCurrency={formatCurrency}
-			/>
+			<div className="space-y-6">
+				<SummaryCards
+					summary={summary}
+					isLoading={summaryLoading}
+					isError={summaryError}
+					onRetry={() => {
+						void refetchSummary();
+					}}
+					formatCurrency={formatCurrency}
+				/>
 
-			{/* Chart and Category Pie */}
-			<div className="grid gap-6 md:grid-cols-7">
-				<div className="md:col-span-4">
-					<Suspense
-						fallback={
-							<div className="h-[280px] animate-pulse rounded bg-muted" />
-						}
-					>
-						<ChartAreaInteractive
-							data={chartDataResponse}
-							isLoading={chartLoading}
-						/>
-					</Suspense>
-				</div>
-				<div className="md:col-span-3">
-					<Suspense
-						fallback={
-							<div className="h-[280px] animate-pulse rounded bg-muted" />
-						}
-					>
-						<ChartPieCategories startDate={startDate} endDate={endDate} />
-					</Suspense>
-				</div>
+				<Section title="Trends">
+					<div className="space-y-6">
+						<div className="grid gap-6 lg:grid-cols-7">
+							<div className="lg:col-span-4">
+								<Suspense
+									fallback={<ChartFallback title="Cash Flow" height="base" />}
+								>
+									<ChartAreaInteractive
+										data={chartDataResponse}
+										isLoading={chartLoading}
+										isError={chartError}
+										onRetry={() => {
+											void refetchChart();
+										}}
+									/>
+								</Suspense>
+							</div>
+							<div className="lg:col-span-3">
+								<Suspense
+									fallback={
+										<ChartFallback title="Breakdown by category" height="lg" />
+									}
+								>
+									<ChartPieCategories startDate={startDate} endDate={endDate} />
+								</Suspense>
+							</div>
+						</div>
+
+						{/* Monthly Bar Chart — lazy per #25 */}
+						<Suspense
+							fallback={
+								<ChartFallback
+									title={
+										monthlyChartType === "expense"
+											? "Monthly Expenses"
+											: "Monthly Income"
+									}
+									height="xl"
+								/>
+							}
+						>
+							{monthlyChartType === "expense" ? (
+								<ChartBarMonthlyExpenses
+									onToggle={() => setMonthlyChartType("income")}
+								/>
+							) : (
+								<ChartBarMonthlyIncome
+									onToggle={() => setMonthlyChartType("expense")}
+								/>
+							)}
+						</Suspense>
+					</div>
+				</Section>
+
+				<Section title="Activity">
+					<RecentTransactions
+						transactions={transactions}
+						isLoading={transactionsLoading}
+						isError={transactionsError}
+						onRetry={() => {
+							void refetchTransactions();
+						}}
+					/>
+				</Section>
 			</div>
-
-			{/* Monthly Bar Chart — lazy per #25 */}
-			<Suspense
-				fallback={<div className="h-[300px] animate-pulse rounded bg-muted" />}
-			>
-				{monthlyChartType === "expense" ? (
-					<ChartBarMonthlyExpenses
-						onToggle={() => setMonthlyChartType("income")}
-					/>
-				) : (
-					<ChartBarMonthlyIncome
-						onToggle={() => setMonthlyChartType("expense")}
-					/>
-				)}
-			</Suspense>
-
-			<RecentTransactions
-				transactions={transactions}
-				isLoading={transactionsLoading}
-			/>
-		</div>
+		</PageContainer>
 	);
 }
