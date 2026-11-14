@@ -24,7 +24,6 @@ export default defineConfig({
 				theme_color: "#2e7a50",
 				background_color: "#ffffff",
 				display: "standalone",
-				orientation: "portrait-primary",
 				categories: ["finance", "productivity"],
 			},
 			pwaAssets: { disabled: false, config: true },
