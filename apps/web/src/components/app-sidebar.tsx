@@ -65,22 +65,26 @@ export function AppSidebar(): React.JSX.Element {
 					collapsed && "justify-center px-0",
 				)}
 			>
-				<Link
-					to="/"
-					className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden rounded-lg p-1"
-					aria-label="Moneta — go to dashboard"
-				>
-					<img
-						src="/logo.png"
-						alt=""
-						className="size-7 shrink-0 rounded-md"
-						width={28}
-						height={28}
-					/>
-					<span className="truncate font-semibold text-base text-kumo-strong">
-						Moneta
-					</span>
-				</Link>
+				{/* Collapsed, the rail only has room for the trigger; a squeezed link
+				    would leave a 1px logo sliver and an invisible tab stop. */}
+				{collapsed ? null : (
+					<Link
+						to="/"
+						className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden rounded-lg p-1"
+						aria-label="Moneta — go to dashboard"
+					>
+						<img
+							src="/logo.png"
+							alt=""
+							className="size-7 shrink-0 rounded-md"
+							width={28}
+							height={28}
+						/>
+						<span className="truncate font-semibold text-base text-kumo-strong">
+							Moneta
+						</span>
+					</Link>
+				)}
 				<Sidebar.Trigger aria-label="Toggle sidebar" />
 			</Sidebar.Header>
 

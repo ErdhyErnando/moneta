@@ -11,7 +11,9 @@ type AuthFieldProps = {
 
 /**
  * One auth text field (§7.4): label above the control, validation message below
- * it, and the native `required` marker — never colour-only.
+ * it, and a visible required marker plus `aria-required` — never colour-only.
+ * No native `required`: the browser's bubble would pre-empt the inline zod
+ * message every other form uses.
  *
  * Callers keep their own `<form.Field>` wrapper so the field name stays typed.
  */
@@ -35,7 +37,6 @@ export function AuthField({
 			name={field.name}
 			type={type}
 			autoComplete={autoComplete}
-			required
 			aria-required="true"
 			value={field.state.value}
 			onBlur={field.handleBlur}

@@ -28,11 +28,13 @@ const THEMES = [
 
 /**
  * The account block in the sidebar footer. Collapsed, it is the avatar alone —
- * and because a 57px rail cannot show the dedicated theme/sign-out buttons, it
+ * and because a 48px rail cannot show the dedicated theme/sign-out buttons, it
  * absorbs them as menu items so nothing becomes unreachable (§8.1).
  */
 export function NavUser({ user, onSignOut }: NavUserProps): React.JSX.Element {
-	const { resolvedTheme, setTheme } = useTheme();
+	// `theme` is the stored choice (light/dark/system); `resolvedTheme` is only
+	// ever light/dark, so it can't mark "System" as selected.
+	const { theme: currentTheme, setTheme } = useTheme();
 	const { state } = useSidebar();
 	const collapsed = state !== "expanded";
 	const initial = (user.name || user.email).slice(0, 1).toUpperCase();
@@ -83,7 +85,7 @@ export function NavUser({ user, onSignOut }: NavUserProps): React.JSX.Element {
 									className="justify-between"
 								>
 									{theme.label}
-									{resolvedTheme === theme.value ? (
+									{currentTheme === theme.value ? (
 										<CheckIcon size={16} className="text-kumo-brand" />
 									) : null}
 								</DropdownMenu.Item>
@@ -103,7 +105,7 @@ export function NavUser({ user, onSignOut }: NavUserProps): React.JSX.Element {
 
 /** Theme menu for the expanded footer (collapsed, the actions live in `NavUser`). */
 export function SidebarThemeMenu(): React.JSX.Element {
-	const { resolvedTheme, setTheme } = useTheme();
+	const { theme: currentTheme, resolvedTheme, setTheme } = useTheme();
 
 	return (
 		<DropdownMenu>
@@ -131,7 +133,7 @@ export function SidebarThemeMenu(): React.JSX.Element {
 							className="justify-between"
 						>
 							{theme.label}
-							{resolvedTheme === theme.value ? (
+							{currentTheme === theme.value ? (
 								<CheckIcon size={16} className="text-kumo-brand" />
 							) : null}
 						</DropdownMenu.Item>
