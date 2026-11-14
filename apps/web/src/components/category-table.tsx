@@ -135,6 +135,7 @@ export function CategoryTable({
 					<Table.Header>
 						<Table.Row>
 							<Table.Head>Category</Table.Head>
+							<Table.Head className="w-40">Label</Table.Head>
 							<Table.Head className="w-32">Status</Table.Head>
 							<Table.Head className="w-16 text-right">Actions</Table.Head>
 						</Table.Row>

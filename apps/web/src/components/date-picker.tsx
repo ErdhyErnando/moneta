@@ -160,7 +160,7 @@ export function DateField({
 					value={text}
 					onChange={handleTextChange}
 					onBlur={handleBlur}
-					className={cn("flex-1", hasError && "ring-kumo-danger")}
+					className={cn("min-w-0 flex-1", hasError && "ring-kumo-danger")}
 					aria-invalid={hasError}
 				/>
 				<PickerPopover

@@ -59,6 +59,8 @@
 	--color-kumo-brand: var(--brand);
 	--color-kumo-brand-hover: var(--brand-hover);
 	--text-color-kumo-brand: var(--brand-strong);
+	/* kumo's link token defaults to blue (links, DatePicker "today") */
+	--text-color-kumo-link: var(--brand-strong);
 	--color-kumo-focus: var(--brand);
 }
 
@@ -67,6 +69,8 @@
 	--color-kumo-brand: var(--brand);
 	--color-kumo-brand-hover: var(--brand-hover);
 	--text-color-kumo-brand: var(--brand-strong);
+	/* kumo's link token defaults to blue (links, DatePicker "today") */
+	--text-color-kumo-link: var(--brand-strong);
 	--color-kumo-focus: var(--brand);
 }
 
