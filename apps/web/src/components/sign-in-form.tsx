@@ -1,6 +1,8 @@
-import { Button } from "@cloudflare/kumo";
+import { Banner, Button } from "@cloudflare/kumo";
+import { WarningCircleIcon } from "@phosphor-icons/react";
 import { useForm } from "@tanstack/react-form";
 import { useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 import z from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { authClient } from "@/lib/auth-client";
@@ -11,12 +13,11 @@ export default function SignInForm({
 	onSwitchToSignUp,
 }: {
 	onSwitchToSignUp: () => void;
-}) {
-	const navigate = useNavigate({
-		from: "/",
-	});
+}): React.JSX.Element {
+	const navigate = useNavigate({ from: "/" });
 	const { isPending } = authClient.useSession();
 	const { toast } = useToast();
+	const [formError, setFormError] = useState<string | null>(null);
 
 	const form = useForm({
 		defaultValues: {
@@ -24,6 +25,7 @@ export default function SignInForm({
 			password: "",
 		},
 		onSubmit: async ({ value }) => {
+			setFormError(null);
 			await authClient.signIn.email(
 				{
 					email: value.email,
@@ -37,11 +39,9 @@ export default function SignInForm({
 						toast({ title: "Sign in successful" });
 					},
 					onError: (error) => {
-						toast({
-							title: "Error",
-							description: error.error.message || error.error.statusText,
-							variant: "destructive",
-						});
+						// Auth failures belong next to the form (§7.8): a toast
+						// disappears and leaves the user staring at filled-in fields.
+						setFormError(error.error.message || error.error.statusText);
 					},
 				},
 			);
@@ -61,11 +61,22 @@ export default function SignInForm({
 	return (
 		<div className="space-y-6">
 			<div className="space-y-2">
-				<h1 className="font-bold text-2xl tracking-tight">Welcome back</h1>
-				<p className="text-muted-foreground text-sm">
-					Sign in to your Moneta account
+				<h1 className="font-semibold text-2xl text-kumo-strong tracking-tight">
+					Welcome back
+				</h1>
+				<p className="text-kumo-subtle text-sm">
+					Sign in to your Moneta account.
 				</p>
 			</div>
+
+			{formError ? (
+				<Banner
+					variant="error"
+					icon={<WarningCircleIcon size={16} />}
+					title="Could not sign you in"
+					description={formError}
+				/>
+			) : null}
 
 			<form
 				onSubmit={(e) => {
@@ -75,31 +86,27 @@ export default function SignInForm({
 				}}
 				className="space-y-4"
 			>
-				<div>
-					<form.Field name="email">
-						{(field) => (
-							<AuthField
-								field={field}
-								label="Email"
-								type="email"
-								autoComplete="email"
-							/>
-						)}
-					</form.Field>
-				</div>
+				<form.Field name="email">
+					{(field) => (
+						<AuthField
+							field={field}
+							label="Email"
+							type="email"
+							autoComplete="email"
+						/>
+					)}
+				</form.Field>
 
-				<div>
-					<form.Field name="password">
-						{(field) => (
-							<AuthField
-								field={field}
-								label="Password"
-								type="password"
-								autoComplete="current-password"
-							/>
-						)}
-					</form.Field>
-				</div>
+				<form.Field name="password">
+					{(field) => (
+						<AuthField
+							field={field}
+							label="Password"
+							type="password"
+							autoComplete="current-password"
+						/>
+					)}
+				</form.Field>
 
 				<form.Subscribe>
 					{(state) => (
@@ -108,21 +115,24 @@ export default function SignInForm({
 							variant="primary"
 							size="lg"
 							className="w-full"
-							disabled={!state.canSubmit || state.isSubmitting}
+							disabled={!state.canSubmit}
+							loading={state.isSubmitting}
 						>
-							{state.isSubmitting ? "Submitting..." : "Sign In"}
+							Sign in
 						</Button>
 					)}
 				</form.Subscribe>
 			</form>
 
-			<div className="text-center">
+			<div className="flex flex-wrap items-center justify-center gap-1">
+				<span className="text-kumo-subtle text-sm">Need an account?</span>
 				<Button
 					variant="ghost"
+					size="sm"
 					onClick={onSwitchToSignUp}
-					className="text-brand-strong"
+					className="text-kumo-brand"
 				>
-					Need an account? Sign up
+					Sign up
 				</Button>
 			</div>
 		</div>

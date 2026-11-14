@@ -1,88 +1,43 @@
 import { Button } from "@cloudflare/kumo";
-import { DropdownMenu } from "@cloudflare/kumo/components/dropdown";
+import { Sidebar, useSidebar } from "@cloudflare/kumo/components/sidebar";
 import {
 	ArrowsLeftRightIcon,
 	GearSixIcon,
-	MoonIcon,
 	QuestionIcon,
 	SignOutIcon,
 	SquaresFourIcon,
 	StackIcon,
-	SunIcon,
 	TrendDownIcon,
 	TrendUpIcon,
 	WalletIcon,
 } from "@phosphor-icons/react";
-import { useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import type * as React from "react";
-import { NavMain } from "@/components/nav-main";
+import { type NavItem, NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
-import { NavUser } from "@/components/nav-user";
-import { useTheme } from "@/components/theme-provider";
-import {
-	Sidebar,
-	SidebarContent,
-	SidebarFooter,
-	SidebarHeader,
-	SidebarMenu,
-	SidebarMenuButton,
-	SidebarMenuItem,
-	SidebarSeparator,
-} from "@/components/ui/sidebar";
+import { NavUser, SidebarThemeMenu } from "@/components/nav-user";
 import { authClient } from "@/lib/auth-client";
+import { cn } from "@/lib/utils";
 
-const navMainItems = [
-	{
-		title: "Dashboard",
-		url: "/",
-		icon: SquaresFourIcon,
-	},
-	{
-		title: "Income",
-		url: "/income",
-		icon: TrendUpIcon,
-	},
-	{
-		title: "Expense",
-		url: "/expense",
-		icon: TrendDownIcon,
-	},
-	{
-		title: "Mutations",
-		url: "/mutations",
-		icon: ArrowsLeftRightIcon,
-	},
-	{
-		title: "Assets",
-		url: "/assets",
-		icon: StackIcon,
-	},
-	{
-		title: "Starting Balance",
-		url: "/starting-balance",
-		icon: WalletIcon,
-	},
+const navMainItems: NavItem[] = [
+	{ title: "Dashboard", url: "/", icon: SquaresFourIcon },
+	{ title: "Income", url: "/income", icon: TrendUpIcon },
+	{ title: "Expense", url: "/expense", icon: TrendDownIcon },
+	{ title: "Mutations", url: "/mutations", icon: ArrowsLeftRightIcon },
+	{ title: "Assets", url: "/assets", icon: StackIcon },
+	{ title: "Starting Balance", url: "/starting-balance", icon: WalletIcon },
 ];
 
-const navSecondaryItems = [
-	{
-		title: "Settings",
-		url: "/settings",
-		icon: GearSixIcon,
-	},
-	{
-		title: "Help",
-		url: "#",
-		icon: QuestionIcon,
-	},
+const navSecondaryItems: NavItem[] = [
+	{ title: "Settings", url: "/settings", icon: GearSixIcon },
+	{ title: "Help", url: "#", icon: QuestionIcon },
 ];
 
-export function AppSidebar({
-	...props
-}: React.ComponentProps<typeof Sidebar>): React.JSX.Element {
+export function AppSidebar(): React.JSX.Element {
 	const navigate = useNavigate();
-	const { resolvedTheme, setTheme } = useTheme();
+	const { state } = useSidebar();
 	const { data: session } = authClient.useSession();
+	const collapsed = state !== "expanded";
 
 	const handleSignOut = () => {
 		authClient.signOut({
@@ -100,73 +55,60 @@ export function AppSidebar({
 				email: session.user.email,
 				avatar: (session.user as { image?: string | null }).image || "",
 			}
-		: {
-				name: "Guest",
-				email: "guest@example.com",
-				avatar: "",
-			};
+		: { name: "Guest", email: "guest@example.com", avatar: "" };
 
 	return (
-		<Sidebar collapsible="offcanvas" {...props}>
-			<SidebarHeader>
-				<SidebarMenu>
-					<SidebarMenuItem>
-						<SidebarMenuButton
-							asChild
-							className="data-[slot=sidebar-menu-button]:p-1.5!"
-						>
-							<a href="/">
-								<img src="/logo.png" alt="Logo" className="size-7 rounded-md" />
-								<h3 className="font-semibold text-base">Moneta</h3>
-							</a>
-						</SidebarMenuButton>
-					</SidebarMenuItem>
-				</SidebarMenu>
-			</SidebarHeader>
-			<SidebarContent>
-				<NavMain items={navMainItems} />
-				<NavSecondary items={navSecondaryItems} className="mt-auto" />
-			</SidebarContent>
-			<SidebarFooter>
-				<SidebarSeparator />
-				<div className="flex items-center justify-between gap-2 px-2 py-2">
-					<DropdownMenu>
-						<DropdownMenu.Trigger>
-							<Button
-								variant="secondary"
-								shape="square"
-								aria-label="Toggle theme"
-								icon={
-									resolvedTheme === "dark" ? (
-										<MoonIcon size={16} />
-									) : (
-										<SunIcon size={16} />
-									)
-								}
-							/>
-						</DropdownMenu.Trigger>
-						<DropdownMenu.Content align="end">
-							<DropdownMenu.Item onClick={() => setTheme("light")}>
-								Light
-							</DropdownMenu.Item>
-							<DropdownMenu.Item onClick={() => setTheme("dark")}>
-								Dark
-							</DropdownMenu.Item>
-							<DropdownMenu.Item onClick={() => setTheme("system")}>
-								System
-							</DropdownMenu.Item>
-						</DropdownMenu.Content>
-					</DropdownMenu>
-					<Button
-						variant="secondary"
-						shape="square"
-						aria-label="Sign out"
-						onClick={handleSignOut}
-						icon={<SignOutIcon size={16} />}
+		<Sidebar>
+			<Sidebar.Header
+				className={cn(
+					"transition-[padding]",
+					collapsed && "justify-center px-0",
+				)}
+			>
+				<Link
+					to="/"
+					className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden rounded-lg p-1"
+					aria-label="Moneta — go to dashboard"
+				>
+					<img
+						src="/logo.png"
+						alt=""
+						className="size-7 shrink-0 rounded-md"
+						width={28}
+						height={28}
 					/>
+					<span className="truncate font-semibold text-base text-kumo-strong">
+						Moneta
+					</span>
+				</Link>
+				<Sidebar.Trigger aria-label="Toggle sidebar" />
+			</Sidebar.Header>
+
+			<Sidebar.Content>
+				<div className="flex flex-col gap-2">
+					<NavMain items={navMainItems} />
+					<NavSecondary items={navSecondaryItems} />
 				</div>
-				<NavUser user={user} />
-			</SidebarFooter>
+			</Sidebar.Content>
+
+			<Sidebar.Footer className={cn(collapsed && "justify-center px-0")}>
+				<div className={collapsed ? "shrink-0" : "min-w-0 flex-1"}>
+					<NavUser user={user} onSignOut={handleSignOut} />
+				</div>
+				{collapsed ? null : (
+					<div className="flex shrink-0 items-center gap-1">
+						<SidebarThemeMenu />
+						<Button
+							variant="ghost"
+							size="sm"
+							shape="square"
+							aria-label="Sign out"
+							onClick={handleSignOut}
+							icon={<SignOutIcon size={16} />}
+						/>
+					</div>
+				)}
+			</Sidebar.Footer>
 		</Sidebar>
 	);
 }

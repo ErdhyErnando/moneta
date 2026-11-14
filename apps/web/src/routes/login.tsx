@@ -31,36 +31,55 @@ const valueProps = [
 	},
 ];
 
-function BrandPanel() {
+function BrandMark(): React.JSX.Element {
 	return (
-		<div className="relative hidden flex-col justify-between overflow-hidden bg-kumo-recessed p-10 lg:flex">
-			{/* kumo-inspired warm accents */}
-			<div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-brand/10 via-transparent to-transparent" />
-			<div className="-top-24 -right-24 pointer-events-none absolute size-96 rounded-full bg-brand/10 blur-3xl" />
-			<div className="-bottom-32 -left-24 pointer-events-none absolute size-96 rounded-full bg-brand/5 blur-3xl" />
+		<div className="flex items-center gap-2">
+			<img
+				src="/logo.png"
+				alt=""
+				className="size-8 shrink-0 rounded-md"
+				width={32}
+				height={32}
+			/>
+			<span className="font-semibold text-kumo-strong text-lg tracking-tight">
+				Moneta
+			</span>
+		</div>
+	);
+}
 
-			<div className="relative flex items-center gap-2">
-				<img src="/logo.png" alt="Moneta logo" className="size-8 rounded-md" />
-				<h2 className="font-bold text-xl tracking-tight">Moneta</h2>
+/**
+ * Brand half of the split layout (`lg` and up). The old version painted two
+ * blurred `bg-brand/10` circles over a gradient; the tint now comes from the
+ * `--brand-subtle` token on the value-prop tiles instead, so there is no
+ * opacity here that does not trace back to a decision (§2.1).
+ */
+function BrandPanel(): React.JSX.Element {
+	return (
+		<div className="relative hidden flex-col justify-between overflow-hidden border-kumo-hairline border-r bg-kumo-recessed p-10 lg:flex">
+			<div>
+				<BrandMark />
 			</div>
 
-			<div className="relative max-w-md">
-				<p className="font-semibold text-brand-strong text-xs uppercase tracking-widest">
+			<div className="relative max-w-md space-y-4">
+				<p className="font-medium text-kumo-brand text-xs uppercase tracking-widest">
 					Personal finance, simply put
 				</p>
-				<h1 className="mt-4 font-bold text-4xl leading-tight tracking-tight">
+				<h2 className="font-semibold text-3xl text-kumo-strong leading-tight tracking-tight">
 					Understand your money with calm, clear numbers.
-				</h1>
-				<ul className="mt-10 space-y-6">
+				</h2>
+				<ul className="space-y-4 pt-4">
 					{valueProps.map(({ icon: Icon, title, description }) => (
-						<li key={title} className="flex gap-4">
-							<div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand-strong">
+						<li key={title} className="flex gap-3">
+							<span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-brand-subtle text-kumo-brand">
 								<Icon size={20} aria-hidden="true" />
-							</div>
-							<div>
-								<p className="font-semibold">{title}</p>
-								<p className="mt-0.5 text-kumo-subtle text-sm">{description}</p>
-							</div>
+							</span>
+							<span className="space-y-0.5">
+								<span className="block font-medium text-base">{title}</span>
+								<span className="block text-kumo-subtle text-sm">
+									{description}
+								</span>
+							</span>
 						</li>
 					))}
 				</ul>
@@ -73,22 +92,19 @@ function BrandPanel() {
 	);
 }
 
-function RouteComponent() {
+function RouteComponent(): React.JSX.Element {
 	const [showSignIn, setShowSignIn] = useState(true);
 
 	return (
-		<div className="grid min-h-svh lg:grid-cols-2">
+		<div className="grid min-h-svh grid-cols-1 bg-kumo-base lg:grid-cols-2">
 			<BrandPanel />
-			<div className="flex flex-col gap-6 p-6 md:p-10">
-				<div className="flex items-center justify-center gap-2 lg:hidden">
-					<img
-						src="/logo.png"
-						alt="Moneta logo"
-						className="size-8 rounded-md"
-					/>
-					<h2 className="font-bold text-xl tracking-tight">Moneta</h2>
+
+			<div className="flex flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:justify-center lg:px-10">
+				<div className="lg:hidden">
+					<BrandMark />
 				</div>
-				<div className="flex flex-1 items-center justify-center py-8">
+
+				<div className="flex flex-1 items-center justify-center py-4 lg:flex-none lg:py-0">
 					<div className="w-full max-w-sm">
 						{showSignIn ? (
 							<SignInForm onSwitchToSignUp={() => setShowSignIn(false)} />
