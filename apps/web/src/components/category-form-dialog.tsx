@@ -1,4 +1,5 @@
 import { Button, Input } from "@cloudflare/kumo";
+import { CategoryBadge } from "@/components/category-badge";
 import {
 	type Category,
 	DEFAULT_CATEGORY_COLOR,
@@ -28,51 +29,55 @@ export function CategoryFormDialog({
 	onColorChange,
 	submitting,
 	onSubmit,
-}: CategoryFormDialogProps) {
+}: CategoryFormDialogProps): React.JSX.Element {
 	return (
 		<ResponsiveDialog
 			open={open}
 			onOpenChange={onOpenChange}
-			title={editingCategory ? "Edit Category" : "Add Category"}
+			title={editingCategory ? "Edit category" : "Add category"}
 		>
 			<form onSubmit={onSubmit} className="space-y-4">
 				<Input
-					label="Category Name"
+					label="Category name"
 					id="name"
 					placeholder="e.g. Salary, Groceries, Rent"
 					value={name}
 					onChange={(e) => onNameChange(e.target.value)}
 					required
 				/>
-				<div className="space-y-2">
-					<span className="font-medium text-sm">Color</span>
+
+				<div className="space-y-1.5">
+					<span className="font-medium text-sm">Colour</span>
 					<div className="flex items-center gap-2">
 						<Input
 							id="color"
 							type="color"
 							value={color}
 							onChange={(e) => onColorChange(e.target.value)}
-							className="h-9 w-14 p-1"
+							aria-label="Pick a colour"
+							className="h-9 w-14 shrink-0 p-1 max-md:h-11"
 						/>
 						<Input
 							type="text"
 							value={color}
 							onChange={(e) => onColorChange(e.target.value)}
+							aria-label="Colour hex value"
 							placeholder={DEFAULT_CATEGORY_COLOR}
-							className="flex-1"
+							className="flex-1 tabular-nums"
 							pattern="^#[0-9a-fA-F]{6}$"
-						/>
-						<span
-							className="inline-flex h-6 w-6 rounded-full border"
-							style={{ backgroundColor: color }}
-							aria-hidden
 						/>
 					</div>
 					<p className="text-kumo-subtle text-xs">
-						Hex color used for pie + pill (solid badge, white text) — same for
-						dashboard and income/expense tables
+						Stored once and derived per theme, so the chip stays legible on both
+						light and dark surfaces — this is the label your records will show.
 					</p>
 				</div>
+
+				<div className="flex items-center gap-3 rounded-lg bg-kumo-recessed p-4">
+					<span className="text-kumo-subtle text-sm">Preview</span>
+					<CategoryBadge name={name.trim() || "Category"} color={color} />
+				</div>
+
 				<div className="flex justify-end gap-2 pt-2">
 					<Button
 						type="button"
@@ -81,7 +86,7 @@ export function CategoryFormDialog({
 					>
 						Cancel
 					</Button>
-					<Button type="submit" variant="primary" disabled={submitting}>
+					<Button type="submit" variant="primary" loading={submitting}>
 						{editingCategory ? "Update" : "Add"}
 					</Button>
 				</div>

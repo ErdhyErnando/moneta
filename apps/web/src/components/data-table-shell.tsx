@@ -9,14 +9,26 @@ import {
 	ColumnsIcon,
 	ReceiptIcon,
 } from "@phosphor-icons/react";
-import { flexRender, type Table as TanStackTable } from "@tanstack/react-table";
+import {
+	flexRender,
+	type Row,
+	type Table as TanStackTable,
+} from "@tanstack/react-table";
 import type { ReactNode } from "react";
 import { EmptyState } from "@/components/layout";
+import { cn } from "@/lib/utils";
 
 type DataTableShellProps<TData> = {
 	table: TanStackTable<TData>;
 	colCount: number;
-	addControl: ReactNode;
+	/** Sits at the right of the toolbar (a page-level CTA usually lives in the header). */
+	addControl?: ReactNode;
+	/**
+	 * `<md` row renderer (docs/design.md §7.5). When provided, the table is
+	 * hidden below `md` and this list takes its place, so no column is clipped
+	 * and row actions stay reachable on a phone.
+	 */
+	renderStackedRow?: (row: Row<TData>) => ReactNode;
 };
 
 const TABLE_CLASSES =
@@ -33,6 +45,7 @@ export function DataTableShell<TData>({
 	table,
 	colCount,
 	addControl,
+	renderStackedRow,
 }: DataTableShellProps<TData>): React.JSX.Element {
 	const rows = table.getRowModel().rows;
 
@@ -88,7 +101,24 @@ export function DataTableShell<TData>({
 			</div>
 
 			<div className="overflow-hidden rounded-xl border border-kumo-hairline bg-kumo-base">
-				<Table className={TABLE_CLASSES}>
+				{renderStackedRow ? (
+					<ul className="divide-y divide-kumo-hairline md:hidden">
+						{rows.length === 0 ? (
+							<li>
+								<EmptyState
+									icon={<ReceiptIcon size={20} />}
+									title="No rows"
+									description="Nothing matches this filter."
+								/>
+							</li>
+						) : (
+							rows.map((row) => renderStackedRow(row))
+						)}
+					</ul>
+				) : null}
+				<Table
+					className={cn(TABLE_CLASSES, renderStackedRow && "hidden md:table")}
+				>
 					<Table.Header>
 						{table.getHeaderGroups().map((headerGroup) => (
 							<Table.Row key={headerGroup.id}>
@@ -144,7 +174,9 @@ export function DataTableShell<TData>({
 				</p>
 				<div className="flex flex-wrap items-center gap-2">
 					<div className="flex items-center gap-2">
-						<span className="text-kumo-subtle text-sm">Rows per page</span>
+						<span className="hidden text-kumo-subtle text-sm sm:inline">
+							Rows per page
+						</span>
 						<Select
 							size="sm"
 							className="w-20 max-md:h-11"

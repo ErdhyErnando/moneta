@@ -1,11 +1,9 @@
-import { Button, Select } from "@cloudflare/kumo";
-import { Popover } from "@cloudflare/kumo/components/popover";
-import { CalendarBlankIcon } from "@phosphor-icons/react";
+import { Select } from "@cloudflare/kumo";
 import { format } from "date-fns";
 import { CurrencySelector } from "@/components/currency-selector";
 import { AddTransactionDialog } from "@/components/dashboard/add-transaction-dialog";
+import { DateFilterField } from "@/components/date-picker";
 import { PageHeader } from "@/components/layout";
-import { Calendar } from "@/components/ui/calendar";
 
 export type TimeRange = "7d" | "30d" | "90d" | "custom";
 
@@ -77,61 +75,20 @@ export function DashboardHeader({
 
 					{timeRange === "custom" && (
 						<>
-							<Popover.Root>
-								<Popover.Trigger
-									render={
-										<Button
-											variant="secondary"
-											className="w-40 justify-start max-md:h-11"
-											icon={<CalendarBlankIcon size={16} />}
-										/>
-									}
-								>
-									{customStartDate
-										? format(customStartDate, "MMM dd, yyyy")
-										: "Start date"}
-								</Popover.Trigger>
-								<Popover.Portal>
-									<Popover.Positioner align="start">
-										<Popover.Popup className="w-auto p-0">
-											<Calendar
-												mode="single"
-												selected={customStartDate}
-												onSelect={onCustomStartChange}
-												initialFocus
-											/>
-										</Popover.Popup>
-									</Popover.Positioner>
-								</Popover.Portal>
-							</Popover.Root>
-
-							<Popover.Root>
-								<Popover.Trigger
-									render={
-										<Button
-											variant="secondary"
-											className="w-40 justify-start max-md:h-11"
-											icon={<CalendarBlankIcon size={16} />}
-										/>
-									}
-								>
-									{customEndDate
-										? format(customEndDate, "MMM dd, yyyy")
-										: "End date"}
-								</Popover.Trigger>
-								<Popover.Portal>
-									<Popover.Positioner align="start">
-										<Popover.Popup className="w-auto p-0">
-											<Calendar
-												mode="single"
-												selected={customEndDate}
-												onSelect={onCustomEndChange}
-												initialFocus
-											/>
-										</Popover.Popup>
-									</Popover.Positioner>
-								</Popover.Portal>
-							</Popover.Root>
+							<DateFilterField
+								label="From"
+								value={customStartDate}
+								onSelect={onCustomStartChange}
+								placeholder="Start date"
+								className="w-40"
+							/>
+							<DateFilterField
+								label="To"
+								value={customEndDate}
+								onSelect={onCustomEndChange}
+								placeholder="End date"
+								className="w-40"
+							/>
 						</>
 					)}
 
