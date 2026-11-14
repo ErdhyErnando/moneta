@@ -1,7 +1,7 @@
 import { Button, Input, Select } from "@cloudflare/kumo";
 import { useForm } from "@tanstack/react-form";
 import { z } from "zod";
-import { DateInput } from "@/components/ui/date-input";
+import { DateField } from "@/components/date-picker";
 import { ASSET_TYPE_LABELS, ASSET_TYPES, type AssetType } from "@/lib/assets";
 
 const assetFormSchema = z.object({
@@ -153,7 +153,7 @@ export function AssetForm({
 				</form.Field>
 				<form.Field name="date">
 					{(field) => (
-						<DateInput
+						<DateField
 							id={field.name}
 							label="Date"
 							value={field.state.value}

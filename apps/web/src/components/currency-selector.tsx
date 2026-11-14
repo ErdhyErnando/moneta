@@ -1,12 +1,19 @@
 import { Button } from "@cloudflare/kumo";
 import { DropdownMenu } from "@cloudflare/kumo/components/dropdown";
-import { CurrencyDollarIcon } from "@phosphor-icons/react";
+import { CheckIcon, CoinsIcon } from "@phosphor-icons/react";
 import {
 	CURRENCIES,
 	type CurrencyCode,
 	useCurrency,
 } from "@/contexts/currency-context";
 
+/**
+ * Currency switcher (secondary control, §7.3).
+ *
+ * The trigger shows the ISO code at every width. It used to swap to the bare
+ * symbol below `sm` next to a dollar-sign icon, so USD rendered as "$ $" and
+ * two different currencies could look identical; the code is unique.
+ */
 export function CurrencySelector(): React.JSX.Element {
 	const { currency, setCurrency } = useCurrency();
 
@@ -16,29 +23,32 @@ export function CurrencySelector(): React.JSX.Element {
 				<Button
 					variant="secondary"
 					size="sm"
-					icon={<CurrencyDollarIcon size={16} />}
+					className="max-md:h-11"
+					icon={<CoinsIcon size={16} className="max-sm:hidden" />}
+					aria-label={`Currency, currently ${currency.code}`}
 				>
-					<span className="hidden sm:inline">{currency.code}</span>
-					<span className="sm:hidden">{currency.symbol}</span>
+					{currency.code}
 				</Button>
 			</DropdownMenu.Trigger>
 			<DropdownMenu.Content align="end" className="w-56">
-				<DropdownMenu.Label>Select Currency</DropdownMenu.Label>
-				<DropdownMenu.Separator />
-				{Object.values(CURRENCIES).map((curr) => (
-					<DropdownMenu.Item
-						key={curr.code}
-						onClick={() => setCurrency(curr.code as CurrencyCode)}
-						className="justify-between"
-					>
-						<span>
-							{curr.symbol} {curr.name}
-						</span>
-						{currency.code === curr.code && (
-							<span className="text-brand-strong">✓</span>
-						)}
-					</DropdownMenu.Item>
-				))}
+				<DropdownMenu.Group>
+					<DropdownMenu.Label>Select currency</DropdownMenu.Label>
+					{Object.values(CURRENCIES).map((curr) => (
+						<DropdownMenu.Item
+							key={curr.code}
+							onClick={() => setCurrency(curr.code as CurrencyCode)}
+							className="justify-between gap-2"
+						>
+							<span className="truncate">
+								<span className="text-kumo-subtle">{curr.code}</span>{" "}
+								{curr.name}
+							</span>
+							{currency.code === curr.code ? (
+								<CheckIcon size={16} className="text-kumo-brand" />
+							) : null}
+						</DropdownMenu.Item>
+					))}
+				</DropdownMenu.Group>
 			</DropdownMenu.Content>
 		</DropdownMenu>
 	);

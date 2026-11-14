@@ -1,5 +1,10 @@
-import { Button, LayerCard } from "@cloudflare/kumo";
-import { PlusIcon } from "@phosphor-icons/react";
+import { Banner, Button, LayerCard } from "@cloudflare/kumo";
+import {
+	ArrowClockwiseIcon,
+	PackageIcon,
+	PlusIcon,
+	WarningCircleIcon,
+} from "@phosphor-icons/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { lazy, Suspense, useMemo, useRef, useState } from "react";
@@ -10,7 +15,12 @@ import {
 import { AssetsGroup } from "@/components/assets/assets-group";
 import { CurrencySelector } from "@/components/currency-selector";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
-import { EmptyState } from "@/components/layout";
+import {
+	EmptyState,
+	PageContainer,
+	PageHeader,
+	Section,
+} from "@/components/layout";
 import { ResponsiveDialog } from "@/components/responsive-dialog";
 import { useCurrency } from "@/contexts/currency-context";
 import { useToast } from "@/hooks/use-toast";
@@ -39,7 +49,26 @@ type AssetGroup = {
 	total: number;
 };
 
-function AssetsPage() {
+const SKELETON_CARDS = [0, 1, 2, 3];
+
+function AssetsSkeleton(): React.JSX.Element {
+	return (
+		<div className="space-y-6">
+			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+				{SKELETON_CARDS.map((card) => (
+					<div
+						key={card}
+						className="h-26 animate-pulse rounded-xl bg-kumo-fill"
+					/>
+				))}
+			</div>
+			<div className="h-85 animate-pulse rounded-xl bg-kumo-fill" />
+			<div className="h-45 animate-pulse rounded-xl bg-kumo-fill" />
+		</div>
+	);
+}
+
+function AssetsPage(): React.JSX.Element {
 	const { toast } = useToast();
 	const { formatCurrency } = useCurrency();
 	const [isOpen, setIsOpen] = useState(false);
@@ -48,7 +77,12 @@ function AssetsPage() {
 	const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 	const queryClient = useQueryClient();
 
-	const { data: assets = [], isLoading } = useQuery({
+	const {
+		data: assets = [],
+		isLoading,
+		isError,
+		refetch,
+	} = useQuery({
 		queryKey: ["assets"],
 		queryFn: async () => {
 			const res = await api.get<{ assets: Asset[] }>("/api/assets");
@@ -149,6 +183,11 @@ function AssetsPage() {
 		}
 	};
 
+	const openCreate = () => {
+		setEditingId(null);
+		setIsOpen(true);
+	};
+
 	const groups = useMemo<AssetGroup[]>(() => {
 		const byType = new Map<AssetType, Asset[]>();
 		for (const asset of assets) {
@@ -180,124 +219,181 @@ function AssetsPage() {
 		? assets.find((a) => a.id === editingId)
 		: undefined;
 
-	return (
-		<div className="container mx-auto px-4 py-6 sm:px-6 sm:py-10">
-			<div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-				<div>
-					<h1 className="font-bold text-2xl sm:text-3xl">Assets</h1>
-					<p className="text-muted-foreground text-sm">
-						Holdings ledger — stocks, bonds, cash, crypto and more
-					</p>
-				</div>
-				<div className="flex items-center gap-2">
-					<CurrencySelector />
-					<Button
-						variant="primary"
-						icon={<PlusIcon size={16} />}
-						onClick={() => setIsOpen(true)}
-					>
-						Add Asset
-					</Button>
-					<ResponsiveDialog
-						open={isOpen}
-						onOpenChange={(open) => {
-							setIsOpen(open);
-							if (!open) setEditingId(null);
-						}}
-						title={editingId ? "Edit Asset" : "Add Asset"}
-					>
-						<AssetForm
-							onSubmit={handleSubmit}
-							defaultValues={
-								editingAsset
-									? {
-											type: editingAsset.type,
-											name: editingAsset.name,
-											symbol: editingAsset.symbol ?? "",
-											quantity: editingAsset.quantity ?? "",
-											amount: editingAsset.amount,
-											date: asUtcDay(editingAsset.date),
-											notes: editingAsset.notes ?? "",
-										}
-									: undefined
-							}
-						/>
-					</ResponsiveDialog>
-				</div>
-			</div>
+	const showEmpty = !isLoading && !isError && assets.length === 0;
 
-			{isLoading ? (
-				<div className="h-[300px] animate-pulse rounded-xl bg-kumo-fill" />
+	const dialog = (
+		<ResponsiveDialog
+			open={isOpen}
+			onOpenChange={(open) => {
+				setIsOpen(open);
+				if (!open) setEditingId(null);
+			}}
+			title={editingId ? "Edit asset" : "Add asset"}
+		>
+			<AssetForm
+				onSubmit={handleSubmit}
+				defaultValues={
+					editingAsset
+						? {
+								type: editingAsset.type,
+								name: editingAsset.name,
+								symbol: editingAsset.symbol ?? "",
+								quantity: editingAsset.quantity ?? "",
+								amount: editingAsset.amount,
+								date: asUtcDay(editingAsset.date),
+								notes: editingAsset.notes ?? "",
+							}
+						: undefined
+				}
+			/>
+		</ResponsiveDialog>
+	);
+
+	return (
+		<PageContainer>
+			<PageHeader
+				title="Assets"
+				description="Holdings ledger — stocks, bonds, cash, crypto and more."
+				className="max-md:mb-4"
+				actions={
+					<>
+						<CurrencySelector />
+						<Button
+							variant="primary"
+							icon={<PlusIcon size={16} />}
+							onClick={openCreate}
+							className="max-md:hidden"
+						>
+							Add asset
+						</Button>
+					</>
+				}
+			/>
+
+			{/* Below md the bottom-nav "+" is the add-transaction flow, so these
+			    pages keep their own CTA — full width at the top of the content.
+			    Skipped when the empty state is on screen, since that carries the
+			    same action. */}
+			{showEmpty ? null : (
+				<Button
+					variant="primary"
+					icon={<PlusIcon size={16} />}
+					onClick={openCreate}
+					className="mb-6 w-full md:hidden"
+				>
+					Add asset
+				</Button>
+			)}
+
+			{isError ? (
+				<Banner
+					variant="error"
+					icon={<WarningCircleIcon size={16} />}
+					title="Could not load your assets"
+					description="The holdings ledger did not load."
+					action={
+						<Banner.Action
+							variant="secondary"
+							icon={<ArrowClockwiseIcon size={16} />}
+							onClick={() => refetch()}
+						>
+							Retry
+						</Banner.Action>
+					}
+				/>
+			) : isLoading ? (
+				<AssetsSkeleton />
+			) : showEmpty ? (
+				<LayerCard className="rounded-xl p-6 shadow-none">
+					<EmptyState
+						icon={<PackageIcon size={20} />}
+						size="base"
+						title="No assets yet"
+						description="Add your first holding and its value will be tracked here."
+						action={
+							<Button
+								variant="secondary"
+								icon={<PlusIcon size={16} />}
+								onClick={openCreate}
+							>
+								Add asset
+							</Button>
+						}
+					/>
+				</LayerCard>
 			) : (
 				<div className="space-y-6">
-					<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-						<LayerCard className="gap-1 rounded-xl p-6 shadow-none">
-							<div className="text-kumo-subtle text-sm">Total Assets</div>
-							<div className="font-semibold text-2xl tabular-nums">
-								{formatCurrency(totalValue)}
-							</div>
-							<p className="text-kumo-subtle text-xs">
-								{assets.length} holding{assets.length === 1 ? "" : "s"}
-							</p>
-						</LayerCard>
-						{groups.map((group) => (
-							<LayerCard
-								key={group.type}
-								className="gap-1 rounded-xl p-6 shadow-none"
-							>
-								<div className="text-kumo-subtle text-sm">
-									{ASSET_TYPE_LABELS[group.type]}
-								</div>
+					<Section title="Overview">
+						<LayerCard className="gap-0 rounded-xl p-0 shadow-none">
+							<div className="space-y-1 px-6 py-5">
+								<div className="text-kumo-subtle text-sm">Total assets</div>
 								<div className="font-semibold text-2xl tabular-nums">
-									{formatCurrency(group.total)}
+									{formatCurrency(totalValue)}
 								</div>
 								<p className="text-kumo-subtle text-xs">
-									{group.assets.length} holding
-									{group.assets.length === 1 ? "" : "s"}
+									{assets.length} holding{assets.length === 1 ? "" : "s"} across{" "}
+									{groups.length} type{groups.length === 1 ? "" : "s"}
 								</p>
-							</LayerCard>
-						))}
-					</div>
-
-					<Suspense
-						fallback={
-							<div className="h-[200px] animate-pulse rounded-xl bg-kumo-fill" />
-						}
-					>
-						<AssetsChart />
-					</Suspense>
-
-					{groups.length === 0 ? (
-						<LayerCard className="rounded-xl p-6 shadow-none">
-							<EmptyState
-								size="base"
-								title="No assets yet"
-								description="Add your first holding to start tracking its value."
-							/>
+							</div>
+							<div className="grid gap-4 border-kumo-hairline border-t p-6 sm:grid-cols-2 lg:grid-cols-4">
+								{groups.map((group) => (
+									<div
+										key={group.type}
+										className="space-y-1 rounded-lg bg-kumo-recessed p-4"
+									>
+										<div className="text-kumo-subtle text-sm">
+											{ASSET_TYPE_LABELS[group.type]}
+										</div>
+										<div className="font-semibold text-lg tabular-nums">
+											{formatCurrency(group.total)}
+										</div>
+										<p className="text-kumo-subtle text-xs">
+											{group.assets.length} holding
+											{group.assets.length === 1 ? "" : "s"}
+										</p>
+									</div>
+								))}
+							</div>
 						</LayerCard>
-					) : (
-						groups.map((group) => (
-							<AssetsGroup
-								key={group.type}
-								type={group.type}
-								assets={group.assets}
-								total={group.total}
-								onEdit={handleEdit}
-								onDelete={handleDelete}
-							/>
-						))
-					)}
+					</Section>
+
+					<Section title="Value over time">
+						<Suspense
+							fallback={
+								<div className="h-85 animate-pulse rounded-xl bg-kumo-fill" />
+							}
+						>
+							<AssetsChart />
+						</Suspense>
+					</Section>
+
+					<Section title="Holdings">
+						<div className="space-y-6">
+							{groups.map((group) => (
+								<AssetsGroup
+									key={group.type}
+									type={group.type}
+									assets={group.assets}
+									total={group.total}
+									onEdit={handleEdit}
+									onDelete={handleDelete}
+								/>
+							))}
+						</div>
+					</Section>
 				</div>
 			)}
+
+			{dialog}
 
 			<DeleteConfirmDialog
 				open={isDeleteOpen}
 				onOpenChange={setIsDeleteOpen}
-				title="Delete Asset"
-				description="Are you sure you want to delete this asset? This action cannot be undone."
+				title="Delete this asset?"
+				description="It is removed from your holdings ledger and cannot be recovered."
 				onConfirm={confirmDelete}
 				pending={deleteMutation.isPending}
 			/>
-		</div>
+		</PageContainer>
 	);
 }

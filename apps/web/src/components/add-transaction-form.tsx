@@ -2,7 +2,7 @@ import { Button, Input, Select } from "@cloudflare/kumo";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { z } from "zod";
-import { DateInput } from "@/components/ui/date-input";
+import { DateField } from "@/components/date-picker";
 import { useToast } from "@/hooks/use-toast";
 import { type AxiosError, api } from "@/lib/api";
 import { toUtcDayIso } from "@/lib/date";
@@ -156,16 +156,13 @@ export function AddTransactionForm({
 				onValueChange={(value) => setCategoryId(Number(value) || 0)}
 				items={categories.map((c) => ({ label: c.name, value: c.id }))}
 			/>
-			<div className="space-y-1.5">
-				<span className="font-medium text-sm">Date</span>
-				<DateInput
-					id="date"
-					label=""
-					value={date}
-					onChange={setDate}
-					disabled={(d) => d > new Date() || d < new Date("1900-01-01")}
-				/>
-			</div>
+			<DateField
+				id="date"
+				label="Date"
+				value={date}
+				onChange={setDate}
+				disabled={(d) => d > new Date() || d < new Date("1900-01-01")}
+			/>
 			<Input
 				label="Description"
 				id="description"

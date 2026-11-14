@@ -2,7 +2,7 @@ import { Button, Input, Select } from "@cloudflare/kumo";
 import { useForm } from "@tanstack/react-form";
 import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
-import { DateInput } from "@/components/ui/date-input";
+import { DateField } from "@/components/date-picker";
 import { api } from "@/lib/api";
 
 const startingBalanceSchema = z.object({
@@ -80,7 +80,7 @@ export default function StartingBalanceForm({
 		>
 			<form.Field name="date">
 				{(field) => (
-					<DateInput
+					<DateField
 						id={field.name}
 						label="Date"
 						value={field.state.value}

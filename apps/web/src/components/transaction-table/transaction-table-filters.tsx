@@ -1,8 +1,5 @@
-import { Button, Input, Label, Select } from "@cloudflare/kumo";
-import { Popover } from "@cloudflare/kumo/components/popover";
-import { format } from "date-fns";
-import { Calendar } from "@/components/ui/calendar";
-import { cn } from "@/lib/utils";
+import { Input, Label, Select } from "@cloudflare/kumo";
+import { DateFilterField } from "@/components/date-picker";
 import { ClearButton } from "./transaction-table-toolbar";
 
 type Category = { id: number; name: string };
@@ -42,72 +39,18 @@ export function TransactionTableFilters({
 	return (
 		<div className="rounded-lg bg-kumo-recessed p-4">
 			<div className="flex flex-wrap items-end gap-4">
-				<div className="flex flex-col gap-1.5">
-					<Label className="font-medium text-kumo-subtle text-xs">
-						Start Date
-					</Label>
-					<Popover.Root>
-						<Popover.Trigger
-							render={
-								<Button
-									variant="secondary"
-									size="sm"
-									className={cn(
-										"w-36 justify-start text-left max-md:h-11",
-										!startDate && "text-kumo-subtle",
-									)}
-								/>
-							}
-						>
-							{startDate ? format(startDate, "MMM d, yyyy") : "Pick date"}
-						</Popover.Trigger>
-						<Popover.Portal>
-							<Popover.Positioner align="start">
-								<Popover.Popup className="w-auto p-0">
-									<Calendar
-										mode="single"
-										selected={startDate}
-										onSelect={setStartDate}
-										initialFocus
-									/>
-								</Popover.Popup>
-							</Popover.Positioner>
-						</Popover.Portal>
-					</Popover.Root>
-				</div>
-				<div className="flex flex-col gap-1.5">
-					<Label className="font-medium text-kumo-subtle text-xs">
-						End Date
-					</Label>
-					<Popover.Root>
-						<Popover.Trigger
-							render={
-								<Button
-									variant="secondary"
-									size="sm"
-									className={cn(
-										"w-36 justify-start text-left max-md:h-11",
-										!endDate && "text-kumo-subtle",
-									)}
-								/>
-							}
-						>
-							{endDate ? format(endDate, "MMM d, yyyy") : "Pick date"}
-						</Popover.Trigger>
-						<Popover.Portal>
-							<Popover.Positioner align="start">
-								<Popover.Popup className="w-auto p-0">
-									<Calendar
-										mode="single"
-										selected={endDate}
-										onSelect={setEndDate}
-										initialFocus
-									/>
-								</Popover.Popup>
-							</Popover.Positioner>
-						</Popover.Portal>
-					</Popover.Root>
-				</div>
+				<DateFilterField
+					label="Start Date"
+					value={startDate}
+					onSelect={setStartDate}
+					className="w-36"
+				/>
+				<DateFilterField
+					label="End Date"
+					value={endDate}
+					onSelect={setEndDate}
+					className="w-36"
+				/>
 				<div className="flex flex-col gap-1.5">
 					<Label className="font-medium text-kumo-subtle text-xs">
 						Category

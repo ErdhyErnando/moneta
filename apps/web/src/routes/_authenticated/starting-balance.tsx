@@ -1,10 +1,21 @@
-import { Button } from "@cloudflare/kumo";
-import { PlusIcon, WalletIcon } from "@phosphor-icons/react";
+import { Banner, Button, LayerCard } from "@cloudflare/kumo";
+import {
+	ArrowClockwiseIcon,
+	PlusIcon,
+	WalletIcon,
+	WarningCircleIcon,
+} from "@phosphor-icons/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
+import {
+	EmptyState,
+	PageContainer,
+	PageHeader,
+	Section,
+} from "@/components/layout";
 import { ResponsiveDialog } from "@/components/responsive-dialog";
 import StartingBalanceForm from "@/components/starting-balance-form";
 import {
@@ -26,7 +37,7 @@ export const Route = createFileRoute("/_authenticated/starting-balance")({
 	component: StartingBalancePage,
 });
 
-function StartingBalancePage() {
+function StartingBalancePage(): React.JSX.Element {
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const [editingBalance, setEditingBalance] = useState<StartingBalance | null>(
 		null,
@@ -36,7 +47,12 @@ function StartingBalancePage() {
 	const { toast } = useToast();
 	const queryClient = useQueryClient();
 
-	const { data: startingBalances = [], isLoading } = useQuery({
+	const {
+		data: startingBalances = [],
+		isLoading,
+		isError,
+		refetch,
+	} = useQuery({
 		queryKey: ["starting-balances"],
 		queryFn: async () => {
 			const res = await api.get<{ startingBalances: StartingBalance[] }>(
@@ -127,92 +143,142 @@ function StartingBalancePage() {
 		},
 	});
 
+	const openCreate = () => {
+		setEditingBalance(null);
+		setIsDialogOpen(true);
+	};
+
+	const showEmpty = !isLoading && !isError && startingBalances.length === 0;
+
 	return (
-		<div className="flex flex-col gap-6 p-6">
-			<div className="flex items-center justify-between">
-				<div className="flex items-center gap-2">
-					<div className="rounded-lg bg-kumo-tint p-2">
-						<WalletIcon className="text-kumo-strong" size={20} />
-					</div>
-					<h1 className="font-bold text-3xl">Starting Balance</h1>
-				</div>
+		<PageContainer>
+			<PageHeader
+				title="Starting balance"
+				description="What each account held before you started recording."
+				className="max-md:mb-4"
+				actions={
+					<Button
+						variant="primary"
+						icon={<PlusIcon size={16} />}
+						onClick={openCreate}
+						className="max-md:hidden"
+					>
+						Add starting balance
+					</Button>
+				}
+			/>
+
+			{/* Below md the bottom-nav "+" is the add-transaction flow, so this page
+			    keeps its own CTA — full width at the top of the content. Skipped
+			    when the empty state is on screen, since that carries the action. */}
+			{showEmpty ? null : (
 				<Button
 					variant="primary"
 					icon={<PlusIcon size={16} />}
-					onClick={() => {
-						setEditingBalance(null);
-						setIsDialogOpen(true);
-					}}
+					onClick={openCreate}
+					className="mb-6 w-full md:hidden"
 				>
-					Add Balance
+					Add starting balance
 				</Button>
-				<ResponsiveDialog
-					open={isDialogOpen}
-					onOpenChange={(open) => {
-						setIsDialogOpen(open);
-						if (!open) setEditingBalance(null);
-					}}
-					title={
-						editingBalance ? "Edit Starting Balance" : "Add Starting Balance"
-					}
-				>
-					<StartingBalanceForm
-						defaultValues={
-							editingBalance
-								? {
-										amount: editingBalance.amount,
-										description: editingBalance.description,
-										date: asUtcDay(editingBalance.date),
-										categoryId: editingBalance.categoryId,
-									}
-								: undefined
-						}
-						onSubmit={async (data) => {
-							if (editingBalance) {
-								await editMutation.mutateAsync({
-									id: editingBalance.id,
-									data,
-								});
-							} else {
-								await createMutation.mutateAsync(data);
-							}
-						}}
-					/>
-				</ResponsiveDialog>
-			</div>
+			)}
 
-			<div className="rounded-xl border border-kumo-hairline bg-kumo-base">
-				<div className="p-6">
-					{isLoading ? (
-						<div className="space-y-2">
-							<div className="h-12 w-full animate-pulse rounded-lg bg-kumo-fill" />
-							<div className="h-12 w-full animate-pulse rounded-lg bg-kumo-fill" />
-							<div className="h-12 w-full animate-pulse rounded-lg bg-kumo-fill" />
-						</div>
-					) : (
-						<StartingBalanceList
-							data={startingBalances}
-							onAddClick={() => {
-								setEditingBalance(null);
-								setIsDialogOpen(true);
-							}}
-							onEdit={(balance) => {
-								setEditingBalance(balance);
-								setIsDialogOpen(true);
-							}}
-							onDelete={setDeletingBalance}
+			<Section title="Balances">
+				{isError ? (
+					<Banner
+						variant="error"
+						icon={<WarningCircleIcon size={16} />}
+						title="Could not load your starting balances"
+						description="The balance history did not load."
+						action={
+							<Banner.Action
+								variant="secondary"
+								icon={<ArrowClockwiseIcon size={16} />}
+								onClick={() => refetch()}
+							>
+								Retry
+							</Banner.Action>
+						}
+					/>
+				) : isLoading ? (
+					<div className="space-y-2 rounded-xl border border-kumo-hairline bg-kumo-base p-4">
+						{[0, 1, 2].map((row) => (
+							<div
+								key={row}
+								className="h-10 w-full animate-pulse rounded bg-kumo-fill"
+							/>
+						))}
+					</div>
+				) : showEmpty ? (
+					<LayerCard className="rounded-xl p-6 shadow-none">
+						<EmptyState
+							icon={<WalletIcon size={20} />}
+							size="base"
+							title="No starting balances yet"
+							description="Add what you had on hand before your first transaction."
+							action={
+								<Button
+									variant="secondary"
+									icon={<PlusIcon size={16} />}
+									onClick={openCreate}
+								>
+									Add starting balance
+								</Button>
+							}
 						/>
-					)}
-				</div>
-			</div>
+					</LayerCard>
+				) : (
+					<StartingBalanceList
+						data={startingBalances}
+						onEdit={(balance) => {
+							setEditingBalance(balance);
+							setIsDialogOpen(true);
+						}}
+						onDelete={setDeletingBalance}
+					/>
+				)}
+			</Section>
+
+			<ResponsiveDialog
+				open={isDialogOpen}
+				onOpenChange={(open) => {
+					setIsDialogOpen(open);
+					if (!open) setEditingBalance(null);
+				}}
+				title={
+					editingBalance ? "Edit starting balance" : "Add starting balance"
+				}
+			>
+				<StartingBalanceForm
+					defaultValues={
+						editingBalance
+							? {
+									amount: editingBalance.amount,
+									description: editingBalance.description,
+									date: asUtcDay(editingBalance.date),
+									categoryId: editingBalance.categoryId,
+								}
+							: undefined
+					}
+					onSubmit={async (data) => {
+						if (editingBalance) {
+							await editMutation.mutateAsync({
+								id: editingBalance.id,
+								data,
+							});
+						} else {
+							await createMutation.mutateAsync(data);
+						}
+					}}
+				/>
+			</ResponsiveDialog>
 
 			<DeleteConfirmDialog
 				open={deletingBalance !== null}
 				onOpenChange={(open) => {
 					if (!open) setDeletingBalance(null);
 				}}
-				title="Delete Starting Balance"
-				description="This entry will be removed from your balance history. This action cannot be undone."
+				title="Delete this starting balance?"
+				description="It is removed from your balance history and cannot be recovered."
 				onConfirm={() => {
 					if (deletingBalance) {
 						deleteMutation.mutate(deletingBalance.id);
@@ -221,6 +287,6 @@ function StartingBalancePage() {
 				}}
 				pending={deleteMutation.isPending}
 			/>
-		</div>
+		</PageContainer>
 	);
 }

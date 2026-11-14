@@ -1,6 +1,6 @@
 import { Button, Checkbox } from "@cloudflare/kumo";
 import { DropdownMenu } from "@cloudflare/kumo/components/dropdown";
-import { DotsThreeVerticalIcon, PlusIcon } from "@phosphor-icons/react";
+import { DotsThreeVerticalIcon } from "@phosphor-icons/react";
 import {
 	type ColumnDef,
 	type ColumnFiltersState,
@@ -75,7 +75,7 @@ const columns: ColumnDef<StartingBalance>[] = [
 		accessorKey: "description",
 		header: "Description",
 		cell: ({ row }) => (
-			<div className="max-w-[200px] truncate font-medium">
+			<div className="max-w-50 truncate font-medium">
 				{row.getValue("description")}
 			</div>
 		),
@@ -101,8 +101,10 @@ const columns: ColumnDef<StartingBalance>[] = [
 				? formatCurrency(amount)
 				: `$${amount.toFixed(2)}`;
 
+			// A starting balance is a balance, not P&L: neutral colour, no sign
+			// (docs/design.md §2.4 — only P&L carries sign + arrow + direction).
 			return (
-				<div className="text-right font-medium tabular-nums">+{formatted}</div>
+				<div className="text-right font-medium tabular-nums">{formatted}</div>
 			);
 		},
 	},
@@ -143,16 +145,85 @@ const columns: ColumnDef<StartingBalance>[] = [
 	},
 ];
 
+/**
+ * `<md` row: selection, description, date + category and the amount, with the
+ * same menu actions as the table row (docs/design.md §7.5).
+ */
+function StartingBalanceStackedRow({
+	balance,
+	selected,
+	onToggle,
+	onEdit,
+	onDelete,
+}: {
+	balance: StartingBalance;
+	selected: boolean;
+	onToggle: () => void;
+	onEdit?: (balance: StartingBalance) => void;
+	onDelete?: (balance: StartingBalance) => void;
+}): React.JSX.Element {
+	const { formatCurrency } = useCurrency();
+
+	return (
+		<li className="flex items-start gap-2 px-4 py-2">
+			<div className="pt-1">
+				<Checkbox
+					checked={selected}
+					onCheckedChange={onToggle}
+					aria-label="Select row"
+				/>
+			</div>
+			<div className="min-w-0 flex-1 space-y-1">
+				<div className="truncate font-medium">{balance.description}</div>
+				<div className="flex flex-wrap items-center gap-2">
+					<span className="text-kumo-subtle text-sm">
+						{asUtcDay(balance.date).toLocaleDateString()}
+					</span>
+					<CategoryBadge
+						name={balance.category.name}
+						color={balance.category.color}
+					/>
+				</div>
+				<div className="font-medium tabular-nums">
+					{formatCurrency(Number.parseFloat(balance.amount))}
+				</div>
+			</div>
+			<DropdownMenu>
+				<DropdownMenu.Trigger>
+					<Button
+						variant="ghost"
+						size="sm"
+						shape="square"
+						aria-label="Open menu"
+						className="size-11 md:size-6.5"
+						icon={<DotsThreeVerticalIcon size={16} />}
+					/>
+				</DropdownMenu.Trigger>
+				<DropdownMenu.Content align="end" className="w-32">
+					<DropdownMenu.Item onClick={() => onEdit?.(balance)}>
+						Edit
+					</DropdownMenu.Item>
+					<DropdownMenu.Separator />
+					<DropdownMenu.Item
+						variant="danger"
+						onClick={() => onDelete?.(balance)}
+					>
+						Delete
+					</DropdownMenu.Item>
+				</DropdownMenu.Content>
+			</DropdownMenu>
+		</li>
+	);
+}
+
 interface StartingBalanceListProps {
 	data: StartingBalance[];
-	onAddClick?: () => void;
 	onEdit?: (balance: StartingBalance) => void;
 	onDelete?: (balance: StartingBalance) => void;
 }
 
 export function StartingBalanceList({
 	data,
-	onAddClick,
 	onEdit,
 	onDelete,
 }: StartingBalanceListProps) {
@@ -197,20 +268,28 @@ export function StartingBalanceList({
 		getSortedRowModel: getSortedRowModel(),
 	});
 
+	const meta = {
+		onEdit,
+		onDelete,
+	} as {
+		onEdit?: (balance: StartingBalance) => void;
+		onDelete?: (balance: StartingBalance) => void;
+	};
+
 	return (
 		<DataTableShell
 			table={table}
 			colCount={columns.length}
-			addControl={
-				<Button
-					variant="primary"
-					size="sm"
-					icon={<PlusIcon size={16} />}
-					onClick={onAddClick}
-				>
-					Add Starting Balance
-				</Button>
-			}
+			renderStackedRow={(row) => (
+				<StartingBalanceStackedRow
+					key={row.id}
+					balance={row.original}
+					selected={row.getIsSelected()}
+					onToggle={() => row.toggleSelected()}
+					onEdit={meta.onEdit}
+					onDelete={meta.onDelete}
+				/>
+			)}
 		/>
 	);
 }

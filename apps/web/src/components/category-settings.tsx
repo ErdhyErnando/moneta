@@ -10,6 +10,7 @@ import {
 	DEFAULT_CATEGORY_COLOR,
 } from "@/components/category-types";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
+import { Section } from "@/components/layout";
 import { useToast } from "@/hooks/use-toast";
 import type { AxiosError } from "@/lib/api";
 import { api } from "@/lib/api";
@@ -190,40 +191,43 @@ export function CategorySettings() {
 	};
 
 	return (
-		<div className="space-y-6">
-			<div className="flex items-center justify-between">
-				<h2 className="font-semibold text-xl">Categories</h2>
-				<Button
-					variant="primary"
-					icon={<PlusIcon size={16} />}
-					onClick={openCreateDialog}
-				>
-					Add Category
-				</Button>
-			</div>
-
-			<Tabs
-				variant="segmented"
-				className="w-full"
-				tabs={[
-					{ value: "income", label: "Income" },
-					{ value: "expense", label: "Expense" },
-					{ value: "starting_balance", label: "Starting Balance" },
-				]}
-				value={activeTab}
-				onValueChange={(value) => setActiveTab(value as CategoryType)}
-			/>
-			<div className="mt-4">
-				<CategoryTable
-					categories={categories}
-					isLoading={isLoading}
-					type={activeTab}
-					isRestoring={restoreMutation.isPending}
-					onEdit={handleEdit}
-					onArchive={handleArchive}
-					onRestore={restoreMutation.mutate}
-				/>
-			</div>
+		<>
+			<Section
+				title="Categories"
+				description="Colour is a label, never the only signal — every category is shown with its name."
+				actions={
+					<Button
+						variant="primary"
+						icon={<PlusIcon size={16} />}
+						onClick={openCreateDialog}
+					>
+						Add category
+					</Button>
+				}
+			>
+				<div className="space-y-4">
+					<Tabs
+						variant="segmented"
+						className="w-full"
+						tabs={[
+							{ value: "income", label: "Income" },
+							{ value: "expense", label: "Expense" },
+							{ value: "starting_balance", label: "Starting balance" },
+						]}
+						value={activeTab}
+						onValueChange={(value) => setActiveTab(value as CategoryType)}
+					/>
+					<CategoryTable
+						categories={categories}
+						isLoading={isLoading}
+						type={activeTab}
+						isRestoring={restoreMutation.isPending}
+						onEdit={handleEdit}
+						onArchive={handleArchive}
+						onRestore={restoreMutation.mutate}
+					/>
+				</div>
+			</Section>
 
 			<CategoryFormDialog
 				open={isOpen}
@@ -247,8 +251,8 @@ export function CategorySettings() {
 			<DeleteConfirmDialog
 				open={isDeleteOpen}
 				onOpenChange={setIsDeleteOpen}
-				title="Archive Category"
-				description={`Archive "${deletingCategory?.name}"? Existing records will keep this category, but it will no longer appear when adding new records.`}
+				title="Archive this category?"
+				description={`"${deletingCategory?.name}" stays on the records that already use it, but it disappears from every category picker. You can restore it later.`}
 				onConfirm={() =>
 					deletingCategory && archiveMutation.mutate(deletingCategory.id)
 				}
@@ -256,6 +260,6 @@ export function CategorySettings() {
 				confirmLabel="Archive"
 				pendingLabel="Archiving..."
 			/>
-		</div>
+		</>
 	);
 }
