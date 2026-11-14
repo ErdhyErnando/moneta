@@ -23,6 +23,7 @@ type Props = {
 	clearFilters: () => void;
 };
 
+/** Inset filter panel (docs/design.md §7.2: `rounded-lg bg-kumo-recessed`). */
 export function TransactionTableFilters({
 	startDate,
 	setStartDate,
@@ -37,9 +38,9 @@ export function TransactionTableFilters({
 	categories,
 	hasActiveFilters,
 	clearFilters,
-}: Props) {
+}: Props): React.JSX.Element {
 	return (
-		<div className="rounded-lg border bg-muted/50 p-4">
+		<div className="rounded-lg bg-kumo-recessed p-4">
 			<div className="flex flex-wrap items-end gap-4">
 				<div className="flex flex-col gap-1.5">
 					<Label className="font-medium text-kumo-subtle text-xs">
@@ -52,7 +53,7 @@ export function TransactionTableFilters({
 									variant="secondary"
 									size="sm"
 									className={cn(
-										"w-[140px] justify-start text-left",
+										"w-36 justify-start text-left max-md:h-11",
 										!startDate && "text-kumo-subtle",
 									)}
 								/>
@@ -85,7 +86,7 @@ export function TransactionTableFilters({
 									variant="secondary"
 									size="sm"
 									className={cn(
-										"w-[140px] justify-start text-left",
+										"w-36 justify-start text-left max-md:h-11",
 										!endDate && "text-kumo-subtle",
 									)}
 								/>
@@ -113,7 +114,7 @@ export function TransactionTableFilters({
 					</Label>
 					<Select
 						size="sm"
-						className="w-40"
+						className="w-40 max-md:h-11"
 						aria-label="Category"
 						value={selectedCategory}
 						onValueChange={(value) => setSelectedCategory(value ?? "all")}
@@ -137,7 +138,7 @@ export function TransactionTableFilters({
 						placeholder="0"
 						value={minAmount}
 						onChange={(e) => setMinAmount(e.target.value)}
-						className="w-[100px]"
+						className="w-25 max-md:h-11"
 					/>
 				</div>
 				<div className="flex flex-col gap-1.5">
@@ -151,7 +152,7 @@ export function TransactionTableFilters({
 						placeholder="No limit"
 						value={maxAmount}
 						onChange={(e) => setMaxAmount(e.target.value)}
-						className="w-[100px]"
+						className="w-25 max-md:h-11"
 					/>
 				</div>
 				{hasActiveFilters && <ClearButton onClick={clearFilters} />}

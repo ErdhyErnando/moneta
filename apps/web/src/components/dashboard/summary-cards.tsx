@@ -1,7 +1,7 @@
 import { Banner, LayerCard } from "@cloudflare/kumo";
 import { ArrowClockwiseIcon, WarningCircleIcon } from "@phosphor-icons/react";
 import type * as React from "react";
-import { SignedAmount } from "@/components/dashboard/signed-amount";
+import { SignedAmount } from "@/components/money/signed-amount";
 import { cn } from "@/lib/utils";
 
 export interface DashboardSummary {

@@ -5,6 +5,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { CurrencySelector } from "@/components/currency-selector";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
+import { PageContainer, PageHeader } from "@/components/layout";
 import { ResponsiveDialog } from "@/components/responsive-dialog";
 import TransactionForm from "@/components/transaction-form";
 import {
@@ -15,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import type { AxiosError } from "@/lib/api";
 import { api } from "@/lib/api";
 import { asUtcDay, toUtcDayIso } from "@/lib/date";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/expense")({
 	component: ExpensePage,
@@ -27,7 +29,7 @@ type TransactionFormData = {
 	categoryId: number;
 };
 
-function ExpensePage() {
+function ExpensePage(): React.JSX.Element {
 	const { toast } = useToast();
 	const [isOpen, setIsOpen] = useState(false);
 	const [editingId, setEditingId] = useState<number | null>(null);
@@ -35,7 +37,12 @@ function ExpensePage() {
 	const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 	const queryClient = useQueryClient();
 
-	const { data: expenses = [], isLoading } = useQuery({
+	const {
+		data: expenses = [],
+		isLoading,
+		isError,
+		refetch,
+	} = useQuery({
 		queryKey: ["expenses"],
 		queryFn: async () => {
 			const res = await api.get<{ expenses: Transaction[] }>("/api/expenses");
@@ -153,55 +160,63 @@ function ExpensePage() {
 		: undefined;
 
 	return (
-		<div className="container mx-auto px-4 py-6 sm:px-6 sm:py-10">
-			<div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-				<h1 className="font-bold text-2xl sm:text-3xl">Expenses</h1>
-				<div className="flex items-center gap-2">
-					<Link
-						to="/expense/breakdown"
-						className={buttonVariants({ variant: "secondary" })}
-					>
-						<ChartBarIcon className="mr-2" size={16} /> Breakdown
-					</Link>
-					<CurrencySelector />
-					<Button
-						variant="primary"
-						icon={<PlusIcon size={16} />}
-						onClick={() => setIsOpen(true)}
-					>
-						Add Expense
-					</Button>
-					<ResponsiveDialog
-						open={isOpen}
-						onOpenChange={(open) => {
-							setIsOpen(open);
-							if (!open) setEditingId(null);
-						}}
-						title={editingId ? "Edit Expense" : "Add Expense"}
-					>
-						<TransactionForm
-							type="expense"
-							onSubmit={handleSubmit}
-							defaultValues={
-								editingExpense
-									? {
-											amount: editingExpense.amount,
-											description: editingExpense.description,
-											date: asUtcDay(editingExpense.date),
-											categoryId: editingExpense.categoryId,
-										}
-									: undefined
-							}
-						/>
-					</ResponsiveDialog>
-				</div>
-			</div>
+		<PageContainer>
+			<PageHeader
+				title="Expenses"
+				description="Every expense, grouped by month."
+				actions={
+					<>
+						<Link
+							to="/expense/breakdown"
+							className={cn(
+								buttonVariants({ variant: "secondary" }),
+								"max-md:h-11",
+							)}
+						>
+							<ChartBarIcon className="mr-2" size={16} /> Breakdown
+						</Link>
+						<CurrencySelector />
+						<Button
+							variant="primary"
+							icon={<PlusIcon size={16} />}
+							onClick={() => setIsOpen(true)}
+							className="max-md:hidden"
+						>
+							Add Expense
+						</Button>
+					</>
+				}
+			/>
+
+			<ResponsiveDialog
+				open={isOpen}
+				onOpenChange={(open) => {
+					setIsOpen(open);
+					if (!open) setEditingId(null);
+				}}
+				title={editingId ? "Edit Expense" : "Add Expense"}
+			>
+				<TransactionForm
+					type="expense"
+					onSubmit={handleSubmit}
+					defaultValues={
+						editingExpense
+							? {
+									amount: editingExpense.amount,
+									description: editingExpense.description,
+									date: asUtcDay(editingExpense.date),
+									categoryId: editingExpense.categoryId,
+								}
+							: undefined
+					}
+				/>
+			</ResponsiveDialog>
 
 			<DeleteConfirmDialog
 				open={isDeleteOpen}
 				onOpenChange={setIsDeleteOpen}
-				title="Delete Expense"
-				description="Are you sure you want to delete this expense? This action cannot be undone."
+				title="Delete this expense?"
+				description="It is removed from your ledger and cannot be recovered."
 				onConfirm={confirmDelete}
 				pending={deleteMutation.isPending}
 			/>
@@ -210,9 +225,13 @@ function ExpensePage() {
 				data={expenses}
 				type="expense"
 				isLoading={isLoading}
+				isError={isError}
+				onRetry={() => {
+					void refetch();
+				}}
 				onEdit={handleEdit}
 				onDelete={handleDelete}
 			/>
-		</div>
+		</PageContainer>
 	);
 }

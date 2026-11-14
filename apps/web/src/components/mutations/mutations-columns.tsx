@@ -1,4 +1,4 @@
-import { Button } from "@cloudflare/kumo";
+import { Badge, Button } from "@cloudflare/kumo";
 import {
 	ArrowDownIcon,
 	ArrowUpIcon,
@@ -7,9 +7,9 @@ import {
 import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { CategoryBadge } from "@/components/category-badge";
+import { SignedAmount } from "@/components/money/signed-amount";
 import { asUtcDay } from "@/lib/date";
 import type { MutationRow } from "@/lib/mutations";
-import { cn } from "@/lib/utils";
 
 export type MutationSortColumn = "date" | "amount";
 export type MutationSortDir = "asc" | "desc";
@@ -20,6 +20,15 @@ type Options = {
 	dir: MutationSortDir;
 	onSortChange: (column: MutationSortColumn) => void;
 };
+
+/** Column ids the stacked (<md) row reads by name — keep them stable. */
+export const MUTATION_COLUMN_ID = {
+	date: "date",
+	type: "type",
+	category: "categoryName",
+	description: "description",
+	amount: "amount",
+} as const;
 
 function SortHeader({
 	column,
@@ -33,26 +42,27 @@ function SortHeader({
 	sort: MutationSortColumn;
 	dir: MutationSortDir;
 	onSortChange: (column: MutationSortColumn) => void;
-}) {
+}): React.JSX.Element {
 	const active = sort === column;
+	let Icon = CaretUpDownIcon;
+	if (active) {
+		Icon = dir === "asc" ? ArrowUpIcon : ArrowDownIcon;
+	}
+	const state = active
+		? `sorted ${dir === "asc" ? "ascending" : "descending"}`
+		: "not sorted";
+
 	return (
 		<Button
 			type="button"
 			variant="ghost"
 			size="sm"
-			className="-ml-3 font-medium"
+			className="-ml-2 font-medium text-kumo-subtle max-md:h-11"
 			onClick={() => onSortChange(column)}
 		>
 			{label}
-			{active ? (
-				dir === "asc" ? (
-					<ArrowUpIcon className="ml-1" size={14} />
-				) : (
-					<ArrowDownIcon className="ml-1" size={14} />
-				)
-			) : (
-				<CaretUpDownIcon className="ml-1 opacity-50" size={14} />
-			)}
+			<Icon className="ml-1" size={16} />
+			<span className="sr-only">{state}</span>
 		</Button>
 	);
 }
@@ -65,7 +75,7 @@ export function getMutationColumns({
 }: Options): ColumnDef<MutationRow>[] {
 	return [
 		{
-			accessorKey: "date",
+			accessorKey: MUTATION_COLUMN_ID.date,
 			header: () => (
 				<SortHeader
 					column="date"
@@ -76,29 +86,22 @@ export function getMutationColumns({
 				/>
 			),
 			cell: ({ row }) => (
-				<div className="whitespace-nowrap font-medium">
+				<div className="whitespace-nowrap">
 					{format(asUtcDay(row.original.date), "MMM d, yyyy")}
 				</div>
 			),
 		},
 		{
-			accessorKey: "type",
+			accessorKey: MUTATION_COLUMN_ID.type,
 			header: "Type",
 			cell: ({ row }) => (
-				<span
-					className={cn(
-						"inline-flex items-center justify-center whitespace-nowrap rounded-full px-2.5 py-0.5 font-medium text-xs",
-						row.original.type === "income"
-							? "bg-kumo-success-tint text-positive"
-							: "bg-kumo-danger-tint text-negative",
-					)}
-				>
+				<Badge variant="secondary">
 					{row.original.type === "income" ? "Income" : "Expense"}
-				</span>
+				</Badge>
 			),
 		},
 		{
-			accessorKey: "categoryName",
+			accessorKey: MUTATION_COLUMN_ID.category,
 			header: "Category",
 			cell: ({ row }) => (
 				<CategoryBadge
@@ -108,16 +111,16 @@ export function getMutationColumns({
 			),
 		},
 		{
-			accessorKey: "description",
+			accessorKey: MUTATION_COLUMN_ID.description,
 			header: "Description",
 			cell: ({ row }) => (
-				<div className="max-w-[200px] truncate font-medium md:max-w-[300px]">
-					{row.original.description || "-"}
+				<div className="min-w-0 truncate font-medium md:max-w-75">
+					{row.original.description || "—"}
 				</div>
 			),
 		},
 		{
-			accessorKey: "amount",
+			accessorKey: MUTATION_COLUMN_ID.amount,
 			header: () => (
 				<div className="flex justify-end">
 					<SortHeader
@@ -129,21 +132,16 @@ export function getMutationColumns({
 					/>
 				</div>
 			),
-			cell: ({ row }) => {
-				const amount = Number.parseFloat(row.original.amount);
-				const income = row.original.type === "income";
-				return (
-					<div
-						className={cn(
-							"whitespace-nowrap text-right font-medium tabular-nums",
-							income ? "text-positive" : "text-negative",
-						)}
-					>
-						{income ? "+" : "-"}
-						{formatCurrency(amount)}
-					</div>
-				);
-			},
+			cell: ({ row }) => (
+				<div className="flex justify-end">
+					<SignedAmount
+						amount={Number.parseFloat(row.original.amount)}
+						formatCurrency={formatCurrency}
+						direction={row.original.type === "income" ? "positive" : "negative"}
+						size="inline"
+					/>
+				</div>
+			),
 		},
 	];
 }

@@ -1,4 +1,4 @@
-import { Button, Input } from "@cloudflare/kumo";
+import { Badge, Button, Input } from "@cloudflare/kumo";
 import { DropdownMenu } from "@cloudflare/kumo/components/dropdown";
 import {
 	CaretDownIcon,
@@ -21,35 +21,34 @@ export function TransactionTableToolbar({
 	showFilters,
 	setShowFilters,
 	hasActiveFilters,
-}: Props) {
+}: Props): React.JSX.Element {
 	return (
 		<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-			<div className="flex flex-col gap-1.5">
-				<Input
-					id="description-filter"
-					aria-label="Filter by description"
-					placeholder="Filter descriptions..."
-					value={
-						(table.getColumn("description")?.getFilterValue() as string) ?? ""
-					}
-					onChange={(event) =>
-						table.getColumn("description")?.setFilterValue(event.target.value)
-					}
-					className="max-w-sm"
-				/>
-			</div>
+			<Input
+				id="description-filter"
+				aria-label="Filter by description"
+				placeholder="Filter descriptions..."
+				value={
+					(table.getColumn("description")?.getFilterValue() as string) ?? ""
+				}
+				onChange={(event) =>
+					table.getColumn("description")?.setFilterValue(event.target.value)
+				}
+				className="max-w-sm max-md:h-11"
+			/>
 			<div className="flex flex-wrap items-center gap-2">
 				<Button
 					variant={showFilters ? "secondary" : "ghost"}
 					size="sm"
 					icon={<FunnelIcon size={16} />}
+					className="max-md:h-11"
 					onClick={() => setShowFilters(!showFilters)}
 				>
 					Filters
 					{hasActiveFilters && (
-						<span className="ml-1 rounded-full bg-kumo-brand px-1.5 py-0.5 text-[10px] text-kumo-inverse">
+						<Badge variant="secondary" className="ml-1">
 							{table.getState().columnFilters.length}
-						</span>
+						</Badge>
 					)}
 				</Button>
 				<DropdownMenu>
@@ -58,9 +57,11 @@ export function TransactionTableToolbar({
 							variant="secondary"
 							size="sm"
 							icon={<ColumnsIcon size={16} />}
+							aria-label="Columns"
+							className="max-sm:size-11 max-md:h-11"
 						>
 							<span className="hidden sm:inline">Columns</span>
-							<CaretDownIcon className="ml-2" size={16} />
+							<CaretDownIcon className="ml-2 hidden sm:inline" size={16} />
 						</Button>
 					</DropdownMenu.Trigger>
 					<DropdownMenu.Content align="end" className="w-56">
@@ -87,12 +88,17 @@ export function TransactionTableToolbar({
 	);
 }
 
-export function ClearButton({ onClick }: { onClick: () => void }) {
+export function ClearButton({
+	onClick,
+}: {
+	onClick: () => void;
+}): React.JSX.Element {
 	return (
 		<Button
 			variant="ghost"
 			size="sm"
 			icon={<XIcon size={16} />}
+			className="max-md:h-11"
 			onClick={onClick}
 		>
 			Clear

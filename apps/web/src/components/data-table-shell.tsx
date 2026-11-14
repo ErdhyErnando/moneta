@@ -1,4 +1,4 @@
-import { Button, Input, Select } from "@cloudflare/kumo";
+import { Button, Input, Select, Table } from "@cloudflare/kumo";
 import { DropdownMenu } from "@cloudflare/kumo/components/dropdown";
 import {
 	CaretDownIcon,
@@ -7,17 +7,11 @@ import {
 	CaretLineRightIcon,
 	CaretRightIcon,
 	ColumnsIcon,
+	ReceiptIcon,
 } from "@phosphor-icons/react";
 import { flexRender, type Table as TanStackTable } from "@tanstack/react-table";
 import type { ReactNode } from "react";
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from "@/components/ui/table";
+import { EmptyState } from "@/components/layout";
 
 type DataTableShellProps<TData> = {
 	table: TanStackTable<TData>;
@@ -25,17 +19,26 @@ type DataTableShellProps<TData> = {
 	addControl: ReactNode;
 };
 
-// Shared toolbar + table + pagination chrome for the dashboard transactions
-// table and the starting-balance list (#49). Only columns, data and the add
-// control differ per table, so those stay with the callers.
+const TABLE_CLASSES =
+	"[&_td]:py-2 [&_th]:border-kumo-hairline [&_th]:text-kumo-subtle [&_th]:text-sm";
+
+/**
+ * Shared toolbar + table + pagination chrome (#49), styled to the
+ * docs/design.md §7.5 recipe: hairline shell, `text-sm` muted header, 40px
+ * rows, zebra from kumo's `Table.Row`, in-shell empty state.
+ *
+ * Only columns, data and the add control differ per caller, so those stay there.
+ */
 export function DataTableShell<TData>({
 	table,
 	colCount,
 	addControl,
-}: DataTableShellProps<TData>) {
+}: DataTableShellProps<TData>): React.JSX.Element {
+	const rows = table.getRowModel().rows;
+
 	return (
 		<div className="w-full space-y-4">
-			<div className="flex items-center justify-between">
+			<div className="flex flex-wrap items-center justify-between gap-2">
 				<Input
 					aria-label="Filter descriptions"
 					placeholder="Filter descriptions..."
@@ -45,7 +48,7 @@ export function DataTableShell<TData>({
 					onChange={(event) =>
 						table.getColumn("description")?.setFilterValue(event.target.value)
 					}
-					className="max-w-sm"
+					className="max-w-sm max-md:h-11"
 				/>
 				<div className="flex items-center gap-2">
 					<DropdownMenu>
@@ -54,8 +57,10 @@ export function DataTableShell<TData>({
 								variant="secondary"
 								size="sm"
 								icon={<ColumnsIcon size={16} />}
+								aria-label="Columns"
+								className="max-sm:size-11 max-md:h-11"
 							>
-								Columns
+								<span className="hidden sm:inline">Columns</span>
 								<CaretDownIcon className="ml-2" size={16} />
 							</Button>
 						</DropdownMenu.Trigger>
@@ -81,64 +86,68 @@ export function DataTableShell<TData>({
 					{addControl}
 				</div>
 			</div>
-			<div className="rounded-xl border border-kumo-hairline">
-				<Table>
-					<TableHeader>
+
+			<div className="overflow-hidden rounded-xl border border-kumo-hairline bg-kumo-base">
+				<Table className={TABLE_CLASSES}>
+					<Table.Header>
 						{table.getHeaderGroups().map((headerGroup) => (
-							<TableRow key={headerGroup.id}>
-								{headerGroup.headers.map((header) => {
-									return (
-										<TableHead key={header.id}>
-											{header.isPlaceholder
-												? null
-												: flexRender(
-														header.column.columnDef.header,
-														header.getContext(),
-													)}
-										</TableHead>
-									);
-								})}
-							</TableRow>
+							<Table.Row key={headerGroup.id}>
+								{headerGroup.headers.map((header) => (
+									<Table.Head key={header.id}>
+										{header.isPlaceholder
+											? null
+											: flexRender(
+													header.column.columnDef.header,
+													header.getContext(),
+												)}
+									</Table.Head>
+								))}
+							</Table.Row>
 						))}
-					</TableHeader>
-					<TableBody>
-						{table.getRowModel().rows?.length ? (
-							table.getRowModel().rows.map((row) => (
-								<TableRow
+					</Table.Header>
+					<Table.Body>
+						{rows.length === 0 ? (
+							<Table.Row>
+								<Table.Cell colSpan={colCount} className="p-0">
+									<EmptyState
+										icon={<ReceiptIcon size={20} />}
+										title="No rows"
+										description="Nothing matches this filter."
+									/>
+								</Table.Cell>
+							</Table.Row>
+						) : (
+							rows.map((row) => (
+								<Table.Row
 									key={row.id}
-									data-state={row.getIsSelected() && "selected"}
+									variant={row.getIsSelected() ? "selected" : "default"}
 								>
 									{row.getVisibleCells().map((cell) => (
-										<TableCell key={cell.id}>
+										<Table.Cell key={cell.id}>
 											{flexRender(
 												cell.column.columnDef.cell,
 												cell.getContext(),
 											)}
-										</TableCell>
+										</Table.Cell>
 									))}
-								</TableRow>
+								</Table.Row>
 							))
-						) : (
-							<TableRow>
-								<TableCell colSpan={colCount} className="h-24 text-center">
-									No results.
-								</TableCell>
-							</TableRow>
 						)}
-					</TableBody>
+					</Table.Body>
 				</Table>
 			</div>
-			<div className="flex items-center justify-between px-2">
-				<div className="flex-1 text-kumo-subtle text-sm">
+
+			<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+				<p className="text-kumo-subtle text-sm tabular-nums">
 					{table.getFilteredSelectedRowModel().rows.length} of{" "}
-					{table.getFilteredRowModel().rows.length} row(s) selected.
-				</div>
-				<div className="flex items-center space-x-6 lg:space-x-8">
-					<div className="flex items-center space-x-2">
-						<p className="font-medium text-sm">Rows per page</p>
+					{table.getFilteredRowModel().rows.length} row(s) selected
+				</p>
+				<div className="flex flex-wrap items-center gap-2">
+					<div className="flex items-center gap-2">
+						<span className="text-kumo-subtle text-sm">Rows per page</span>
 						<Select
 							size="sm"
-							className="w-[70px]"
+							className="w-20 max-md:h-11"
 							aria-label="Rows per page"
 							value={`${table.getState().pagination.pageSize}`}
 							onValueChange={(value) => {
@@ -150,50 +159,50 @@ export function DataTableShell<TData>({
 							}))}
 						/>
 					</div>
-					<div className="flex w-[100px] items-center justify-center font-medium text-sm">
+					<p className="text-kumo-subtle text-sm tabular-nums">
 						Page {table.getState().pagination.pageIndex + 1} of{" "}
 						{table.getPageCount() || 1}
-					</div>
-					<div className="flex items-center space-x-2">
-						<Button
-							variant="secondary"
-							size="sm"
-							shape="square"
-							aria-label="Go to first page"
-							className="hidden lg:inline-flex"
-							onClick={() => table.setPageIndex(0)}
-							disabled={!table.getCanPreviousPage()}
-							icon={<CaretLineLeftIcon size={16} />}
-						/>
-						<Button
-							variant="secondary"
-							size="sm"
-							shape="square"
-							aria-label="Go to previous page"
-							onClick={() => table.previousPage()}
-							disabled={!table.getCanPreviousPage()}
-							icon={<CaretLeftIcon size={16} />}
-						/>
-						<Button
-							variant="secondary"
-							size="sm"
-							shape="square"
-							aria-label="Go to next page"
-							onClick={() => table.nextPage()}
-							disabled={!table.getCanNextPage()}
-							icon={<CaretRightIcon size={16} />}
-						/>
-						<Button
-							variant="secondary"
-							size="sm"
-							shape="square"
-							aria-label="Go to last page"
-							className="hidden lg:inline-flex"
-							onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-							disabled={!table.getCanNextPage()}
-							icon={<CaretLineRightIcon size={16} />}
-						/>
-					</div>
+					</p>
+					<Button
+						variant="secondary"
+						size="sm"
+						shape="square"
+						aria-label="Go to first page"
+						className="max-md:size-11 max-lg:hidden"
+						onClick={() => table.setPageIndex(0)}
+						disabled={!table.getCanPreviousPage()}
+						icon={<CaretLineLeftIcon size={16} />}
+					/>
+					<Button
+						variant="secondary"
+						size="sm"
+						shape="square"
+						aria-label="Go to previous page"
+						className="max-md:size-11"
+						onClick={() => table.previousPage()}
+						disabled={!table.getCanPreviousPage()}
+						icon={<CaretLeftIcon size={16} />}
+					/>
+					<Button
+						variant="secondary"
+						size="sm"
+						shape="square"
+						aria-label="Go to next page"
+						className="max-md:size-11"
+						onClick={() => table.nextPage()}
+						disabled={!table.getCanNextPage()}
+						icon={<CaretRightIcon size={16} />}
+					/>
+					<Button
+						variant="secondary"
+						size="sm"
+						shape="square"
+						aria-label="Go to last page"
+						className="max-md:size-11 max-lg:hidden"
+						onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+						disabled={!table.getCanNextPage()}
+						icon={<CaretLineRightIcon size={16} />}
+					/>
 				</div>
 			</div>
 		</div>

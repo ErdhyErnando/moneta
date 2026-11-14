@@ -4,14 +4,19 @@ import type * as React from "react";
 import { EmptyState } from "@/components/layout";
 import { cn } from "@/lib/utils";
 
-type ChartCardHeight = "sm" | "base" | "lg" | "xl";
+type ChartCardHeight = "sm" | "base" | "lg" | "xl" | "auto";
 
-/** Chart canvases are not on the spacing scale; these are the only four sizes. */
+/**
+ * Chart canvases are not on the spacing scale; these are the only sizes.
+ * `auto` is for charts that size themselves from their data (the breakdown
+ * bars do, and touching that would be Phase 5).
+ */
 const BODY_HEIGHT: Record<ChartCardHeight, string> = {
 	sm: "h-60",
 	base: "h-70",
 	lg: "h-75",
 	xl: "h-100",
+	auto: "",
 };
 
 type ChartCardProps = {
@@ -19,6 +24,8 @@ type ChartCardProps = {
 	description?: React.ReactNode;
 	/** Card-level controls (year, category type, series toggle). */
 	actions?: React.ReactNode;
+	/** Period/range controls, shown above the plot and kept in every state. */
+	toolbar?: React.ReactNode;
 	height?: ChartCardHeight;
 	isLoading?: boolean;
 	isError?: boolean;
@@ -35,10 +42,11 @@ type ChartCardProps = {
 };
 
 /**
- * Card chrome and states for every dashboard chart (docs/design.md §7.2, §7.8,
+ * Card chrome and states for every chart in the app (docs/design.md §7.2, §7.8,
  * §10). Charts are lazy-loaded, so they own their loading/empty/error states
  * rather than leaving a hole in the page, and the body keeps one fixed height
- * across all four states so a late chart never shifts the layout.
+ * across all states so a late chart never shifts the layout (`auto` opts out
+ * for charts that size themselves from their data).
  *
  * Chart *internals* stay untouched until Phase 5 — this component only owns the
  * surface around them.
@@ -47,6 +55,7 @@ export function ChartCard({
 	title,
 	description,
 	actions,
+	toolbar,
 	height = "base",
 	isLoading = false,
 	isError = false,
@@ -77,6 +86,10 @@ export function ChartCard({
 					<div className="flex flex-wrap items-center gap-2">{actions}</div>
 				) : null}
 			</div>
+
+			{toolbar ? (
+				<div className="border-kumo-hairline border-b px-6 py-2">{toolbar}</div>
+			) : null}
 
 			<div className={cn("p-6", BODY_HEIGHT[height])}>
 				{isLoading ? (

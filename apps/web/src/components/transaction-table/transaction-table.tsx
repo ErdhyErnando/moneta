@@ -1,3 +1,9 @@
+import { Banner } from "@cloudflare/kumo";
+import {
+	ArrowClockwiseIcon,
+	ReceiptIcon,
+	WarningCircleIcon,
+} from "@phosphor-icons/react";
 import {
 	getCoreRowModel,
 	getFilteredRowModel,
@@ -5,6 +11,7 @@ import {
 	useReactTable,
 } from "@tanstack/react-table";
 import * as React from "react";
+import { EmptyState } from "@/components/layout";
 import { Accordion } from "@/components/primitives/accordion";
 import { useCurrency } from "@/contexts/currency-context";
 import { getTransactionTableColumns } from "./transaction-table-columns";
@@ -34,9 +41,33 @@ type Props = {
 	data: Transaction[];
 	type: "income" | "expense";
 	isLoading?: boolean;
+	isError?: boolean;
+	onRetry?: () => void;
 	onEdit?: (t: Transaction) => void;
 	onDelete?: (t: Transaction) => void;
 };
+
+const SKELETON_GROUPS = ["group-1", "group-2"];
+const SKELETON_ROWS = ["row-1", "row-2", "row-3", "row-4"];
+
+function MonthGroupSkeleton(): React.JSX.Element {
+	return (
+		<div className="rounded-xl border border-kumo-hairline bg-kumo-base p-4">
+			<div className="flex items-center justify-between gap-4">
+				<div className="h-4 w-32 animate-pulse rounded bg-kumo-fill" />
+				<div className="h-4 w-40 animate-pulse rounded bg-kumo-fill" />
+			</div>
+			<div className="mt-4 space-y-2">
+				{SKELETON_ROWS.map((row) => (
+					<div
+						key={row}
+						className="h-10 w-full animate-pulse rounded bg-kumo-fill"
+					/>
+				))}
+			</div>
+		</div>
+	);
+}
 
 /**
  * #32: rows are grouped into UTC-month accordion sections. Filtering/sorting
@@ -48,9 +79,11 @@ export function TransactionTable({
 	data,
 	type,
 	isLoading = false,
+	isError = false,
+	onRetry,
 	onEdit,
 	onDelete,
-}: Props) {
+}: Props): React.JSX.Element {
 	const { formatCurrency } = useCurrency();
 	const { state, dispatch } = useTransactionTableState();
 	const filters = useTransactionFilters(data, type);
@@ -125,8 +158,10 @@ export function TransactionTable({
 	const expanded =
 		expandedOverride ?? (defaultExpandedKey ? [defaultExpandedKey] : []);
 
+	const typeName = type === "income" ? "income" : "expense";
+
 	return (
-		<div className="w-full space-y-4">
+		<div className="space-y-4">
 			<div className="flex flex-col gap-4">
 				<TransactionTableToolbar
 					table={table}
@@ -152,41 +187,75 @@ export function TransactionTable({
 					/>
 				)}
 			</div>
-			{isLoading ? (
-				<div className="rounded-xl border border-kumo-hairline py-12 text-center text-kumo-subtle">
-					Loading...
+
+			{isError ? (
+				<Banner
+					variant="error"
+					icon={<WarningCircleIcon size={16} />}
+					title={`Could not load your ${typeName}s`}
+					description="The list for this period did not load."
+					action={
+						onRetry ? (
+							<Banner.Action
+								variant="secondary"
+								icon={<ArrowClockwiseIcon size={16} />}
+								onClick={onRetry}
+							>
+								Retry
+							</Banner.Action>
+						) : undefined
+					}
+				/>
+			) : isLoading ? (
+				<div className="space-y-4">
+					{SKELETON_GROUPS.map((group) => (
+						<MonthGroupSkeleton key={group} />
+					))}
 				</div>
 			) : groups.length === 0 ? (
-				<div className="rounded-xl border border-kumo-hairline py-12 text-center text-kumo-subtle">
-					No {type === "income" ? "incomes" : "expenses"} found.
-				</div>
+				<EmptyState
+					icon={<ReceiptIcon size={20} />}
+					title={
+						filters.hasActiveFilters ? "No matches" : `No ${typeName}s yet`
+					}
+					description={
+						filters.hasActiveFilters
+							? `No ${typeName} matches the current filters.`
+							: `Nothing has been recorded for ${typeName}. Add one to see it here.`
+					}
+				/>
 			) : (
-				<Accordion
-					value={expanded}
-					onValueChange={(value) => setExpandedOverride(value)}
-					className="space-y-3"
-				>
-					{pageGroups.map((group) => (
-						<TransactionTableMonthGroup
-							key={group.key}
-							group={group}
-							table={table}
-							type={type}
-							formatCurrency={formatCurrency}
-						/>
-					))}
-				</Accordion>
+				<>
+					<Accordion
+						value={expanded}
+						onValueChange={(value) => setExpandedOverride(value)}
+						className="space-y-4"
+					>
+						{pageGroups.map((group) => (
+							<TransactionTableMonthGroup
+								key={group.key}
+								group={group}
+								table={table}
+								type={type}
+								formatCurrency={formatCurrency}
+							/>
+						))}
+					</Accordion>
+					<TransactionTablePagination
+						rowCount={sortedRows.length}
+						selectedCount={table.getFilteredSelectedRowModel().rows.length}
+						totalMonths={groups.length}
+						pageIndex={pageIndex}
+						pageCount={pageCount}
+						onFirst={() => setMonthPageIndex(0)}
+						onPrevious={() => setMonthPageIndex(Math.max(0, pageIndex - 1))}
+						onNext={() =>
+							setMonthPageIndex(Math.min(pageCount - 1, pageIndex + 1))
+						}
+						onLast={() => setMonthPageIndex(pageCount - 1)}
+					/>
+				</>
 			)}
-			<TransactionTablePagination
-				selectedCount={table.getFilteredSelectedRowModel().rows.length}
-				totalMonths={groups.length}
-				pageIndex={pageIndex}
-				pageCount={pageCount}
-				onFirst={() => setMonthPageIndex(0)}
-				onPrevious={() => setMonthPageIndex(Math.max(0, pageIndex - 1))}
-				onNext={() => setMonthPageIndex(Math.min(pageCount - 1, pageIndex + 1))}
-				onLast={() => setMonthPageIndex(pageCount - 1)}
-			/>
 		</div>
 	);
 }

@@ -3,7 +3,7 @@ import { useForm } from "@tanstack/react-form";
 import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 import { DateInput } from "@/components/ui/date-input";
-import { AxiosError, api } from "@/lib/api";
+import { api } from "@/lib/api";
 
 const transactionSchema = z.object({
 	amount: z.string().min(1, "Amount is required"),
@@ -29,35 +29,13 @@ export default function TransactionForm({
 	onSubmit,
 	defaultValues,
 }: TransactionFormProps) {
-	const {
-		data: categories,
-		error,
-		isLoading,
-	} = useQuery({
+	const { data: categories, isError: categoriesError } = useQuery({
 		queryKey: ["categories"],
 		queryFn: async () => {
-			try {
-				console.log(
-					`Fetching categories from: ${api.defaults.baseURL}/api/categories`,
-				);
-				const res = await api.get<{ categories: Category[] }>(
-					"/api/categories",
-				);
-				console.log("Categories response:", res.data);
-				const filtered = res.data.categories.filter((c) => c.type === type);
-				console.log(`Filtered ${type} categories:`, filtered);
-				return filtered;
-			} catch (err) {
-				console.error("Error fetching categories:", err);
-				if (err instanceof AxiosError) {
-					console.error("Error response:", err.response?.data);
-				}
-				throw err;
-			}
+			const res = await api.get<{ categories: Category[] }>("/api/categories");
+			return res.data.categories.filter((c) => c.type === type);
 		},
 	});
-
-	console.log("Categories state:", { categories, error, isLoading });
 
 	const form = useForm({
 		defaultValues: {
@@ -69,7 +47,6 @@ export default function TransactionForm({
 		onSubmit: async ({ value }) => {
 			const result = transactionSchema.safeParse(value);
 			if (!result.success) {
-				console.error("Validation error:", result.error);
 				return;
 			}
 			await onSubmit(result.data);
@@ -118,18 +95,25 @@ export default function TransactionForm({
 
 			<form.Field name="categoryId">
 				{(field) => (
-					<Select
-						label="Category"
-						id={field.name}
-						className="w-full"
-						placeholder="Select category"
-						value={field.state.value ? field.state.value : null}
-						onValueChange={(val) => field.handleChange(Number(val))}
-						items={(categories ?? []).map((category) => ({
-							label: category.name,
-							value: category.id,
-						}))}
-					/>
+					<div className="space-y-1">
+						<Select
+							label="Category"
+							id={field.name}
+							className="w-full"
+							placeholder="Select category"
+							value={field.state.value ? field.state.value : null}
+							onValueChange={(val) => field.handleChange(Number(val))}
+							items={(categories ?? []).map((category) => ({
+								label: category.name,
+								value: category.id,
+							}))}
+						/>
+						{categoriesError ? (
+							<p className="text-kumo-danger text-xs">
+								Categories could not be loaded. Close this dialog and try again.
+							</p>
+						) : null}
+					</div>
 				)}
 			</form.Field>
 
@@ -152,9 +136,10 @@ export default function TransactionForm({
 						type="submit"
 						variant="primary"
 						className="w-full"
+						loading={state.isSubmitting}
 						disabled={!state.canSubmit || state.isSubmitting}
 					>
-						{state.isSubmitting ? "Saving..." : "Save Transaction"}
+						{state.isSubmitting ? "Saving…" : "Save Transaction"}
 					</Button>
 				)}
 			</form.Subscribe>
