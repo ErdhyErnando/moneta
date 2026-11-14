@@ -1,7 +1,7 @@
 import { Select } from "@cloudflare/kumo";
 import { Chart, type KumoChartOption } from "@cloudflare/kumo/components/chart";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { ChartCard } from "@/components/charts/chart-card";
 import { echarts, REPLACE_OPTION } from "@/components/charts/echarts";
 import { useElementHeight } from "@/components/charts/use-element-height";
@@ -14,6 +14,21 @@ import {
 	tooltipHtml,
 	useChartTheme,
 } from "@/lib/chart-theme";
+
+const WIDE_QUERY = "(min-width: 768px)";
+
+/** `md` and up: there is room for all twelve month labels. */
+function useIsWide(): boolean {
+	return useSyncExternalStore(
+		(onChange) => {
+			const mql = window.matchMedia(WIDE_QUERY);
+			mql.addEventListener("change", onChange);
+			return () => mql.removeEventListener("change", onChange);
+		},
+		() => window.matchMedia(WIDE_QUERY).matches,
+		() => true,
+	);
+}
 
 const MONTH_NAMES = [
 	"Jan",
@@ -37,6 +52,7 @@ const MONTH_NAMES = [
 export function AssetsChart(): React.JSX.Element {
 	const { formatCurrency, currency } = useCurrency();
 	const theme = useChartTheme();
+	const isWide = useIsWide();
 	const { ref, height } = useElementHeight<HTMLDivElement>();
 	// Use UTC year to match server DATE_TRUNC UTC per #22
 	const currentYear = new Date().getUTCFullYear();
@@ -85,10 +101,9 @@ export function AssetsChart(): React.JSX.Element {
 				data: chartData.map((d) => d.month),
 				...axis,
 				splitLine: { show: false },
-				// Deliberate density, not silent auto-hiding: every other month is
-				// labelled at every width, so a 375px screen never drops a label
-				// without telling the reader.
-				axisLabel: { ...axis.axisLabel, interval: 1 },
+				// Deliberate density, not silent auto-hiding: every month from `md`
+				// up, every other month below it, where twelve labels don't fit.
+				axisLabel: { ...axis.axisLabel, interval: isWide ? 0 : 1 },
 			},
 			yAxis: {
 				type: "value" as const,
@@ -134,7 +149,7 @@ export function AssetsChart(): React.JSX.Element {
 				},
 			},
 		} as unknown as KumoChartOption;
-	}, [theme, chartData, currency.symbol, formatCurrency]);
+	}, [theme, chartData, currency.symbol, formatCurrency, isWide]);
 
 	return (
 		<ChartCard
